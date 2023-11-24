@@ -1,6 +1,6 @@
-package sk.zimen.semestralka.dynamic_hashing.interfaces
+package sk.zimen.semestralka.structures.dynamic_hashing.interfaces
 
-import java.util.BitSet
+import java.util.*
 
 /**
  * Interface containing methods for data to be inserted in dynamic hashing structure.
@@ -17,9 +17,4 @@ interface IData : IBlock {
      * Own implementation for better control over hashing.
      */
     fun hash(): BitSet
-
-    /**
-     * Creates a new instance of implementing class as a copy.
-     */
-    fun <T> createInstance(): T
 }

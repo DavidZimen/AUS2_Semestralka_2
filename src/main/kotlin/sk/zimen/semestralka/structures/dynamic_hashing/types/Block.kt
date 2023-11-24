@@ -1,7 +1,7 @@
-package sk.zimen.semestralka.dynamic_hashing.types
+package sk.zimen.semestralka.structures.dynamic_hashing.types
 
-import sk.zimen.semestralka.dynamic_hashing.interfaces.IBlock
-import sk.zimen.semestralka.dynamic_hashing.interfaces.IData
+import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IBlock
+import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
 
 /**
  * Class that represents one block inside file for dynamic hashing structure.
@@ -9,6 +9,7 @@ import sk.zimen.semestralka.dynamic_hashing.interfaces.IData
  */
 class Block<T : IData>(blockFactor: Int) : IBlock {
 
+    private val validElements = 0
     private val data: Array<T?>
 
     init {
@@ -24,7 +25,9 @@ class Block<T : IData>(blockFactor: Int) : IBlock {
         TODO("Not yet implemented")
     }
 
-    override fun <T> formData(bytes: ByteArray): T {
+    override fun formData(bytes: ByteArray) {
         TODO("Not yet implemented")
     }
+
+    override fun createInstance(): IBlock = Block<T>(data.size)
 }

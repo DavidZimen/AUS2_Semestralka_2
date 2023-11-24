@@ -5,6 +5,10 @@ module sk.zimen.semestralka {
 
     requires net.synedra.validatorfx;
     requires org.kordamp.ikonli.javafx;
+    requires commons.math3;
+    requires kotlin.reflect;
+    requires kotlinx.coroutines.core.jvm;
+    requires org.apache.commons.collections4;
 
     opens sk.zimen.semestralka to javafx.fxml;
     opens sk.zimen.semestralka.ui to javafx.fxml;

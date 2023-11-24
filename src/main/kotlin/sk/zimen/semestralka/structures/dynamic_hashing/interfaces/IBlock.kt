@@ -1,4 +1,4 @@
-package sk.zimen.semestralka.dynamic_hashing.interfaces
+package sk.zimen.semestralka.structures.dynamic_hashing.interfaces
 
 /**
  * Interface that holds every method needed in block for dynamic hashing structure.
@@ -18,7 +18,12 @@ interface IBlock {
     fun getData(): ByteArray
 
     /**
-     * Converts provided [ByteArray] to the instance of implementing class.
+     * Converts provided [ByteArray].
      */
-    fun <T> formData(bytes: ByteArray): T
+    fun formData(bytes: ByteArray)
+
+    /**
+     * Creates a new instance of implementing class as a copy.
+     */
+    fun createInstance(): IBlock
 }
