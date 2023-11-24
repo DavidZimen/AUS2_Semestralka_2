@@ -5,7 +5,6 @@ package sk.zimen.semestralka.structures.dynamic_hashing.interfaces
  * @author David Zimen
  */
 interface IBlock {
-
     /**
      * Size of implementing object in bytes representation.
      */

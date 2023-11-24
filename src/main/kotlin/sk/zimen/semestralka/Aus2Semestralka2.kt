@@ -11,6 +11,8 @@ class Aus2Semestralka2 : Application() {
         val scene = Scene(fxmlLoader.load(), 320.0, 240.0)
         stage.title = "Bla!"
         stage.scene = scene
+
+        stage.setOnCloseRequest { println("Application is closing.") }
         stage.show()
     }
 }
