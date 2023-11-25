@@ -20,9 +20,4 @@ interface IBlock {
      * Converts provided [ByteArray].
      */
     fun formData(bytes: ByteArray)
-
-    /**
-     * Creates a new instance of implementing class as a copy.
-     */
-    fun createInstance(): IBlock
 }

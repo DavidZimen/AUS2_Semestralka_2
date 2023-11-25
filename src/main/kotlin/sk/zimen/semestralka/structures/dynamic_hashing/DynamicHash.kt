@@ -1,6 +1,5 @@
 package sk.zimen.semestralka.structures.dynamic_hashing
 
-import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IBlock
 import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
 import sk.zimen.semestralka.structures.dynamic_hashing.types.Block
 import sk.zimen.semestralka.structures.trie.Trie
@@ -8,35 +7,34 @@ import sk.zimen.semestralka.structures.trie.nodes.ExternalTrieNode
 import sk.zimen.semestralka.structures.trie.nodes.InternalTrieNode
 import sk.zimen.semestralka.utils.*
 import java.io.RandomAccessFile
-import java.lang.IllegalArgumentException
 import java.util.*
 import kotlin.reflect.KClass
 
 class DynamicHash<T : IData>(
-    fileName: String,
-    blockFactor: Int,
-    clazz: KClass<T>,
+    name: String,
+    private val blockFactor: Int,
+    private val clazz: KClass<T>,
     hashTrieDepth: Int = 5
 ) {
 
-    private val blockFactor: Int = blockFactor
-    private val clazz: KClass<T> = clazz
-    val file: RandomAccessFile = RandomAccessFile("${fileName}.bin", "rw")
+    val file: RandomAccessFile
     val blockSize: Int = Block(blockFactor, clazz).getSize()
     private var firstEmptyBlockAddress: Long = 0L
     private val hashTrie = Trie(0, blockSize.toLong(), hashTrieDepth)
 
     init {
+        val directory = "data/${name}"
+        initializeDirectory(directory)
+        file = RandomAccessFile("${directory}/main_file.bin", "rw")
         file.setLength(blockSize.toLong() * 2)
         firstEmptyBlockAddress = file.length()
         val block = Block(blockFactor, clazz)
-        block.writeBlock(0)
-        block.writeBlock(blockSize.toLong())
+        block.writeBlock()
+        block.apply { address = blockSize.toLong() }.writeBlock()
     }
 
     fun insert(item: T) {
         var hashNode = hashTrie.getLeaf(item.hash())
-        var address: Long
 
         // find correct node from hash and load its block
         if (hashNode is InternalTrieNode) {
@@ -45,7 +43,7 @@ class DynamicHash<T : IData>(
             } else if (hashNode.right == null) {
                 hashNode = hashNode.createRightSon(firstEmptyBlockAddress)
             }
-            getFreeBlock()
+            getEmptyBlock()
         }
 
         // cast to external node, now it is possible
@@ -56,13 +54,13 @@ class DynamicHash<T : IData>(
             //load data from that block
             val dataList = loadBlock(externalNode.blockAddress).run {
                 validElements = 0
-                writeBlock(externalNode.blockAddress)
+                writeBlock()
                 data
             }
 
             // divide external node
             val newParent = externalNode.divideNode(firstEmptyBlockAddress).also {
-                getFreeBlock()
+                getEmptyBlock()
             }
 
             // load left and right block of parent
@@ -85,10 +83,25 @@ class DynamicHash<T : IData>(
                 }
             }
 
+            // get correct node where to insert item
             externalNode = when (item.hash()[newParent.level]) {
-                true -> right
-                false -> left
+                true -> {
+                    if (left.size == 0) {
+                        leftBlock.addToEmptyBlocks()
+                        newParent.left = null
+                    }
+                    right
+                }
+                false -> {
+                    if (right.size == 0) {
+                        rightBlock.addToEmptyBlocks()
+                        newParent.right = null
+                    }
+                    left
+                }
             }
+            rightBlock.writeBlock()
+            leftBlock.writeBlock()
         }
 
         // go to overload file
@@ -99,16 +112,9 @@ class DynamicHash<T : IData>(
         } else {
             loadBlock(externalNode.blockAddress)
                 .also { it.insert(item) }
-                .writeBlock(externalNode.blockAddress)
+                .writeBlock()
             externalNode.increaseSize()
         }
-
-        // previous version
-//        val index = (blockIndex * blockSize).toLong()
-//        val block = Block(blockFactor, clazz)
-//        block.formData(file.readAtPosition(index, blockSize))
-//        block.insert(item)
-//        file.writeAtPosition(index, block.getData())
     }
 
     fun getBlock(blockIndex: Int) : Block<T> {
@@ -117,19 +123,37 @@ class DynamicHash<T : IData>(
         return block
     }
 
-    fun save() = file.close()
+    /**
+     * Closes the files and saves metadata into separate text file.
+     */
+    fun save() {
+        file.close()
+        //TODO write metadata into separate yaml file
+    }
+
+    fun printStructure() {
+        hashTrie.actionOnLeafs { address ->
+            loadBlock(address).printBlock()
+        }
+        println("-------------------------------------------------------------------")
+        println("File size: ${file.length()}")
+    }
 
     /**
      * Gets block at the [firstEmptyBlockAddress].
      * Also updates chain of empty blocks in the [file].
      */
     @Throws(IllegalArgumentException::class)
-    private fun getFreeBlock(): Block<T> {
+    private fun getEmptyBlock(): Block<T> {
         // if at the end of file
         if (firstEmptyBlockAddress == file.length()) {
             file.setLength(file.length() + blockSize)
-            firstEmptyBlockAddress = file.length()
-            return Block(blockFactor, clazz)
+            val freeBlock = Block(blockFactor, clazz).also {
+                it.address = firstEmptyBlockAddress
+                firstEmptyBlockAddress = file.length()
+            }
+            freeBlock.writeBlock()
+            return freeBlock
         }
 
         // read block from position in file
@@ -141,10 +165,9 @@ class DynamicHash<T : IData>(
 
         //adjust empty blocks in chain
         if (freeBlock.nextEmpty > -1L) {
-            val nextBlock = loadBlock(freeBlock.nextEmpty).apply {
-                previousEmpty = -1L
-            }
-            nextBlock.writeBlock(freeBlock.nextEmpty)
+            loadBlock(freeBlock.nextEmpty)
+                .apply { previousEmpty = -1L }
+                .writeBlock()
             firstEmptyBlockAddress = freeBlock.nextEmpty
             freeBlock.nextEmpty = -1L
         } else if (freeBlock.nextEmpty == -1L) {
@@ -160,14 +183,20 @@ class DynamicHash<T : IData>(
      * Extension function to add [Block] into chain of empty blocks
      * on provided [address].
      */
-    private fun <T : IData> Block<T>.addToFreeBlock(address: Long) {
+    private fun <T : IData> Block<T>.addToEmptyBlocks() {
+        if (address + blockSize == file.length()) {
+            file.setLength(address)
+            return
+            // TODO code to clear all empty from the end of file
+        }
+
         makeEmpty()
         if (firstEmptyBlockAddress != file.length()) {
             loadBlock(firstEmptyBlockAddress)
                 .apply { previousEmpty = address }
-                .writeBlock(firstEmptyBlockAddress)
+                .writeBlock()
             apply { nextEmpty = firstEmptyBlockAddress}
-                .writeBlock(address)
+                .writeBlock()
         }
         firstEmptyBlockAddress = address
     }
@@ -178,13 +207,14 @@ class DynamicHash<T : IData>(
     private fun loadBlock(address: Long): Block<T> {
         return Block(blockFactor, clazz).also {
             it.formData(file.readAtPosition(address, blockSize))
+            it.address = address
         }
     }
 
     /**
-     * Writes block on provided [address].
+     * Writes block to [file].
      */
-    private fun <T : IData> Block<T>.writeBlock(address: Long) {
+    private fun <T : IData> Block<T>.writeBlock() {
         file.writeAtPosition(address, getData())
     }
 }
@@ -231,8 +261,6 @@ class TestItem() : IData {
         }
         desc = getValidString(String(bytes.copyOfRange(index, index + STRING_LENGTH)), STRING_LENGTH)
     }
-
-    override fun createInstance(): IBlock = TestItem()
 
     companion object {
         const val STRING_LENGTH = 20

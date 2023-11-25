@@ -13,34 +13,48 @@ import kotlin.reflect.full.createInstance
  * @author David Zimen
  */
 class Block<T : IData>(
-    blockFactor: Int,
-    clazz: KClass<T>
+    private val blockFactor: Int,
+    private val clazz: KClass<T>
 ) : IBlock {
 
-    val blockFactor: Int
+    var address = 0L
     var validElements = 0
     var overloadBlock = -1L
     var previousEmpty = -1L
     var nextEmpty = -1L
     val data: MutableList<T> = ArrayList(blockFactor)
-    private val clazz: KClass<T>
 
-    init {
-        this.blockFactor = blockFactor
-        this.clazz = clazz
-    }
-
+    /**
+     * Inserts [item] into [data] if list size is less than [blockFactor].
+     */
     fun insert(item: T) {
         if (data.size < blockFactor) {
             data.add(validElements++, item)
         }
     }
 
+    /**
+     * Makes [Block] empty and ready to be written to file.
+     */
     fun makeEmpty() {
         validElements = 0
         overloadBlock = -1L
         previousEmpty = -1L
         nextEmpty = -1L
+    }
+
+    /**
+     * Returns boolean whether [Block] is empty or not.
+     */
+    fun isEmpty(): Boolean {
+        return validElements == 0
+                && overloadBlock == -1L
+                && (previousEmpty > -1L || nextEmpty > -1L)
+    }
+
+    fun printBlock() {
+        println("-------------------------------------------------------------------")
+        println("Address: ${address}, Valid items: ${validElements}, Prev: ${previousEmpty}, Next: ${nextEmpty}")
     }
 
     //OVERRIDE FUNCTIONS
@@ -96,6 +110,4 @@ class Block<T : IData>(
             data.add(i, element)
         }
     }
-
-    override fun createInstance(): IBlock = Block(data.size, clazz)
 }

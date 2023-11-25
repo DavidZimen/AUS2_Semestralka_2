@@ -22,7 +22,7 @@ class Aus2Semestralka2 : Application() {
 
 fun main() {
 //    Application.launch(Aus2Semestralka2::class.java)
-    val hash = DynamicHash("file", 1, TestItem::class)
+    val hash = DynamicHash("mainTest", 2, TestItem::class)
     val testItem1 = TestItem().apply {
         id = 1
         desc = "Description 1"
@@ -54,9 +54,11 @@ fun main() {
     hash.insert(testItem4)
     hash.insert(testItem5)
     hash.insert(testItem6)
+    hash.printStructure()
     val blocks = ArrayList<Block<TestItem>>()
     for (i in 0 until hash.file.length() / hash.blockSize) {
         blocks.add(hash.getBlock(i.toInt()))
     }
+
     hash.save()
 }

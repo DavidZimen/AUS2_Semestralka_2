@@ -1,8 +1,9 @@
 package sk.zimen.semestralka.structures.trie
 
+import sk.zimen.semestralka.structures.trie.nodes.ExternalTrieNode
 import sk.zimen.semestralka.structures.trie.nodes.InternalTrieNode
 import sk.zimen.semestralka.structures.trie.nodes.TrieNode
-import java.util.BitSet
+import java.util.*
 
 /**
  * Class that represents Digital Trie data structure.
@@ -50,34 +51,27 @@ class Trie(
         return node
     }
 
-//    fun getLeaf(hash: BitSet): TrieNode {
-//        var node: TrieNode = root
-//        var index = 0
-//        var bit: Boolean
-//        var canGoFurther = true
-//
-//        while (canGoFurther) {
-//            bit = hash[index++]
-//
-//            if (node is InternalTrieNode) {
-//                if (bit) {
-//                    if (node.right != null) {
-//                        node = node.right!!
-//                        canGoFurther = node is InternalTrieNode
-//                    } else {
-//                        canGoFurther = false
-//                    }
-//                } else {
-//                    if (node.left != null) {
-//                        node = node.left!!
-//                        canGoFurther = node is InternalTrieNode
-//                    } else {
-//                        canGoFurther = false
-//                    }
-//                }
-//            }
-//        }
-//
-//        return node
-//    }
+    /**
+     * Traverses [Trie] and performs provided [func] on each
+     * [ExternalTrieNode].
+     */
+    fun actionOnLeafs(func: (address: Long) -> Unit) {
+        val stack = Stack<TrieNode>()
+        stack.push(root)
+
+        while (stack.isNotEmpty()) {
+            val node = stack.pop()
+
+            when (node is ExternalTrieNode) {
+                true -> {
+                    func.invoke(node.blockAddress)
+                }
+                false -> {
+                    val internal = node as InternalTrieNode
+                    internal.right?.let { stack.push(it) }
+                    internal.left?.let { stack.push(it) }
+                }
+            }
+        }
+    }
 }

@@ -17,16 +17,16 @@ import kotlin.reflect.full.*
 @Target(AnnotationTarget.PROPERTY)
 annotation class CsvExclude
 
+fun initializeDirectory(path: String) {
+    try {
+        Files.createDirectories(Path.of(path))
+    } catch (_: FileAlreadyExistsException) { }
+}
+
 
 object CsvUtils {
     private const val DELIMITER = ";"
     private const val DIRECTORY = "data"
-
-    fun initialize() {
-        try {
-            Files.createDirectory(Path.of(DIRECTORY))
-        } catch (_: FileAlreadyExistsException) { }
-    }
 
     /**
      * Uses kotlin-reflection library to get all
