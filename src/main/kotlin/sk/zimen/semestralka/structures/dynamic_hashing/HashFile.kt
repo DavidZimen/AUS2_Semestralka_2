@@ -28,6 +28,16 @@ abstract class HashFile<K, T : IData<K>>(
      */
     protected abstract fun initFile(dirName: String, fileName: String)
 
+    // PUBLIC FUNCTIONS
+    /**
+     * Function for testing purposes.
+     * Return boolean whether last block in [file] has some items.
+     */
+    fun isLastBlockOccupied(): Boolean {
+        return loadBlock(file.length() - blockSize).validElements > 0
+    }
+
+    // PROTECTED FUNCTIONS
     /**
      * Gets block at the [firstEmptyBlockAddress].
      * Also updates chain of empty blocks in the [file].
@@ -70,7 +80,6 @@ abstract class HashFile<K, T : IData<K>>(
         return freeBlock
     }
 
-    //PROTECTED FUNCTIONS
     /**
      * Load block from [file] from provided [address] with size of [blockSize].
      */

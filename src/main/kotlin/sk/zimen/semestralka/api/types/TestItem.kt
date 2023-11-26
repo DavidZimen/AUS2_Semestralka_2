@@ -3,6 +3,7 @@ package sk.zimen.semestralka.api.types
 import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IBlock
 import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
 import sk.zimen.semestralka.utils.*
+import java.util.*
 
 class TestItem() : IData<Long>() {
 
@@ -47,7 +48,7 @@ class TestItem() : IData<Long>() {
 
     override fun createInstance(): IBlock = TestItem()
 
-    override fun printData() = println("Hash: ${moduloHashFunction(key).toOwnString()}, Id: ${key}, Description: ${desc.value}")
+    override fun printData(hashFunc: (Long) -> BitSet) = println("Hash: ${hashFunc.invoke(key).toOwnString()}, Id: ${key}, Description: ${desc.value}")
 
 
     companion object {

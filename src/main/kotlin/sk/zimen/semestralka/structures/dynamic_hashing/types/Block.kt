@@ -5,6 +5,7 @@ import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
 import sk.zimen.semestralka.utils.append
 import sk.zimen.semestralka.utils.toByteArray
 import sk.zimen.semestralka.utils.toNumber
+import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
@@ -64,12 +65,12 @@ class Block<K, T : IData<K>>(
                 && (previousEmpty > -1L || nextEmpty > -1L)
     }
 
-    fun printBlock() {
+    fun printBlock(hashFunc: (K) -> BitSet) {
         println("Address: ${address}, Valid items: ${validElements}, Prev: ${previousEmpty}, Next: ${nextEmpty}")
         println("Data items:")
         for (i in 0 until  validElements) {
             print("\t")
-            data[i].printData()
+            data[i].printData(hashFunc)
         }
     }
 

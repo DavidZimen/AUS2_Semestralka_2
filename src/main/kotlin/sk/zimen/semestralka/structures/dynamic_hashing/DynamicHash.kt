@@ -20,7 +20,7 @@ class DynamicHash<K, T : IData<K>>(
     blockFactor: Int,
     overloadBlockFactor: Int,
     clazz: KClass<T>,
-    hashFunction: (key: K) -> BitSet,
+    hashFunction: (K) -> BitSet,
     hashTrieDepth: Int = 5
 ) : HashFile<K, T>(
     name,
@@ -47,7 +47,7 @@ class DynamicHash<K, T : IData<K>>(
     /**
      * Function to be used together with key, to make [BitSet] from key of type [K].
      */
-    private val hashFunction: (key: K) -> BitSet = hashFunction
+    private val hashFunction: (K) -> BitSet = hashFunction
 
     /**
      * Inserts [item] to the correct block in [file].
@@ -124,7 +124,7 @@ class DynamicHash<K, T : IData<K>>(
         println("First empty block at: $firstEmptyBlockAddress")
         println("Size: $size")
         hashTrie.actionOnLeafs(true) { address ->
-            loadBlock(address).printBlock()
+            loadBlock(address).printBlock(hashFunction)
         }
         println("-------------------------------------------------------------------\n")
     }

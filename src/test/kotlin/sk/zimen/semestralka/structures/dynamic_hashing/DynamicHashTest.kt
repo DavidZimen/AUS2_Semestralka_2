@@ -52,6 +52,7 @@ internal class DynamicHashTest {
                     try {
                         dynamicHash.insert(item)
                         assertTrue(dynamicHash.contains(item))
+                        assertTrue(dynamicHash.isLastBlockOccupied())
                     } catch (_: Exception) { }
                 }
                 GeneratedOperation.DELETE -> {
