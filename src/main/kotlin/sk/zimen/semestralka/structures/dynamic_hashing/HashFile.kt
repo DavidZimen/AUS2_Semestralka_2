@@ -48,8 +48,10 @@ abstract class HashFile<K, T : IData<K>>(
         val freeBlock = loadBlock(firstEmptyBlockAddress)
 
         // check if it is really empty and first
-        if (freeBlock.validElements > 0) throw IllegalArgumentException("Block is not empty !!!")
-        if (freeBlock.previousEmpty != -1L) throw IllegalArgumentException("Block has some predecessor !!!")
+        if (freeBlock.validElements > 0)
+            throw IllegalArgumentException("Block is not empty !!!")
+        if (freeBlock.previousEmpty != -1L)
+            throw IllegalArgumentException("Block has some predecessor !!!")
 
         //adjust empty blocks in chain
         if (freeBlock.nextEmpty > -1L) {
@@ -68,8 +70,7 @@ abstract class HashFile<K, T : IData<K>>(
     }
 
     /**
-     * Extension function to add [Block] into chain of empty blocks
-     * on provided [address].
+     * Extension function to add [Block] into chain of empty blocks.
      */
     protected fun Block<K, T>.addToEmptyBlocks() {
         if (address + blockSize == file.length()) {

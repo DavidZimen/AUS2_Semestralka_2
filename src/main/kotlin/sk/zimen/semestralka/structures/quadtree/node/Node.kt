@@ -531,9 +531,8 @@ abstract class Node<T : QuadTreeData> {
 
 
         override operator fun next(): Node<T> {
-            if (!hasNext()) {
+            if (!hasNext())
                 throw NoSuchElementException("No more items in NodeIterator.")
-            }
             val current: Node<T> = stack.pop()
 
             // Push all not null children into stack
@@ -553,9 +552,8 @@ abstract class Node<T : QuadTreeData> {
         }
 
         override fun nextWithoutChildren(): Node<T> {
-            if (!hasNext()) {
+            if (!hasNext())
                 throw NoSuchElementException("No more items in NodeIterator.")
-            }
             return stack.pop()
         }
 
@@ -587,9 +585,8 @@ abstract class Node<T : QuadTreeData> {
         override fun hasNext(): Boolean = !stack.isEmpty()
 
         override fun next(): Node<T> {
-            if (!hasNext()) {
+            if (!hasNext())
                 throw NoSuchElementException("No more items in NodeIterator.")
-            }
             val current: Node<T> = stack.pop()
 
             // Push children that intersects with required boundary to stack

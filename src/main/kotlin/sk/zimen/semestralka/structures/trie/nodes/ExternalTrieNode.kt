@@ -62,7 +62,8 @@ class ExternalTrieNode(
         }
 
         // when null throw exception
-        if (newParent == null) throw IllegalStateException("External node has to have a parent !!")
+        if (newParent == null)
+            throw IllegalStateException("External node has to have a parent !!")
 
         // create new sons and return their parent
         newParent.createLeftSon(newAddress)

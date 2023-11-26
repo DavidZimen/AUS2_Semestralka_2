@@ -17,9 +17,8 @@ import kotlin.math.abs
 data class Boundary(val topLeft: DoubleArray, val bottomRight: DoubleArray) {
 
     init {
-        if (!isCorrectBoundary(topLeft, bottomRight)) {
+        if (!isCorrectBoundary(topLeft, bottomRight))
             throw BoundaryException(topLeft, bottomRight)
-        }
     }
 
     /**
