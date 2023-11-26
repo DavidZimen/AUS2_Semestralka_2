@@ -20,7 +20,7 @@ internal class DynamicHashTest {
         val itemsCount = 10_000
         val operationsCount = 1_000
         val strName = "randomizedTest"
-        val blockFactor = 6
+        val blockFactor = 50
         val overloadBlockFactor = 10
         val modulo = 1_000L
         val operationRatio = intArrayOf(1, 0, 0, 1)
