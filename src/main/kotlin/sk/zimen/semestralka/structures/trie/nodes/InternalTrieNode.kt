@@ -23,20 +23,19 @@ class InternalTrieNode(
      * Its key value should be [Binary.ONE]
      */
     var right: TrieNode? = null
-
     /**
      * Creates son to the left.
      */
-    fun createLeftSon(blockAddress: Long): TrieNode {
-        left = ExternalTrieNode(Binary.ZERO, this, blockAddress, level + 1)
+    fun createLeftSon(blockAddress: Long, route: String): TrieNode {
+        left = ExternalTrieNode(Binary.ZERO, this, blockAddress, level + 1, route)
         return left!!
     }
 
     /**
      * Creates son to the right.
      */
-    fun createRightSon(blockAddress: Long): TrieNode {
-        right = ExternalTrieNode(Binary.ONE, this, blockAddress, level + 1)
+    fun createRightSon(blockAddress: Long, route: String): TrieNode {
+        right = ExternalTrieNode(Binary.ONE, this, blockAddress, level + 1, route)
         return right!!
     }
 }

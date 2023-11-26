@@ -11,7 +11,8 @@ class ExternalTrieNode(
     key: Binary,
     parent: InternalTrieNode,
     blockAddress: Long,
-    level: Int
+    level: Int,
+    route: String
 ) : TrieNode(key, parent, level) {
 
     /**
@@ -32,8 +33,14 @@ class ExternalTrieNode(
     var size: Int = 0
         private set
 
+    /**
+     * Represents route of 0 and 1 to get from root to leaf.
+     */
+    val route: String
+
     init {
         this.blockAddress = blockAddress
+        this.route = route
     }
 
     fun isLeft() = parent?.left == this
@@ -66,8 +73,8 @@ class ExternalTrieNode(
             throw IllegalStateException("External node has to have a parent !!")
 
         // create new sons and return their parent
-        newParent.createLeftSon(newAddress)
-        newParent.createRightSon(blockAddress)
+        newParent.createLeftSon(newAddress, route + '0')
+        newParent.createRightSon(blockAddress, route + '1')
         return newParent
     }
 

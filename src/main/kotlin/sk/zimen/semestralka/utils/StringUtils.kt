@@ -6,7 +6,7 @@ package sk.zimen.semestralka.utils
  */
 class StringData() {
 
-    var validChars: Int = 0
+    private var validChars: Int = 0
     var value: String = ""
         set(value) {
             field = value
@@ -22,7 +22,7 @@ class StringData() {
         var index = 0
         val bytes = ByteArray(getSize(maxStringLength))
 
-        index = bytes.append(numberToByteArray(validChars), index)
+        index = bytes.append(validChars.toByteArray(), index)
         bytes.append(value.fillRemainingString(maxStringLength).toByteArray(), index)
 
         return bytes
@@ -30,9 +30,9 @@ class StringData() {
 
     fun formData(bytes: ByteArray, maxStringLength: Int) {
         var index = 0
-        with(byteArrayToNumber(bytes.copyOfRange(index, index + Int.SIZE_BYTES), index, Int::class)) {
-            validChars = number as Int
-            index = newIndex
+        bytes.copyOfRange(index, index + Int.SIZE_BYTES).toNumber(index, Int::class).also {
+            validChars = it.number as Int
+            index = it.newIndex
         }
         value = String(bytes.copyOfRange(index, index + maxStringLength)).getValidString(validChars)
     }
@@ -50,7 +50,7 @@ class StringData() {
 private const val EMPTY_CHAR = '/'
 
 /**
- * Transforms [input] to fill remaining spaces to [length] with [EMPTY_CHAR].
+ * Transforms [String] to fill remaining spaces to [maxLength] with [EMPTY_CHAR].
  */
 fun String.fillRemainingString(maxLength: Int): String {
     return if (length > maxLength) {
@@ -64,3 +64,12 @@ fun String.fillRemainingString(maxLength: Int): String {
  * Returns only string containing first [validCount] characters.
  */
 fun String.getValidString(validCount: Int) = take(validCount)
+
+/**
+ * Replaces last character of string with [newChar].
+ */
+fun String.replaceLast(newChar: Char): String {
+    if (isEmpty())
+        return this
+    return substring(0, length - 1) + newChar
+}

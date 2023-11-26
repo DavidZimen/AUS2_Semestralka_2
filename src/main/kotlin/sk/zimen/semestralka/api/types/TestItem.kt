@@ -2,10 +2,7 @@ package sk.zimen.semestralka.api.types
 
 import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IBlock
 import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
-import sk.zimen.semestralka.utils.StringData
-import sk.zimen.semestralka.utils.append
-import sk.zimen.semestralka.utils.byteArrayToNumber
-import sk.zimen.semestralka.utils.numberToByteArray
+import sk.zimen.semestralka.utils.*
 
 class TestItem() : IData<Long>() {
 
@@ -33,7 +30,7 @@ class TestItem() : IData<Long>() {
         var index = 0
         val bytes = ByteArray(getSize())
 
-        index = bytes.append(numberToByteArray(key), index)
+        index = bytes.append(key.toByteArray(), index)
         bytes.append(desc.getData(MAX_STRING_LENGTH), index)
 
         return bytes
@@ -41,16 +38,16 @@ class TestItem() : IData<Long>() {
 
     override fun formData(bytes: ByteArray) {
         var index = 0
-        with(byteArrayToNumber(bytes.copyOfRange(index, index + Long.SIZE_BYTES), index, Long::class)) {
-            key = number as Long
-            index = newIndex
+        bytes.copyOfRange(index, index + Long.SIZE_BYTES).toNumber(index, Long::class).also {
+            key = it.number as Long
+            index = it.newIndex
         }
         desc.formData(bytes.copyOfRange(index, index + StringData.getSize(MAX_STRING_LENGTH)), MAX_STRING_LENGTH)
     }
 
     override fun createInstance(): IBlock = TestItem()
 
-    override fun printData() = println("Id: ${key}, Description: ${desc.value}")
+    override fun printData() = println("Hash: ${moduloHashFunction(key).toOwnString()}, Id: ${key}, Description: ${desc.value}")
 
 
     companion object {

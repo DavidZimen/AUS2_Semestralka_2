@@ -8,7 +8,7 @@ import java.io.RandomAccessFile
 import kotlin.reflect.KClass
 
 abstract class HashFile<K, T : IData<K>>(
-    dirName: String,
+    val dirName: String,
     fileName: String,
     protected val blockFactor: Int,
     protected val clazz: KClass<T>
@@ -22,6 +22,7 @@ abstract class HashFile<K, T : IData<K>>(
         initFile(dirName, fileName)
     }
 
+    // ABSTRACT FUNCTIONS
     /**
      * Initializes file based on every implementing class needs.
      */
@@ -69,6 +70,18 @@ abstract class HashFile<K, T : IData<K>>(
         return freeBlock
     }
 
+    //PROTECTED FUNCTIONS
+    /**
+     * Load block from [file] from provided [address] with size of [blockSize].
+     */
+    protected fun loadBlock(address: Long): Block<K, T> {
+        return Block(blockFactor, clazz).also {
+            it.formData(file.readAtPosition(address, blockSize))
+            it.address = address
+        }
+    }
+
+    //EXTENSION FUNCTIONS
     /**
      * Extension function to add [Block] into chain of empty blocks.
      */
@@ -95,15 +108,5 @@ abstract class HashFile<K, T : IData<K>>(
      */
     protected fun Block<K, T>.writeBlock() {
         file.writeAtPosition(address, getData())
-    }
-
-    /**
-     * Load block from [file] from provided [address] with size of [blockSize].
-     */
-    protected fun loadBlock(address: Long): Block<K, T> {
-        return Block(blockFactor, clazz).also {
-            it.formData(file.readAtPosition(address, blockSize))
-            it.address = address
-        }
     }
 }

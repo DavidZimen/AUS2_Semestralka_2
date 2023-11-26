@@ -3,8 +3,8 @@ package sk.zimen.semestralka.structures.dynamic_hashing.types
 import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IBlock
 import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
 import sk.zimen.semestralka.utils.append
-import sk.zimen.semestralka.utils.byteArrayToNumber
-import sk.zimen.semestralka.utils.numberToByteArray
+import sk.zimen.semestralka.utils.toByteArray
+import sk.zimen.semestralka.utils.toNumber
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
@@ -65,10 +65,10 @@ class Block<K, T : IData<K>>(
     }
 
     fun printBlock() {
-        println("-------------------------------------------------------------------")
         println("Address: ${address}, Valid items: ${validElements}, Prev: ${previousEmpty}, Next: ${nextEmpty}")
+        println("Data items:")
         for (i in 0 until  validElements) {
-            print("\t\t")
+            print("\t")
             data[i].printData()
         }
     }
@@ -84,10 +84,10 @@ class Block<K, T : IData<K>>(
     override fun getData(): ByteArray {
         var index = 0
         val bytes = ByteArray(getSize())
-        index = bytes.append(numberToByteArray(validElements), index)
-        index = bytes.append(numberToByteArray(overloadBlock), index)
-        index = bytes.append(numberToByteArray(nextEmpty), index)
-        index = bytes.append(numberToByteArray(previousEmpty), index)
+        index = bytes.append(validElements.toByteArray(), index)
+        index = bytes.append(overloadBlock.toByteArray(), index)
+        index = bytes.append(nextEmpty.toByteArray(), index)
+        index = bytes.append(previousEmpty.toByteArray(), index)
 
         for (i in 0 until validElements) {
             val element = data[i]
@@ -100,21 +100,21 @@ class Block<K, T : IData<K>>(
 
     override fun formData(bytes: ByteArray) {
         var index = 0
-        with(byteArrayToNumber(bytes.copyOfRange(index, index + Int.SIZE_BYTES), index, Int::class)) {
-            validElements = number as Int
-            index = newIndex
+        bytes.copyOfRange(index, index + Int.SIZE_BYTES).toNumber(index, Int::class).also {
+            validElements = it.number as Int
+            index = it.newIndex
         }
-        with (byteArrayToNumber(bytes.copyOfRange(index, index + Long.SIZE_BYTES), index, Long::class)) {
-            overloadBlock = number as Long
-            index = newIndex
+        bytes.copyOfRange(index, index + Long.SIZE_BYTES).toNumber(index, Long::class).also {
+            overloadBlock = it.number as Long
+            index = it.newIndex
         }
-        with (byteArrayToNumber(bytes.copyOfRange(index, index + Long.SIZE_BYTES), index, Long::class)) {
-            nextEmpty = number as Long
-            index = newIndex
+        bytes.copyOfRange(index, index + Long.SIZE_BYTES).toNumber(index, Long::class).also {
+            nextEmpty = it.number as Long
+            index = it.newIndex
         }
-        with (byteArrayToNumber(bytes.copyOfRange(index, index + Long.SIZE_BYTES), index, Long::class)) {
-            previousEmpty = number as Long
-            index = newIndex
+        bytes.copyOfRange(index, index + Long.SIZE_BYTES).toNumber(index, Long::class).also {
+            previousEmpty = it.number as Long
+            index = it.newIndex
         }
 
         for (i in 0 until validElements) {

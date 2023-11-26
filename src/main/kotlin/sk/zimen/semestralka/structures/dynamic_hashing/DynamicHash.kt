@@ -52,7 +52,7 @@ class DynamicHash<K, T : IData<K>>(
     @Throws(IllegalArgumentException::class, IllegalStateException::class)
     fun insert(item: T) {
         // find node in trie and divide if necessary
-        val hashNode = getHashNode(hashFunction.invoke(item.key)).divide(item)
+        val hashNode = getTrieNode(hashFunction.invoke(item.key)).divide(item)
 
         // check if item with same key is already present
         if (loadBlock(hashNode.blockAddress).contains(item))
@@ -76,7 +76,7 @@ class DynamicHash<K, T : IData<K>>(
      */
     @Throws(NoResultFoundException::class)
     fun find(key: K): T {
-        val hashNode = getHashNode(hashFunction.invoke(key), false)
+        val hashNode = getTrieNode(hashFunction.invoke(key), false)
         val block = loadBlock(hashNode.blockAddress)
         var item: T?
 
@@ -105,12 +105,13 @@ class DynamicHash<K, T : IData<K>>(
      * whether everything works correctly.
      */
     fun printStructure() {
-        hashTrie.actionOnLeafs { address ->
-            loadBlock(address).printBlock()
-        }
-        println("-------------------------------------------------------------------")
+        println("\nDynamic hash structure: $dirName")
         println("File size: ${file.length()}")
         println("First empty block at: $firstEmptyBlockAddress")
+        hashTrie.actionOnLeafs(true) { address ->
+            loadBlock(address).printBlock()
+        }
+        println("-------------------------------------------------------------------\n")
     }
 
     // OVERRIDE FUNCTIONS
@@ -133,20 +134,26 @@ class DynamicHash<K, T : IData<K>>(
      * Traverses [Trie] and find node, which corresponds to [hash].
      * - [shouldDivide] is only used when inserting and node is internal.
      */
-    fun getHashNode(hash: BitSet, shouldDivide: Boolean = true): ExternalTrieNode {
-        var hashNode = hashTrie.getLeaf(hash)
+    private fun getTrieNode(hash: BitSet, shouldDivide: Boolean = true): ExternalTrieNode {
+        var node = hashTrie.getLeaf(hash)
 
         // find correct node from hash and load its block
-        if (shouldDivide && hashNode is InternalTrieNode) {
-            if (hashNode.left == null) {
-                hashNode = hashNode.createLeftSon(firstEmptyBlockAddress)
-            } else if (hashNode.right == null) {
-                hashNode = hashNode.createRightSon(firstEmptyBlockAddress)
+        if (shouldDivide && node is InternalTrieNode) {
+            if (node.left == null) {
+                node = node.createLeftSon(
+                    firstEmptyBlockAddress,
+                    (node.right as ExternalTrieNode).route.replaceLast('0')
+                )
+            } else if (node.right == null) {
+                node = node.createRightSon(
+                    firstEmptyBlockAddress,
+                    (node.left as ExternalTrieNode).route.replaceLast('1')
+                )
             }
             getEmptyBlock()
         }
 
-        return hashNode as ExternalTrieNode
+        return node as ExternalTrieNode
     }
 
     // EXTENSION FUNCTIONS

@@ -28,8 +28,8 @@ class Trie(
 
     init {
         root.apply {
-            createLeftSon(leftBlockAddress)
-            createRightSon(rightBlockAddress)
+            createLeftSon(leftBlockAddress, "0")
+            createRightSon(rightBlockAddress, "1")
         }
         this.maxDepth = maxDepth
     }
@@ -55,7 +55,7 @@ class Trie(
      * Traverses [Trie] and performs provided [func] on each
      * [ExternalTrieNode].
      */
-    fun actionOnLeafs(func: (address: Long) -> Unit) {
+    fun actionOnLeafs(isPrintout: Boolean = true, func: (address: Long) -> Unit) {
         val stack = Stack<TrieNode>()
         stack.push(root)
 
@@ -64,6 +64,10 @@ class Trie(
 
             when (node is ExternalTrieNode) {
                 true -> {
+                    if (isPrintout) {
+                        println("-------------------------------------------------------------------")
+                        println("Hash route: ${node.route}")
+                    }
                     func.invoke(node.blockAddress)
                 }
                 false -> {
