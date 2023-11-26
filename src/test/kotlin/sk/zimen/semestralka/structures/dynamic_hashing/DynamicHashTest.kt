@@ -24,7 +24,7 @@ internal class DynamicHashTest {
         val overloadBlockFactor = 10
         val operationRatio = intArrayOf(1, 0, 0, 1)
         deleteDirectory("data/$strName")
-        val dynamicHash = DynamicHash(strName, blockFactor, overloadBlockFactor, TestItem::class, ::moduloHashFunction)
+        val dynamicHash = DynamicHash(strName, blockFactor, overloadBlockFactor, TestItem::class, ::moduloHashFunction, Long.SIZE_BYTES)
 
         // generate items
         val items = generator.generateTestItems(itemsCount)
@@ -65,5 +65,17 @@ internal class DynamicHashTest {
         dynamicHash.printStructure()
     }
 
-    private fun <K, T: IData<K>> DynamicHash<K, T>.initialize(items: List<T>) = items.forEach { insert(it) }
+    private fun <K, T: IData<K>> DynamicHash<K, T>.initialize(items: MutableList<T>) {
+        val iterator = items.iterator()
+
+        while (iterator.hasNext()) {
+            val item = iterator.next()
+
+            try {
+                insert(item)
+            } catch (e: IllegalStateException) {
+                iterator.remove()
+            }
+        }
+    }
 }

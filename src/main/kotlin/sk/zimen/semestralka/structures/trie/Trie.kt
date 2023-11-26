@@ -28,8 +28,8 @@ class Trie(
 
     init {
         root.apply {
-            createLeftSon(leftBlockAddress, "0")
-            createRightSon(rightBlockAddress, "1")
+            createLeftSon(leftBlockAddress)
+            createRightSon(rightBlockAddress)
         }
         this.maxDepth = maxDepth
     }

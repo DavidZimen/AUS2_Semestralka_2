@@ -9,7 +9,8 @@ import sk.zimen.semestralka.structures.trie.enums.Binary
 class InternalTrieNode(
     key: Binary?,
     parent: InternalTrieNode?,
-    level: Int
+    level: Int,
+    route: String = ""
 ) : TrieNode(key, parent, level) {
 
     /**
@@ -23,19 +24,24 @@ class InternalTrieNode(
      * Its key value should be [Binary.ONE]
      */
     var right: TrieNode? = null
+
+    init {
+        this.route = route
+    }
+
     /**
      * Creates son to the left.
      */
-    fun createLeftSon(blockAddress: Long, route: String): TrieNode {
-        left = ExternalTrieNode(Binary.ZERO, this, blockAddress, level + 1, route)
+    fun createLeftSon(blockAddress: Long): TrieNode {
+        left = ExternalTrieNode(Binary.ZERO, this, blockAddress, level + 1, route + '0')
         return left!!
     }
 
     /**
      * Creates son to the right.
      */
-    fun createRightSon(blockAddress: Long, route: String): TrieNode {
-        right = ExternalTrieNode(Binary.ONE, this, blockAddress, level + 1, route)
+    fun createRightSon(blockAddress: Long): TrieNode {
+        right = ExternalTrieNode(Binary.ONE, this, blockAddress, level + 1, route + '1')
         return right!!
     }
 }

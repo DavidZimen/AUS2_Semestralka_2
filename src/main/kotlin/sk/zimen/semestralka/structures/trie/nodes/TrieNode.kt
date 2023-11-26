@@ -18,6 +18,11 @@ abstract class TrieNode(
 
     val level: Int
 
+    /**
+     * Represents route of 0 and 1 to get from root to leaf.
+     */
+    var route: String = ""
+
     init {
         this.key = key
         this.parent = parent

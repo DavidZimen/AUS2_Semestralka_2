@@ -152,20 +152,18 @@ class DynamicHash<K, T : IData<K>>(
     private fun getTrieNode(hash: BitSet, shouldDivide: Boolean = true): ExternalTrieNode {
         var node = hashTrie.getLeaf(hash)
 
-        // find correct node from hash and load its block
-        if (shouldDivide && node is InternalTrieNode) {
-            if (node.left == null) {
-                node = node.createLeftSon(
-                    firstEmptyBlockAddress,
-                    (node.right as ExternalTrieNode).route.replaceLast('0')
-                )
-            } else if (node.right == null) {
-                node = node.createRightSon(
-                    firstEmptyBlockAddress,
-                    (node.left as ExternalTrieNode).route.replaceLast('1')
-                )
+        try {
+            // find correct node from hash and load its block
+            if (shouldDivide && node is InternalTrieNode) {
+                if (node.left == null) {
+                    node = node.createLeftSon(firstEmptyBlockAddress)
+                } else if (node.right == null) {
+                    node = node.createRightSon(firstEmptyBlockAddress)
+                }
+                getEmptyBlock()
             }
-            getEmptyBlock()
+        } catch (e: ClassCastException) {
+            println(e.message)
         }
 
         return node as ExternalTrieNode

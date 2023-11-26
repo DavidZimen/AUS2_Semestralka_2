@@ -23,7 +23,7 @@ class Generator() {
         setCoordinates(-quadrantWidth, quadrantHeight, quadrantWidth, -quadrantHeight)
     }
 
-    fun generateTestItems(count: Int): List<TestItem> {
+    fun generateTestItems(count: Int): MutableList<TestItem> {
         val items = ArrayList<TestItem>(count)
         val keys = HashSet<Long>(count)
         while (items.size < count) {

@@ -3,6 +3,7 @@ package sk.zimen.semestralka.utils
 import java.io.RandomAccessFile
 import java.nio.file.FileAlreadyExistsException
 import java.nio.file.Files
+import java.nio.file.NoSuchFileException
 import java.nio.file.Path
 
 
@@ -13,10 +14,12 @@ fun initializeDirectory(path: String) {
 }
 
 fun deleteDirectory(path: String) {
-    Files.walk(Path.of(path))
-            .sorted(Comparator.reverseOrder())
-            .map { it.toFile() }
-            .forEach { it.delete() }
+    try {
+        Files.walk(Path.of(path))
+                .sorted(Comparator.reverseOrder())
+                .map { it.toFile() }
+                .forEach { it.delete() }
+    } catch (_: NoSuchFileException) { }
 }
 
 fun RandomAccessFile.writeAtPosition(position: Long, bytesToWrite: ByteArray) {
