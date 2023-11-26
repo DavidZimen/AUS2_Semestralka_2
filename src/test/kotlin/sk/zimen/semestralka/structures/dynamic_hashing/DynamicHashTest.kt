@@ -22,9 +22,10 @@ internal class DynamicHashTest {
         val strName = "randomizedTest"
         val blockFactor = 6
         val overloadBlockFactor = 10
+        val modulo = 1_000L
         val operationRatio = intArrayOf(1, 0, 0, 1)
         deleteDirectory("data/$strName")
-        val dynamicHash = DynamicHash(strName, blockFactor, overloadBlockFactor, TestItem::class, ::moduloHashFunction, Long.SIZE_BYTES)
+        val dynamicHash = DynamicHash(strName, blockFactor, overloadBlockFactor, TestItem::class, moduloHashFunction(modulo), Long.SIZE_BYTES)
 
         // generate items
         val items = generator.generateTestItems(itemsCount)

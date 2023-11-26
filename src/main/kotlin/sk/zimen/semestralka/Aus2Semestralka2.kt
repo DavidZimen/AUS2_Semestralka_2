@@ -22,7 +22,7 @@ class Aus2Semestralka2 : Application() {
 
 fun main() {
 //    Application.launch(Aus2Semestralka2::class.java)
-    val hash = DynamicHash("mainTest", 1, 3, TestItem::class, ::moduloHashFunction)
+    val hash = DynamicHash("mainTest", 1, 3, TestItem::class, moduloHashFunction(50))
     val testItem1 = TestItem(1, "Description 1")
     val testItem2 = TestItem(2, "Description 2")
     val testItem3 = TestItem(3, "Description 3")
