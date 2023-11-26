@@ -142,12 +142,6 @@ class DynamicHash<K, T : IData<K>>(
         //TODO logic when file is not empty at the start
     }
 
-    fun getBlock(blockIndex: Int) : Block<K, T> {
-        val block = Block(blockFactor, clazz)
-        block.formData(file.readAtPosition((blockIndex * blockSize).toLong(), blockSize))
-        return block
-    }
-
     private fun Block<K, T>.contains(item: T): Boolean {
         var isPresent = false
         for (i in 0 until validElements) {
