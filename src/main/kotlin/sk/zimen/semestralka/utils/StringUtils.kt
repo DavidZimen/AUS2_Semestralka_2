@@ -23,14 +23,14 @@ class StringData() {
         val bytes = ByteArray(getSize(maxStringLength))
 
         index = bytes.append(validChars.toByteArray(), index)
-        bytes.append(value.fillRemainingString(maxStringLength).toByteArray(), index)
+        bytes.append(value.fillRemaining(maxStringLength).toByteArray(), index)
 
         return bytes
     }
 
     fun formData(bytes: ByteArray, maxStringLength: Int) {
         var index = 0
-        bytes.copyOfRange(index, index + Int.SIZE_BYTES).toNumber(index, Int::class).also {
+        bytes.copyOfRange(index, Int.SIZE_BYTES).toNumber(index, Int::class).also {
             validChars = it.number as Int
             index = it.newIndex
         }
@@ -52,7 +52,7 @@ private const val EMPTY_CHAR = '/'
 /**
  * Transforms [String] to fill remaining spaces to [maxLength] with [EMPTY_CHAR].
  */
-fun String.fillRemainingString(maxLength: Int): String {
+fun String.fillRemaining(maxLength: Int): String {
     return if (length > maxLength) {
         take(maxLength)
     } else {
