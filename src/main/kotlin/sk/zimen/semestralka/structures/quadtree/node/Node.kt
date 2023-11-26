@@ -1,9 +1,10 @@
 package sk.zimen.semestralka.structures.quadtree.node
 
-import sk.zimen.semestralka.structures.quadtree.exceptions.BoundaryException
-import sk.zimen.semestralka.structures.quadtree.exceptions.MultipleResultsFoundException
-import sk.zimen.semestralka.structures.quadtree.exceptions.NoResultFoundException
-import sk.zimen.semestralka.structures.quadtree.exceptions.PositionException
+import org.apache.commons.collections4.iterators.IteratorChain
+import sk.zimen.semestralka.exceptions.BoundaryException
+import sk.zimen.semestralka.exceptions.MultipleResultsFoundException
+import sk.zimen.semestralka.exceptions.NoResultFoundException
+import sk.zimen.semestralka.exceptions.PositionException
 import sk.zimen.semestralka.structures.quadtree.interfaces.NodeIterator
 import sk.zimen.semestralka.structures.quadtree.metrics.SubTreeMetrics
 import sk.zimen.semestralka.structures.quadtree.types.Boundary
@@ -15,8 +16,12 @@ import java.util.*
  * Represents a base abstract class for node with data in QuadTree.
  * @author David Zimen
  */
-abstract class Node<T : QuadTreeData> {
+class Node<T : QuadTreeData> {
 
+    /**
+     * Holds data, where it is not possible further insert into deeper nodes.
+     */
+    private val nonDivisibleData: MutableList<T> = ArrayList()
     val dataList: MutableList<T> = ArrayList()
     val level: Int
     var boundary: Boundary
@@ -37,56 +42,94 @@ abstract class Node<T : QuadTreeData> {
         this.parent = parent
     }
 
-    // ABSTRACT function and functional attributes
     /**
      * Returns boolean flag, if current node has no elements.
      */
-    abstract val isEmpty: Boolean
+    val isEmpty: Boolean
+        get() = dataList.isEmpty() && nonDivisibleData.isEmpty()
 
     /**
      * @return Number of elements in node.
      */
-    abstract val size: Int
+    val size: Int
+        get() = dataList.size + nonDivisibleData.size
 
     /**
      * Function to edit data in current node.
      * @param old Version of item before editing.
      * @param new Version to be saved.
      */
-    abstract fun edit(old: T, new: T): T
+    fun edit(old: T, new: T): T {
+        val iterator = if (getPosition(new) == Position.CURRENT) {
+            nonDivisibleData.listIterator()
+        } else {
+            dataList.listIterator()
+        }
+
+        for (item in iterator) {
+            if (item == old) {
+                iterator.set(new)
+            }
+        }
+        return new
+    }
 
     /**
      * Function to only add data the list in node.
      * @param item Provided data.
      */
-    abstract fun simpleInsert(item: T, p: Position): Boolean
+    fun simpleInsert(item: T, p: Position): Boolean {
+        return if (p === Position.CURRENT) {
+            nonDivisibleData.add(item)
+        } else {
+            dataList.add(item)
+        }
+    }
 
     /**
      * Iterator with every item in [Node].
      */
-    abstract fun dataIterator(): MutableIterator<T>
+    fun dataIterator(): MutableIterator<T> = IteratorChain(dataList.listIterator(), nonDivisibleData.listIterator())
 
     /**
      * Creates new [Node] with boundary corresponding to provided [Position].
      * @param p Position where to create [Boundary].
      */
-    abstract fun createNewNode(p: Position): Node<T>
+    fun createNewNode(p: Position): Node<T> = Node(level + 1, this, Boundary.createBoundaryOnPosition(p, boundary))
 
     /**
      * Used to remove data when there is only one item left in node.
      */
-    protected abstract fun removeSingleItem(): T
+    private fun removeSingleItem(): T {
+        return if (dataList.isEmpty()) {
+            nonDivisibleData.removeAt(0)
+        } else {
+            dataList.removeAt(0)
+        }
+    }
 
     /**
      * @param maxDepth Maximum depth of QuadTree where node is located.
      * @return Information whether node can be further divided.
      */
-    protected abstract fun canBeDivided(maxDepth: Int): Boolean
+    private fun canBeDivided(maxDepth: Int): Boolean {
+        return if (nonDivisibleData.isEmpty()) {
+            dataList.isNotEmpty() && (dataList.size > 1 || !isLeaf) && level < maxDepth
+        } else {
+            dataList.isNotEmpty() && level < maxDepth
+        }
+    }
 
     /**
      * @return Number of items in node which can go into lower nodes if allowed.
      */
-    protected abstract fun divisibleItems(): List<T>
+    private fun divisibleItems(): List<T> {
+        return if (size > 1) {
+            dataList
+        } else {
+            emptyList()
+        }
+    }
 
     // Functions and functional attributes
     /**
@@ -160,7 +203,7 @@ abstract class Node<T : QuadTreeData> {
      * Method to find all items which intersects with given key.
      * @param boundary Provided are to do interval searching.
      */
-    open fun find(boundary: Boundary): List<T> {
+    fun find(boundary: Boundary): List<T> {
         val foundData: MutableList<T> = mutableListOf()
 
         // check child notes and their data
@@ -510,7 +553,13 @@ abstract class Node<T : QuadTreeData> {
     /**
      * Operator to traverse data for finding operation.
      */
-    open fun findDataIterator(): Iterator<T> = dataIterator()
+    fun findDataIterator(): Iterator<T> {
+        return if (!isLeaf) {
+            nonDivisibleData.listIterator()
+        } else {
+            dataIterator()
+        }
+    }
 
     /**
      * Iterator implementation for [Node].

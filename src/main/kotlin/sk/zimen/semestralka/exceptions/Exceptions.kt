@@ -1,10 +1,8 @@
-package sk.zimen.semestralka.structures.quadtree.exceptions
+package sk.zimen.semestralka.exceptions
 
 class MultipleResultsFoundException(message: String) : RuntimeException(message)
 
-class NoResultFoundException(message: String) : RuntimeException(message) {
-    constructor() : this("No results found for provided key.")
-}
+class NoResultFoundException(message: String) : RuntimeException(message)
 
 class PositionException(message: String) : RuntimeException(message)
 

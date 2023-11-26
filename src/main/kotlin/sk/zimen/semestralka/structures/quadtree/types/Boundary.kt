@@ -1,6 +1,6 @@
 package sk.zimen.semestralka.structures.quadtree.types
 
-import sk.zimen.semestralka.structures.quadtree.exceptions.BoundaryException
+import sk.zimen.semestralka.exceptions.BoundaryException
 import sk.zimen.semestralka.utils.DoubleUtils
 import kotlin.math.abs
 

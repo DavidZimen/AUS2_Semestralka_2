@@ -14,7 +14,7 @@ import kotlin.math.abs
  * - [T] Data type to be used in Quad Tree.
  *      Must implement [QuadTreeData] interface to work correctly.
  */
-abstract class QuadTree<T : QuadTreeData> (
+class QuadTree<T : QuadTreeData> (
     maxDepth: Int,
     topLeftX: Double,
     topLeftY: Double,
@@ -45,12 +45,12 @@ abstract class QuadTree<T : QuadTreeData> (
      * @param bottomRightX Bottom x coordinate of tree boundary.
      * @param bottomRightY Bottom y coordinate of tree boundary.
      */
-    protected abstract fun createRoot(
+    private fun createRoot(
         topLeftX: Double,
         topLeftY: Double,
         bottomRightX: Double,
         bottomRightY: Double
-    ): Node<T>
+    ): Node<T> = Node(0, Boundary(doubleArrayOf(topLeftX, topLeftY), doubleArrayOf(bottomRightX, bottomRightY)))
 
     // Functions and functional attributes
     /**

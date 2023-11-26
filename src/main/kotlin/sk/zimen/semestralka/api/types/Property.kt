@@ -1,6 +1,5 @@
 package sk.zimen.semestralka.api.types
 
-import sk.zimen.semestralka.utils.CsvExclude
 import sk.zimen.semestralka.utils.Mapper
 
 /**
@@ -9,7 +8,6 @@ import sk.zimen.semestralka.utils.Mapper
  */
 class Property() : Place() {
 
-    @CsvExclude
     var parcelsForProperty: MutableList<Parcel> = mutableListOf()
 
     constructor(number: Int, topLeft: GpsPosition, bottomRight: GpsPosition) : this() {

@@ -5,7 +5,9 @@ import javafx.fxml.FXMLLoader
 import javafx.scene.Scene
 import javafx.stage.Stage
 import sk.zimen.semestralka.api.types.TestItem
+import sk.zimen.semestralka.exceptions.NoResultFoundException
 import sk.zimen.semestralka.structures.dynamic_hashing.DynamicHash
+import sk.zimen.semestralka.utils.moduloHashFunction
 
 class Aus2Semestralka2 : Application() {
     override fun start(stage: Stage) {
@@ -21,31 +23,13 @@ class Aus2Semestralka2 : Application() {
 
 fun main() {
 //    Application.launch(Aus2Semestralka2::class.java)
-    val hash = DynamicHash("mainTest", 2, 3, TestItem::class)
-    val testItem1 = TestItem().apply {
-        id = 1
-        desc = "Description 1"
-    }
-    val testItem2 = TestItem().apply {
-        id = 2
-        desc = "Description 2"
-    }
-    val testItem3 = TestItem().apply {
-        id = 3
-        desc = "Description 3"
-    }
-    val testItem4 = TestItem().apply {
-        id = 4
-        desc = "Description 4"
-    }
-    val testItem5 = TestItem().apply {
-        id = 5
-        desc = "Description 5"
-    }
-    val testItem6 = TestItem().apply {
-        id = 6
-        desc = "Description 6"
-    }
+    val hash = DynamicHash("mainTest", 2, 3, TestItem::class, ::moduloHashFunction)
+    val testItem1 = TestItem(1, "Description 1")
+    val testItem2 = TestItem(2, "Description 2")
+    val testItem3 = TestItem(3, "Description 3")
+    val testItem4 = TestItem(4, "Description 4")
+    val testItem5 = TestItem(5, "Description 5")
+    val testItem6 = TestItem(6, "Description 6")
 
     hash.insert(testItem1)
     hash.insert(testItem2)
@@ -54,5 +38,16 @@ fun main() {
     hash.insert(testItem5)
     hash.insert(testItem6)
     hash.printStructure()
+
+    try {
+        hash.find(1).printData()
+        hash.find(3).printData()
+        hash.find(6).printData()
+        hash.find(8).printData()
+        hash.find(10).printData()
+    } catch (e: NoResultFoundException) {
+        println(e.message)
+    }
+
     hash.save()
 }

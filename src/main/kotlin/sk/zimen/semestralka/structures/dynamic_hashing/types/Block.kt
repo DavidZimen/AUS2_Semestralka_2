@@ -34,6 +34,18 @@ class Block<K, T : IData<K>>(
     }
 
     /**
+     * Finds item, whose key matches provided [key].
+     * If no item found, returns null.
+     */
+    fun find(key: K): T? {
+        for (i in 0 until validElements) {
+            if (data[i].key == key)
+                return data[i]
+        }
+        return null
+    }
+
+    /**
      * Makes [Block] empty and ready to be written to file.
      */
     fun makeEmpty() {
@@ -62,7 +74,6 @@ class Block<K, T : IData<K>>(
     }
 
     //OVERRIDE FUNCTIONS
-
     override fun getSize(): Int {
         Byte.SIZE_BYTES
         return 2 * Int.SIZE_BYTES +
@@ -114,4 +125,6 @@ class Block<K, T : IData<K>>(
             data.add(i, element)
         }
     }
+
+    override fun createInstance(): IBlock = Block(blockFactor, clazz)
 }

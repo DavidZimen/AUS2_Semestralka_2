@@ -2,61 +2,58 @@ package sk.zimen.semestralka.api.types
 
 import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IBlock
 import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
-import sk.zimen.semestralka.utils.*
-import java.util.*
+import sk.zimen.semestralka.utils.StringData
+import sk.zimen.semestralka.utils.append
+import sk.zimen.semestralka.utils.byteArrayToNumber
+import sk.zimen.semestralka.utils.numberToByteArray
 
-class TestItem() : IData<Int> {
+class TestItem() : IData<Long>() {
 
-    var id: Int = 0
-    var desc: String = ""
+    override var key: Long = Long.MIN_VALUE
+    var desc: StringData = StringData()
 
-    constructor(number: Int, desc: String) : this() {
-        this.id = number
-        this.desc = desc
+    constructor(id: Long, desc: String): this() {
+        this.key = id
+        this.desc.value = desc
     }
-
-    override fun key(): Int = id
 
     override fun equals(other: Any?): Boolean {
         if (other === this) {
             return true
         }
 
-        return other is TestItem && id == other.id && desc == other.desc
+        return other is TestItem && key == other.key && desc == other.desc
     }
 
-    override fun hash(): BitSet = numberToBitSet(id % 4)
-
     override fun getSize(): Int {
-        return Int.SIZE_BYTES + STRING_LENGTH
+        return Long.SIZE_BYTES + StringData.getSize(MAX_STRING_LENGTH)
     }
 
     override fun getData(): ByteArray {
         var index = 0
         val bytes = ByteArray(getSize())
 
-        index = bytes.append(numberToByteArray(id), index)
-        index = bytes.append(fillRemainingString(desc, STRING_LENGTH).toByteArray(), index)
+        index = bytes.append(numberToByteArray(key), index)
+        bytes.append(desc.getData(MAX_STRING_LENGTH), index)
 
         return bytes
     }
 
     override fun formData(bytes: ByteArray) {
         var index = 0
-        with(byteArrayToNumber(bytes.copyOfRange(index, index + Int.SIZE_BYTES), index, Int::class)) {
-            id = number as Int
+        with(byteArrayToNumber(bytes.copyOfRange(index, index + Long.SIZE_BYTES), index, Long::class)) {
+            key = number as Long
             index = newIndex
         }
-        desc = getValidString(String(bytes.copyOfRange(index, index + STRING_LENGTH)), STRING_LENGTH)
+        desc.formData(bytes.copyOfRange(index, index + StringData.getSize(MAX_STRING_LENGTH)), MAX_STRING_LENGTH)
     }
 
     override fun createInstance(): IBlock = TestItem()
 
-    override fun printData() {
-        println("Id: ${id}, Description: ${desc}")
-    }
+    override fun printData() = println("Id: ${key}, Description: ${desc.value}")
+
 
     companion object {
-        const val STRING_LENGTH = 20
+        const val MAX_STRING_LENGTH = 20
     }
 }

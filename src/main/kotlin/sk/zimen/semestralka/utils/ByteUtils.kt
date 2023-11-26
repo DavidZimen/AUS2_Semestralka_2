@@ -1,21 +1,8 @@
 package sk.zimen.semestralka.utils
 
-import java.io.RandomAccessFile
 import java.nio.ByteBuffer
-import java.util.BitSet
+import java.util.*
 import kotlin.reflect.KClass
-
-fun RandomAccessFile.writeAtPosition(position: Long, bytesToWrite: ByteArray) {
-    seek(position)
-    write(bytesToWrite)
-}
-
-fun RandomAccessFile.readAtPosition(position: Long, bytesCount: Int): ByteArray {
-    seek(position)
-    val bytes = ByteArray(bytesCount)
-    read(bytes)
-    return bytes
-}
 
 fun ByteArray.append(array: ByteArray, index: Int): Int {
     array.copyInto(this, index)
