@@ -18,7 +18,7 @@ enum class GeneratedSize(val maxSize: Double) {
  * Enum values to represent operation to invoke in testing.
  * @author David Zimen
  */
-enum class GeneratedOperation() {
+enum class GeneratedOperation {
     DELETE,
     INSERT,
     FIND,

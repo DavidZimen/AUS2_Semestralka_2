@@ -37,6 +37,14 @@ class StringData() {
         value = String(bytes.copyOfRange(index, index + maxStringLength)).getValidString(validChars)
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (other === this) {
+            return true
+        }
+
+        return other is StringData && value == other.value && validChars == other.validChars
+    }
+
     companion object {
         fun getSize(maxStringLength: Int): Int {
             return Int.SIZE_BYTES + maxStringLength

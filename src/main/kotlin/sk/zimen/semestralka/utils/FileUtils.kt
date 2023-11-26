@@ -12,6 +12,13 @@ fun initializeDirectory(path: String) {
     } catch (_: FileAlreadyExistsException) { }
 }
 
+fun deleteDirectory(path: String) {
+    Files.walk(Path.of(path))
+            .sorted(Comparator.reverseOrder())
+            .map { it.toFile() }
+            .forEach { it.delete() }
+}
+
 fun RandomAccessFile.writeAtPosition(position: Long, bytesToWrite: ByteArray) {
     seek(position)
     write(bytesToWrite)

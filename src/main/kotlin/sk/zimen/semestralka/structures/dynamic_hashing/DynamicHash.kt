@@ -28,7 +28,6 @@ class DynamicHash<K, T : IData<K>>(
     blockFactor,
     clazz
 ) {
-
     /**
      * Number of elements in structure.
      */
@@ -97,6 +96,14 @@ class DynamicHash<K, T : IData<K>>(
         }
 
         return item ?: throw NoResultFoundException("No result for provided key: ${key}.")
+    }
+
+    /**
+     * Returns boolean value, whether item is present in structure.
+     */
+    fun contains(item: T): Boolean {
+        val hashNode = getTrieNode(hashFunction.invoke(item.key), false)
+        return loadBlock(hashNode.blockAddress).contains(item)
     }
 
     /**
