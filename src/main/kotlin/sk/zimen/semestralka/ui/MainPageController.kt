@@ -3,7 +3,7 @@ package sk.zimen.semestralka.ui
 import javafx.fxml.FXML
 import javafx.scene.control.Label
 
-class HelloController {
+class MainPageController {
     @FXML
     private lateinit var welcomeText: Label
 

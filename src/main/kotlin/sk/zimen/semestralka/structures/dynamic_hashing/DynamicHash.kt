@@ -30,6 +30,12 @@ class DynamicHash<K, T : IData<K>>(
 ) {
 
     /**
+     * Number of elements in structure.
+     */
+    var size: Int = 0
+        private set
+
+    /**
      * Trie to quickly find correct [Block] from [hashFunction] function.
      */
     private val hashTrie = Trie(0, blockSize.toLong(), hashTrieDepth)
@@ -68,6 +74,7 @@ class DynamicHash<K, T : IData<K>>(
                 .writeBlock()
             hashNode.increaseSize()
         }
+        size++
     }
 
     /**
@@ -108,6 +115,7 @@ class DynamicHash<K, T : IData<K>>(
         println("\nDynamic hash structure: $dirName")
         println("File size: ${file.length()}")
         println("First empty block at: $firstEmptyBlockAddress")
+        println("Size: $size")
         hashTrie.actionOnLeafs(true) { address ->
             loadBlock(address).printBlock()
         }
