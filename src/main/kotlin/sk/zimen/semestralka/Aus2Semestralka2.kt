@@ -4,9 +4,8 @@ import javafx.application.Application
 import javafx.fxml.FXMLLoader
 import javafx.scene.Scene
 import javafx.stage.Stage
+import sk.zimen.semestralka.api.types.TestItem
 import sk.zimen.semestralka.structures.dynamic_hashing.DynamicHash
-import sk.zimen.semestralka.structures.dynamic_hashing.TestItem
-import sk.zimen.semestralka.structures.dynamic_hashing.types.Block
 
 class Aus2Semestralka2 : Application() {
     override fun start(stage: Stage) {
@@ -22,7 +21,7 @@ class Aus2Semestralka2 : Application() {
 
 fun main() {
 //    Application.launch(Aus2Semestralka2::class.java)
-    val hash = DynamicHash("mainTest", 2, TestItem::class)
+    val hash = DynamicHash("mainTest", 2, 3, TestItem::class)
     val testItem1 = TestItem().apply {
         id = 1
         desc = "Description 1"
@@ -55,10 +54,5 @@ fun main() {
     hash.insert(testItem5)
     hash.insert(testItem6)
     hash.printStructure()
-    val blocks = ArrayList<Block<TestItem>>()
-    for (i in 0 until hash.file.length() / hash.blockSize) {
-        blocks.add(hash.getBlock(i.toInt()))
-    }
-
     hash.save()
 }

@@ -12,7 +12,7 @@ import kotlin.reflect.full.createInstance
  * Class that represents one block inside file for dynamic hashing structure.
  * @author David Zimen
  */
-class Block<T : IData>(
+class Block<K, T : IData<K>>(
     private val blockFactor: Int,
     private val clazz: KClass<T>
 ) : IBlock {
@@ -55,6 +55,10 @@ class Block<T : IData>(
     fun printBlock() {
         println("-------------------------------------------------------------------")
         println("Address: ${address}, Valid items: ${validElements}, Prev: ${previousEmpty}, Next: ${nextEmpty}")
+        for (i in 0 until  validElements) {
+            print("\t\t")
+            data[i].printData()
+        }
     }
 
     //OVERRIDE FUNCTIONS
@@ -75,7 +79,7 @@ class Block<T : IData>(
         index = bytes.append(numberToByteArray(previousEmpty), index)
 
         for (i in 0 until validElements) {
-            val element = data[i] ?: break
+            val element = data[i]
             element.getData().copyInto(bytes, index)
             index += element.getSize()
         }

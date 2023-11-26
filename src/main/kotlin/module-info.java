@@ -13,5 +13,6 @@ module sk.zimen.semestralka {
     opens sk.zimen.semestralka to javafx.fxml;
     opens sk.zimen.semestralka.ui to javafx.fxml;
     opens sk.zimen.semestralka.structures.dynamic_hashing to kotlin.reflect;
+    opens sk.zimen.semestralka.api.types to kotlin.reflect;
     exports sk.zimen.semestralka;
 }
