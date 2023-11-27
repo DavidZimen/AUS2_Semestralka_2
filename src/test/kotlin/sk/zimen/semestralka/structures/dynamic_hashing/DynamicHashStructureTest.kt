@@ -10,7 +10,7 @@ import sk.zimen.semestralka.utils.generator.GeneratedOperation
 import sk.zimen.semestralka.utils.generator.Generator
 import sk.zimen.semestralka.utils.moduloHashFunction
 
-internal class DynamicHashTest {
+internal class DynamicHashStructureTest {
 
     private val generator = Generator()
 
@@ -25,7 +25,7 @@ internal class DynamicHashTest {
         val modulo = 1_000L
         val operationRatio = intArrayOf(1, 0, 0, 1)
         deleteDirectory("data/$strName")
-        val dynamicHash = DynamicHash(strName, blockFactor, overloadBlockFactor, TestItem::class, moduloHashFunction(modulo), Long.SIZE_BYTES)
+        val dynamicHash = DynamicHashStructure(strName, blockFactor, overloadBlockFactor, TestItem::class, moduloHashFunction(modulo), Long.SIZE_BYTES)
 
         // generate items
         val items = generator.generateTestItems(itemsCount)
@@ -65,9 +65,10 @@ internal class DynamicHashTest {
         }
 
         dynamicHash.printStructure()
+        dynamicHash.save()
     }
 
-    private fun <K, T: IData<K>> DynamicHash<K, T>.initialize(items: MutableList<T>) {
+    private fun <K, T: IData<K>> DynamicHashStructure<K, T>.initialize(items: MutableList<T>) {
         val iterator = items.iterator()
 
         while (iterator.hasNext()) {

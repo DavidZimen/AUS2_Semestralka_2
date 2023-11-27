@@ -15,14 +15,14 @@ import kotlin.reflect.KClass
  * Class that represents Dynamic hash data structure, where collision
  * are
  */
-class DynamicHash<K, T : IData<K>>(
+class DynamicHashStructure<K, T : IData<K>>(
     name: String,
     blockFactor: Int,
     overloadBlockFactor: Int,
     clazz: KClass<T>,
     hashFunction: (K) -> BitSet,
     hashTrieDepth: Int = 5
-) : HashFile<K, T>(
+) : HashStructure<K, T>(
     name,
     "main_file",
     blockFactor,
@@ -42,11 +42,12 @@ class DynamicHash<K, T : IData<K>>(
     /**
      * File for storing colliding [Block]s, when [Trie.maxDepth] level has been hit.
      */
-    private val overloadFile = OverloadFile(name, overloadBlockFactor, clazz)
+    private val overloadStructure = OverloadHashStructure(name, overloadBlockFactor, clazz)
 
     /**
      * Function to be used together with key, to make [BitSet] from key of type [K].
      */
+    @Suppress("CanBePrimaryConstructorProperty")
     private val hashFunction: (K) -> BitSet = hashFunction
 
     /**

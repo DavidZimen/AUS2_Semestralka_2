@@ -7,7 +7,10 @@ import sk.zimen.semestralka.utils.writeAtPosition
 import java.io.RandomAccessFile
 import kotlin.reflect.KClass
 
-abstract class HashFile<K, T : IData<K>>(
+/**
+ * Generic structure for hashing in files.
+ */
+abstract class HashStructure<K, T : IData<K>>(
     val dirName: String,
     fileName: String,
     protected val blockFactor: Int,

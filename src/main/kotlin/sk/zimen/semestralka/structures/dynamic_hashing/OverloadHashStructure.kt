@@ -5,11 +5,11 @@ import sk.zimen.semestralka.utils.initializeDirectory
 import java.io.RandomAccessFile
 import kotlin.reflect.KClass
 
-class OverloadFile<K, T : IData<K>>(
+class OverloadHashStructure<K, T : IData<K>>(
     name: String,
     blockFactor: Int,
     clazz: KClass<T>
-) : HashFile<K, T>(
+) : HashStructure<K, T>(
     name,
     "overload_file",
     blockFactor,

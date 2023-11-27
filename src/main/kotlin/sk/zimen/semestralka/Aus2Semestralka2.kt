@@ -4,9 +4,6 @@ import javafx.application.Application
 import javafx.fxml.FXMLLoader
 import javafx.scene.Scene
 import javafx.stage.Stage
-import sk.zimen.semestralka.api.types.TestItem
-import sk.zimen.semestralka.structures.dynamic_hashing.DynamicHash
-import sk.zimen.semestralka.utils.moduloHashFunction
 
 class Aus2Semestralka2 : Application() {
     override fun start(stage: Stage) {
