@@ -1,5 +1,6 @@
 package sk.zimen.semestralka.structures.dynamic_hashing
 
+import sk.zimen.semestralka.exceptions.BlockIsFullException
 import sk.zimen.semestralka.exceptions.NoResultFoundException
 import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
 import sk.zimen.semestralka.structures.dynamic_hashing.types.Block
@@ -61,19 +62,17 @@ class DynamicHashStructure<K, T : IData<K>>(
         val hashNode = getTrieNode(hashFunction.invoke(item.key)).divide(item)
 
         // check if item with same key is already present
-        if (loadBlock(hashNode.blockAddress).contains(item))
+        if (contains(hashNode.blockAddress, item))
             throw IllegalArgumentException("Item is already present.")
 
-        // go to overload file
-        if (!hashNode.canGoFurther(hashTrie.maxDepth)) {
-            // TODO Here is if branch where it should go to Overload file, so far not implemented
-            throw IllegalStateException("Overload file logic not implemented.")
-        } else {
-            loadBlock(hashNode.blockAddress)
-                .also { it.insert(item) }
-                .writeBlock()
-            hashNode.increaseSize()
+        val block = loadBlock(hashNode.blockAddress)
+        try {
+            block.insert(item)
+        } catch (e: BlockIsFullException) {
+            if (overloadStructure.insert(block.next, item))
+                hashNode.increaseChainLength()
         }
+        hashNode.increaseSize()
         size++
     }
 
@@ -91,12 +90,12 @@ class DynamicHashStructure<K, T : IData<K>>(
         item = block.find(key)
 
         //try overload block if not found
-        if (item == null && block.overloadBlock > -1) {
+        if (item == null && block.hasNext()) {
             // TODO search in overload blocks
             throw NoResultFoundException("Overloading block not yet implemented for searching.")
         }
 
-        return item ?: throw NoResultFoundException("No result for provided key: ${key}.")
+        return item ?: throw NoResultFoundException("No result for provided key: ${key.toString()}.")
     }
 
     /**
@@ -104,15 +103,15 @@ class DynamicHashStructure<K, T : IData<K>>(
      */
     fun contains(item: T): Boolean {
         val hashNode = getTrieNode(hashFunction.invoke(item.key), false)
-        return loadBlock(hashNode.blockAddress).contains(item)
+        return contains(hashNode.blockAddress, item)
     }
 
     /**
      * Closes the files and saves metadata into separate text file.
      */
-    fun save() {
-        file.close()
-        //TODO write metadata into separate yaml file
+    override fun save() {
+        super.save()
+        overloadStructure.save()
     }
 
     /**
@@ -144,8 +143,22 @@ class DynamicHashStructure<K, T : IData<K>>(
         //TODO logic when file is not empty at the start
     }
 
-    // PRIVATE FUNCTIONS
+    /**
+     * Checks if block contains provided [item].
+     */
+    override fun contains(address: Long, item: T): Boolean {
+        val block = loadBlock(address)
+        val isPresent = block.contains(item)
+        return if (isPresent) {
+            true
+        } else if (!block.hasNext()) {
+            false
+        } else {
+            overloadStructure.contains(block.next, item)
+        }
+    }
 
+    // PRIVATE FUNCTIONS
     /**
      * Traverses [Trie] and find node, which corresponds to [hash].
      * - [shouldDivide] is only used when inserting and node is internal.
@@ -153,38 +166,20 @@ class DynamicHashStructure<K, T : IData<K>>(
     private fun getTrieNode(hash: BitSet, shouldDivide: Boolean = true): ExternalTrieNode {
         var node = hashTrie.getLeaf(hash)
 
-        try {
-            // find correct node from hash and load its block
-            if (shouldDivide && node is InternalTrieNode) {
-                if (node.left == null) {
-                    node = node.createLeftSon(firstEmptyBlockAddress)
-                } else if (node.right == null) {
-                    node = node.createRightSon(firstEmptyBlockAddress)
-                }
-                getEmptyBlock()
+        // find correct node from hash and load its block
+        if (shouldDivide && node is InternalTrieNode) {
+            if (node.left == null) {
+                node = node.createLeftSon(firstEmptyBlockAddress)
+            } else if (node.right == null) {
+                node = node.createRightSon(firstEmptyBlockAddress)
             }
-        } catch (e: ClassCastException) {
-            println(e.message)
+            getEmptyBlock()
         }
 
         return node as ExternalTrieNode
     }
 
     // EXTENSION FUNCTIONS
-    /**
-     * Checks if block contains provided [item].
-     */
-    private fun Block<K, T>.contains(item: T): Boolean {
-        var isPresent = false
-        for (i in 0 until validElements) {
-            isPresent = data[i] == item
-        }
-
-        //TODO logic for chaining blocks in overload file
-
-        return isPresent
-    }
-
     /**
      * Divides [ExternalTrieNode] into two and changes it to [InternalTrieNode].
      * - Node will be divided, when its [ExternalTrieNode.size] is equal to [blockFactor]
@@ -196,7 +191,7 @@ class DynamicHashStructure<K, T : IData<K>>(
         // if full, divide node into two in cycle
         while (currentNode.size == blockFactor && currentNode.canGoFurther(hashTrie.maxDepth)) {
             //load data from that block
-            val dataList = loadBlock(currentNode.blockAddress).run {
+            val dataList = with(loadBlock(currentNode.blockAddress)) {
                 validElements = 0
                 writeBlock()
                 data
@@ -215,37 +210,33 @@ class DynamicHashStructure<K, T : IData<K>>(
 
             // reinsert data
             dataList.forEach {
-                when (hashFunction.invoke(it.key)[newParent.level]) {
-                    true -> {
-                        rightBlock.insert(it)
-                        right.increaseSize()
-                    }
-                    false -> {
-                        leftBlock.insert(it)
-                        left.increaseSize()
-                    }
+                if (hashFunction.invoke(it.key)[newParent.level]) {
+                    rightBlock.insert(it)
+                    right.increaseSize()
+                } else {
+                    leftBlock.insert(it)
+                    left.increaseSize()
                 }
             }
 
             // get correct node where to insert item
-            currentNode = when (hashFunction.invoke(item.key)[newParent.level]) {
-                true -> {
-                    if (left.size == 0) {
-                        leftBlock.addToEmptyBlocks()
-                        newParent.left = null
-                    }
-                    right
+            currentNode = if (hashFunction.invoke(item.key)[newParent.level]) {
+                if (left.size == 0) {
+                    leftBlock.addToEmptyBlocks()
+                    newParent.left = null
                 }
-                false -> {
-                    if (right.size == 0) {
-                        rightBlock.addToEmptyBlocks()
-                        newParent.right = null
-                    }
-                    left
+                right
+            } else {
+                if (right.size == 0) {
+                    rightBlock.addToEmptyBlocks()
+                    newParent.right = null
                 }
+                left
             }
-            rightBlock.writeBlock()
-            leftBlock.writeBlock()
+
+            // write child block if child is not null
+            newParent.left?.let { leftBlock.writeBlock() }
+            newParent.right?.let { rightBlock.writeBlock() }
         }
 
         return currentNode

@@ -1,5 +1,6 @@
 package sk.zimen.semestralka.structures.dynamic_hashing.types
 
+import sk.zimen.semestralka.exceptions.BlockIsFullException
 import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IBlock
 import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
 import sk.zimen.semestralka.utils.append
@@ -20,17 +21,19 @@ class Block<K, T : IData<K>>(
 
     var address = 0L
     var validElements = 0
-    var overloadBlock = -1L
-    var previousEmpty = -1L
-    var nextEmpty = -1L
+    var next = -1L
+    var previous = -1L
     val data: MutableList<T> = ArrayList(blockFactor)
 
     /**
      * Inserts [item] into [data] if list size is less than [blockFactor].
      */
+    @Throws(BlockIsFullException::class)
     fun insert(item: T) {
         if (data.size < blockFactor) {
             data.add(validElements++, item)
+        } else {
+            throw BlockIsFullException("Current block is at its maximum capacity !!!")
         }
     }
 
@@ -47,13 +50,19 @@ class Block<K, T : IData<K>>(
     }
 
     /**
+     * Check whether block contains provided [item].
+     */
+    fun contains(item: T): Boolean {
+        return (0 until validElements).any { data[it] == item }
+    }
+
+    /**
      * Makes [Block] empty and ready to be written to file.
      */
     fun makeEmpty() {
         validElements = 0
-        overloadBlock = -1L
-        previousEmpty = -1L
-        nextEmpty = -1L
+        next = -1L
+        previous = -1L
     }
 
     /**
@@ -61,9 +70,13 @@ class Block<K, T : IData<K>>(
      */
     fun isEmpty(): Boolean {
         return validElements == 0
-                && overloadBlock == -1L
-                && (previousEmpty > -1L || nextEmpty > -1L)
+                && (previous > -1L || next > -1L)
     }
+
+    /**
+     * Return boolean flag whether blockchain continues after current block.
+     */
+    fun hasNext(): Boolean = next > -1L
 
     //OVERRIDE FUNCTIONS
     override fun getSize(): Int {
@@ -77,9 +90,8 @@ class Block<K, T : IData<K>>(
         var index = 0
         val bytes = ByteArray(getSize())
         index = bytes.append(validElements.toByteArray(), index)
-        index = bytes.append(overloadBlock.toByteArray(), index)
-        index = bytes.append(nextEmpty.toByteArray(), index)
-        index = bytes.append(previousEmpty.toByteArray(), index)
+        index = bytes.append(next.toByteArray(), index)
+        index = bytes.append(previous.toByteArray(), index)
 
         for (i in 0 until validElements) {
             val element = data[i]
@@ -92,20 +104,16 @@ class Block<K, T : IData<K>>(
 
     override fun formData(bytes: ByteArray) {
         var index = 0
-        bytes.copyOfRange(index, index + Int.SIZE_BYTES).toNumber(index, Int::class).also {
+        bytes.copyOfRange(index, Int.SIZE_BYTES).toNumber(index, Int::class).also {
             validElements = it.number as Int
             index = it.newIndex
         }
         bytes.copyOfRange(index, index + Long.SIZE_BYTES).toNumber(index, Long::class).also {
-            overloadBlock = it.number as Long
+            next = it.number as Long
             index = it.newIndex
         }
         bytes.copyOfRange(index, index + Long.SIZE_BYTES).toNumber(index, Long::class).also {
-            nextEmpty = it.number as Long
-            index = it.newIndex
-        }
-        bytes.copyOfRange(index, index + Long.SIZE_BYTES).toNumber(index, Long::class).also {
-            previousEmpty = it.number as Long
+            previous = it.number as Long
             index = it.newIndex
         }
 
@@ -119,7 +127,7 @@ class Block<K, T : IData<K>>(
     }
 
     override fun printData(hashFunc: (K) -> BitSet) {
-        println("Address: $address, Valid items: $validElements, Prev: $previousEmpty, Next: $nextEmpty")
+        println("Address: $address, Valid items: $validElements, Prev: $previous, Next: $next")
         println("Data items:")
         for (i in 0 until  validElements) {
             print("\t")

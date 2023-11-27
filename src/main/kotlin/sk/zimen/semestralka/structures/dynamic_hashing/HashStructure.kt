@@ -27,6 +27,11 @@ abstract class HashStructure<K, T : IData<K>>(
 
     // ABSTRACT FUNCTIONS
     /**
+     * Check whether block contains provided [item].
+     */
+    abstract fun contains(address: Long, item: T): Boolean
+
+    /**
      * Initializes file based on every implementing class needs.
      */
     protected abstract fun initFile(dirName: String, fileName: String)
@@ -40,7 +45,22 @@ abstract class HashStructure<K, T : IData<K>>(
         return loadBlock(file.length() - blockSize).validElements > 0
     }
 
+    /**
+     * Closes [file], so the buffer for it is released.
+     */
+    open fun save() = file.close()
+
     // PROTECTED FUNCTIONS
+    /**
+     * Load block from [file] from provided [address] with size of [blockSize].
+     */
+    protected fun loadBlock(address: Long): Block<K, T> {
+        return Block(blockFactor, clazz).also {
+            it.formData(file.readAtPosition(address, blockSize))
+            it.address = address
+        }
+    }
+
     /**
      * Gets block at the [firstEmptyBlockAddress].
      * Also updates chain of empty blocks in the [file].
@@ -64,33 +84,23 @@ abstract class HashStructure<K, T : IData<K>>(
         // check if it is really empty and first
         if (freeBlock.validElements > 0)
             throw IllegalArgumentException("Block is not empty !!!")
-        if (freeBlock.previousEmpty != -1L)
+        if (freeBlock.previous != -1L)
             throw IllegalArgumentException("Block has some predecessor !!!")
 
         //adjust empty blocks in chain
-        if (freeBlock.nextEmpty > -1L) {
-            loadBlock(freeBlock.nextEmpty)
-                .apply { previousEmpty = -1L }
+        if (freeBlock.hasNext()) {
+            loadBlock(freeBlock.next)
+                .apply { previous = -1L }
                 .writeBlock()
-            firstEmptyBlockAddress = freeBlock.nextEmpty
-            freeBlock.nextEmpty = -1L
-        } else if (freeBlock.nextEmpty == -1L) {
+            firstEmptyBlockAddress = freeBlock.next
+            freeBlock.next = -1L
+        } else if (!freeBlock.hasNext()) {
             firstEmptyBlockAddress = file.length()
         } else {
             throw IllegalArgumentException("Empty block next is less than -1 !!!")
         }
 
         return freeBlock
-    }
-
-    /**
-     * Load block from [file] from provided [address] with size of [blockSize].
-     */
-    protected fun loadBlock(address: Long): Block<K, T> {
-        return Block(blockFactor, clazz).also {
-            it.formData(file.readAtPosition(address, blockSize))
-            it.address = address
-        }
     }
 
     //EXTENSION FUNCTIONS
@@ -107,9 +117,9 @@ abstract class HashStructure<K, T : IData<K>>(
         makeEmpty()
         if (firstEmptyBlockAddress != file.length()) {
             loadBlock(firstEmptyBlockAddress)
-                .apply { previousEmpty = address }
+                .apply { previous = address }
                 .writeBlock()
-            apply { nextEmpty = firstEmptyBlockAddress}
+            this.apply { next = firstEmptyBlockAddress}
                 .writeBlock()
         }
         firstEmptyBlockAddress = address
