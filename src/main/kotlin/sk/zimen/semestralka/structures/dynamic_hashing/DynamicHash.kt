@@ -124,7 +124,7 @@ class DynamicHash<K, T : IData<K>>(
         println("First empty block at: $firstEmptyBlockAddress")
         println("Size: $size")
         hashTrie.actionOnLeafs(true) { address ->
-            loadBlock(address).printBlock(hashFunction)
+            loadBlock(address).printData(hashFunction)
         }
         println("-------------------------------------------------------------------\n")
     }

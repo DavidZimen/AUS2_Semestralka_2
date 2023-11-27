@@ -46,7 +46,7 @@ class TestItem() : IData<Long>() {
         desc.formData(bytes.copyOfRange(index, index + StringData.getSize(MAX_STRING_LENGTH)), MAX_STRING_LENGTH)
     }
 
-    override fun createInstance(): IBlock = TestItem()
+    override fun createInstance(): IBlock<Long> = TestItem()
 
     override fun printData(hashFunc: (Long) -> BitSet) = println("Hash: ${hashFunc.invoke(key).toOwnString()}, Id: ${key}, Description: ${desc.value}")
 

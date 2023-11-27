@@ -16,7 +16,7 @@ import kotlin.reflect.full.createInstance
 class Block<K, T : IData<K>>(
     private val blockFactor: Int,
     private val clazz: KClass<T>
-) : IBlock {
+) : IBlock<K> {
 
     var address = 0L
     var validElements = 0
@@ -63,15 +63,6 @@ class Block<K, T : IData<K>>(
         return validElements == 0
                 && overloadBlock == -1L
                 && (previousEmpty > -1L || nextEmpty > -1L)
-    }
-
-    fun printBlock(hashFunc: (K) -> BitSet) {
-        println("Address: ${address}, Valid items: ${validElements}, Prev: ${previousEmpty}, Next: ${nextEmpty}")
-        println("Data items:")
-        for (i in 0 until  validElements) {
-            print("\t")
-            data[i].printData(hashFunc)
-        }
     }
 
     //OVERRIDE FUNCTIONS
@@ -127,5 +118,14 @@ class Block<K, T : IData<K>>(
         }
     }
 
-    override fun createInstance(): IBlock = Block(blockFactor, clazz)
+    override fun printData(hashFunc: (K) -> BitSet) {
+        println("Address: $address, Valid items: $validElements, Prev: $previousEmpty, Next: $nextEmpty")
+        println("Data items:")
+        for (i in 0 until  validElements) {
+            print("\t")
+            data[i].printData(hashFunc)
+        }
+    }
+
+    override fun createInstance(): IBlock<K> = Block(blockFactor, clazz)
 }

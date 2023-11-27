@@ -53,9 +53,10 @@ fun Number.toByteArray(): ByteArray {
 /**
  * Converts [BitSet]
  */
-fun BitSet.toOwnString(): String {
+fun BitSet.toOwnString(maxLength: Int? = null): String {
+    val length = maxLength ?: length()
     var result = ""
-    for (i in 0 until length()) {
+    for (i in 0 until length) {
         result += if (get(i)) '1' else '0'
     }
     return result
