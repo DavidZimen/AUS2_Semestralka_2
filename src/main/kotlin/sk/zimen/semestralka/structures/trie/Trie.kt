@@ -55,7 +55,7 @@ class Trie(
      * Traverses [Trie] and performs provided [func] on each
      * [ExternalTrieNode].
      */
-    fun actionOnLeafs(isPrintout: Boolean = true, func: (address: Long) -> Unit) {
+    fun actionOnLeafs(isPrintout: Boolean = false, func: (address: Long) -> Unit) {
         val stack = Stack<TrieNode>()
         stack.push(root)
 
@@ -64,10 +64,8 @@ class Trie(
 
             when (node is ExternalTrieNode) {
                 true -> {
-                    if (isPrintout) {
-                        println("-------------------------------------------------------------------")
-                        println("Hash route: ${node.route}")
-                    }
+                    if (isPrintout)
+                        node.printNode()
                     func.invoke(node.blockAddress)
                 }
                 false -> {
