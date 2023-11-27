@@ -1,6 +1,6 @@
 package sk.zimen.semestralka.structures.dynamic_hashing
 
-import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
+import sk.zimen.semestralka.structures.dynamic_hashing.generics.IData
 import sk.zimen.semestralka.structures.dynamic_hashing.types.Block
 import sk.zimen.semestralka.utils.readAtPosition
 import sk.zimen.semestralka.utils.writeAtPosition

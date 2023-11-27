@@ -1,10 +1,12 @@
-package sk.zimen.semestralka.structures.dynamic_hashing.interfaces
+package sk.zimen.semestralka.structures.dynamic_hashing.generics
+
+import java.util.*
 
 /**
  * Interface that holds every method needed in block for dynamic hashing structure.
  * @author David Zimen
  */
-interface IBlock {
+interface IBlock<K> {
     /**
      * Size of implementing object in bytes representation.
      */
@@ -24,5 +26,10 @@ interface IBlock {
     /**
      * Creates a new empty instance of the implementing class.
      */
-    fun createInstance(): IBlock
+    fun createInstance(): IBlock<K>
+
+    /**
+     * Method for printing object to console.
+     */
+    fun printData(hashFunc: (K) -> BitSet)
 }

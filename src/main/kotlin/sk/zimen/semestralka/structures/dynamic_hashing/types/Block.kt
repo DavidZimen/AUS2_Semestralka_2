@@ -1,7 +1,7 @@
 package sk.zimen.semestralka.structures.dynamic_hashing.types
 
-import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IBlock
-import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
+import sk.zimen.semestralka.structures.dynamic_hashing.generics.IBlock
+import sk.zimen.semestralka.structures.dynamic_hashing.generics.IData
 import sk.zimen.semestralka.utils.append
 import sk.zimen.semestralka.utils.toByteArray
 import sk.zimen.semestralka.utils.toNumber
@@ -16,21 +16,21 @@ import kotlin.reflect.full.createInstance
 class Block<K, T : IData<K>>(
     private val blockFactor: Int,
     private val clazz: KClass<T>
-) : IBlock {
+) : IBlock<K> {
 
     var address = 0L
     var validElements = 0
     var overloadBlock = -1L
     var previousEmpty = -1L
     var nextEmpty = -1L
-    val data: MutableList<T> = ArrayList(blockFactor)
+    val data: MutableList<DHData<K, T>> = ArrayList(blockFactor)
 
     /**
      * Inserts [item] into [data] if list size is less than [blockFactor].
      */
-    fun insert(item: T) {
+    fun insert(key: K, item: T) {
         if (data.size < blockFactor) {
-            data.add(validElements++, item)
+            data.add(validElements++, DHData(key, item))
         }
     }
 
@@ -41,7 +41,7 @@ class Block<K, T : IData<K>>(
     fun find(key: K): T? {
         for (i in 0 until validElements) {
             if (data[i].key == key)
-                return data[i]
+                return data[i].data
         }
         return null
     }
@@ -65,21 +65,13 @@ class Block<K, T : IData<K>>(
                 && (previousEmpty > -1L || nextEmpty > -1L)
     }
 
-    fun printBlock(hashFunc: (K) -> BitSet) {
-        println("Address: ${address}, Valid items: ${validElements}, Prev: ${previousEmpty}, Next: ${nextEmpty}")
-        println("Data items:")
-        for (i in 0 until  validElements) {
-            print("\t")
-            data[i].printData(hashFunc)
-        }
-    }
-
     //OVERRIDE FUNCTIONS
     override fun getSize(): Int {
-        Byte.SIZE_BYTES
+        val instance = clazz.createInstance()
         return 2 * Int.SIZE_BYTES +
                 3 * Long.SIZE_BYTES +
-                blockFactor * clazz.createInstance().getSize()
+                blockFactor * instance.getSize() +
+                blockFactor * instance.getKeySize()
     }
 
     override fun getData(): ByteArray {
@@ -92,8 +84,8 @@ class Block<K, T : IData<K>>(
 
         for (i in 0 until validElements) {
             val element = data[i]
-            element.getData().copyInto(bytes, index)
-            index += element.getSize()
+            element.data!!.getData().copyInto(bytes, index)
+            index += element.data!!.getSize()
         }
 
         return bytes
@@ -101,7 +93,7 @@ class Block<K, T : IData<K>>(
 
     override fun formData(bytes: ByteArray) {
         var index = 0
-        bytes.copyOfRange(index, index + Int.SIZE_BYTES).toNumber(index, Int::class).also {
+        bytes.copyOfRange(index, Int.SIZE_BYTES).toNumber(index, Int::class).also {
             validElements = it.number as Int
             index = it.newIndex
         }
@@ -127,5 +119,14 @@ class Block<K, T : IData<K>>(
         }
     }
 
-    override fun createInstance(): IBlock = Block(blockFactor, clazz)
+    override fun printData(hashFunc: (K) -> BitSet) {
+        println("Address: $address, Valid items: $validElements, Prev: $previousEmpty, Next: $nextEmpty")
+        println("Data items:")
+        for (i in 0 until  validElements) {
+            print("\t")
+            data[i].printData(hashFunc)
+        }
+    }
+
+    override fun createInstance(): IBlock<K> = Block(blockFactor, clazz)
 }

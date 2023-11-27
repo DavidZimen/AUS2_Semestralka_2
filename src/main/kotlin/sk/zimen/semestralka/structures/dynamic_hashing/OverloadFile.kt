@@ -1,6 +1,6 @@
 package sk.zimen.semestralka.structures.dynamic_hashing
 
-import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
+import sk.zimen.semestralka.structures.dynamic_hashing.generics.IData
 import sk.zimen.semestralka.utils.initializeDirectory
 import java.io.RandomAccessFile
 import kotlin.reflect.KClass

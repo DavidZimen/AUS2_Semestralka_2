@@ -1,7 +1,7 @@
 package sk.zimen.semestralka.structures.dynamic_hashing
 
 import sk.zimen.semestralka.exceptions.NoResultFoundException
-import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
+import sk.zimen.semestralka.structures.dynamic_hashing.generics.IData
 import sk.zimen.semestralka.structures.dynamic_hashing.types.Block
 import sk.zimen.semestralka.structures.trie.Trie
 import sk.zimen.semestralka.structures.trie.nodes.ExternalTrieNode
@@ -124,7 +124,7 @@ class DynamicHash<K, T : IData<K>>(
         println("First empty block at: $firstEmptyBlockAddress")
         println("Size: $size")
         hashTrie.actionOnLeafs(true) { address ->
-            loadBlock(address).printBlock(hashFunction)
+            loadBlock(address).printData(hashFunction)
         }
         println("-------------------------------------------------------------------\n")
     }

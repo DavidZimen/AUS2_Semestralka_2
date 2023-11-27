@@ -1,17 +1,17 @@
 package sk.zimen.semestralka.api.types
 
-import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IBlock
-import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
+import sk.zimen.semestralka.structures.dynamic_hashing.generics.IBlock
+import sk.zimen.semestralka.structures.dynamic_hashing.generics.IData
 import sk.zimen.semestralka.utils.*
 import java.util.*
 
 class TestItem() : IData<Long>() {
 
-    override var key: Long = Long.MIN_VALUE
+    var number: Long = Long.MIN_VALUE
     var desc: StringData = StringData()
 
-    constructor(id: Long, desc: String): this() {
-        this.key = id
+    constructor(number: Long, desc: String): this() {
+        this.number = number
         this.desc.value = desc
     }
 
@@ -20,8 +20,10 @@ class TestItem() : IData<Long>() {
             return true
         }
 
-        return other is TestItem && key == other.key && desc == other.desc
+        return other is TestItem && number == other.number && desc == other.desc
     }
+
+    override fun getKeySize(): Int = Long.SIZE_BYTES
 
     override fun getSize(): Int {
         return Long.SIZE_BYTES + StringData.getSize(MAX_STRING_LENGTH)
@@ -31,7 +33,7 @@ class TestItem() : IData<Long>() {
         var index = 0
         val bytes = ByteArray(getSize())
 
-        index = bytes.append(key.toByteArray(), index)
+        index = bytes.append(number.toByteArray(), index)
         bytes.append(desc.getData(MAX_STRING_LENGTH), index)
 
         return bytes
@@ -39,16 +41,16 @@ class TestItem() : IData<Long>() {
 
     override fun formData(bytes: ByteArray) {
         var index = 0
-        bytes.copyOfRange(index, index + Long.SIZE_BYTES).toNumber(index, Long::class).also {
-            key = it.number as Long
+        bytes.copyOfRange(index, Long.SIZE_BYTES).toNumber(index, Long::class).also {
+            number = it.number as Long
             index = it.newIndex
         }
         desc.formData(bytes.copyOfRange(index, index + StringData.getSize(MAX_STRING_LENGTH)), MAX_STRING_LENGTH)
     }
 
-    override fun createInstance(): IBlock = TestItem()
+    override fun createInstance(): IBlock<Long> = TestItem()
 
-    override fun printData(hashFunc: (Long) -> BitSet) = println("Hash: ${hashFunc.invoke(key).toOwnString()}, Id: ${key}, Description: ${desc.value}")
+    override fun printData(hashFunc: (Long) -> BitSet) = println("Hash: ${hashFunc.invoke(number).toOwnString()}, Id: ${number}, Description: ${desc.value}")
 
 
     companion object {

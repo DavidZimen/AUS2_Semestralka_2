@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import sk.zimen.semestralka.api.types.TestItem
-import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
+import sk.zimen.semestralka.structures.dynamic_hashing.generics.IData
 import sk.zimen.semestralka.utils.deleteDirectory
 import sk.zimen.semestralka.utils.generator.GeneratedOperation
 import sk.zimen.semestralka.utils.generator.Generator
