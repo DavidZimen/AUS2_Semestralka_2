@@ -13,8 +13,8 @@ import kotlin.reflect.KClass
 abstract class HashStructure<K, T : IData<K>>(
     val dirName: String,
     fileName: String,
-    protected val allowedEmptyBlocks: Int,
     protected val blockFactor: Int,
+    private val allowedEmptyBlocks: Int,
     protected val clazz: KClass<T>
 ) {
     /**
@@ -119,18 +119,20 @@ abstract class HashStructure<K, T : IData<K>>(
      */
     private fun clearEmptyBlockFromEnd() {
         var newLength = file.length() - blockSize
+        file.setLength(newLength)
 
-        while (newLength > allowedEmptyBlocks * blockSize) {
+        while (newLength > 0) {
             val block = loadBlock(newLength - blockSize)
-            if (block.emptyAtEnd()) {
-                block.removeFromChain()
-            } else {
+
+            if (!block.emptyAtEnd()) {
                 break
             }
+
+            block.removeFromChain()
             newLength -= blockSize
+            file.setLength(newLength)
         }
 
-        file.setLength(newLength)
         if (firstEmpty > newLength) {
             firstEmpty = newLength
         }
@@ -164,6 +166,10 @@ abstract class HashStructure<K, T : IData<K>>(
         file.writeAtPosition(address, getData())
     }
 
+    /**
+     * Removes block from chain, by changing previous blocks next address
+     * and next blocks previous address.
+     */
     private fun Block<K, T>.removeFromChain() {
         if (hasPrevious()) {
             loadBlock(previous)
@@ -178,6 +184,9 @@ abstract class HashStructure<K, T : IData<K>>(
         }
     }
 
+    /**
+     * Returns information if block is empty and at the end of file.
+     */
     private fun Block<K, T>.emptyAtEnd(): Boolean {
         return validElements == 0
                 && address + blockSize == file.length()

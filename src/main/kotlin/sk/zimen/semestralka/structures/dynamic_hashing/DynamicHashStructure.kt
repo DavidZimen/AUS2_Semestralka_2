@@ -27,6 +27,7 @@ class DynamicHashStructure<K, T : IData<K>>(
     name,
     "main_file",
     blockFactor,
+    2,
     clazz
 ) {
     /**
