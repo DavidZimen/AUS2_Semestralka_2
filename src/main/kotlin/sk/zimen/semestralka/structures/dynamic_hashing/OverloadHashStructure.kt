@@ -6,6 +6,9 @@ import sk.zimen.semestralka.utils.initializeDirectory
 import java.io.RandomAccessFile
 import kotlin.reflect.KClass
 
+/**
+ * Implementation of overloading hash structure for [DynamicHashStructure].
+ */
 class OverloadHashStructure<K, T : IData<K>>(
     name: String,
     blockFactor: Int,
@@ -14,6 +17,7 @@ class OverloadHashStructure<K, T : IData<K>>(
     name,
     "overload_file",
     blockFactor,
+    0,
     clazz
 ) {
 
@@ -71,13 +75,16 @@ class OverloadHashStructure<K, T : IData<K>>(
         val dir = "data/${dirName}"
         initializeDirectory(dir)
         file = RandomAccessFile("${dir}/${fileName}.bin", "rw")
-        file.setLength(blockSize.toLong())
+        file.setLength(0)
         firstEmpty = file.length()
 
         //TODO logic when file is not empty at the start
     }
 
-    override fun contains(address: Long, item: T): Boolean {
+    /**
+     * Check whether block contains provided [item].
+     */
+    fun contains(address: Long, item: T): Boolean {
         var block = loadBlock(address)
 
         while (true) {

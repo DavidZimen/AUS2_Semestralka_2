@@ -59,12 +59,12 @@ class DynamicHashStructure<K, T : IData<K>>(
      */
     @Throws(IllegalArgumentException::class)
     fun insert(item: T) {
+        // check if item with same key is already present
+        if (contains(item))
+            throw IllegalArgumentException("Item is already present.")
+
         // find node in trie and divide if necessary
         val hashNode = getTrieNode(hashFunction.invoke(item.key)).divide(item)
-
-        // check if item with same key is already present
-        if (contains(hashNode.blockAddress, item))
-            throw IllegalArgumentException("Item is already present.")
 
         val block = loadBlock(hashNode.blockAddress)
         try {
@@ -110,11 +110,19 @@ class DynamicHashStructure<K, T : IData<K>>(
     }
 
     /**
-     * Returns boolean value, whether item is present in structure.
+     * Check whether block contains provided [item].
      */
     fun contains(item: T): Boolean {
         val hashNode = getTrieNode(hashFunction.invoke(item.key), false)
-        return contains(hashNode.blockAddress, item)
+        val block = loadBlock(hashNode.blockAddress)
+        val isPresent = block.contains(item)
+        return if (isPresent) {
+            true
+        } else if (!block.hasNext()) {
+            false
+        } else {
+            overloadStructure.contains(block.next, item)
+        }
     }
 
     /**
@@ -154,21 +162,6 @@ class DynamicHashStructure<K, T : IData<K>>(
         block.apply { address = blockSize.toLong() }.writeBlock()
 
         //TODO logic when file is not empty at the start
-    }
-
-    /**
-     * Checks if block contains provided [item].
-     */
-    override fun contains(address: Long, item: T): Boolean {
-        val block = loadBlock(address)
-        val isPresent = block.contains(item)
-        return if (isPresent) {
-            true
-        } else if (!block.hasNext()) {
-            false
-        } else {
-            overloadStructure.contains(block.next, item)
-        }
     }
 
     // PRIVATE FUNCTIONS

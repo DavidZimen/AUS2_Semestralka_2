@@ -40,11 +40,6 @@ abstract class HashStructure<K, T : IData<K>>(
 
     // ABSTRACT FUNCTIONS
     /**
-     * Check whether block contains provided [item].
-     */
-    abstract fun contains(address: Long, item: T): Boolean
-
-    /**
      * Initializes file based on every implementing class needs.
      */
     protected abstract fun initFile(dirName: String, fileName: String)
