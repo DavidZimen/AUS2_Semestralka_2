@@ -126,7 +126,8 @@ class DynamicHashStructure<K, T : IData<K>>(
         println("Size: $size")
         hashTrie.actionOnLeafs(true) { address ->
             val block = loadBlock(address)
-            block.printData(hashFunction)
+            if (block.hasNext())
+                block.printData(hashFunction)
         }
         println("-------------------------------------------------------------------\n")
     }

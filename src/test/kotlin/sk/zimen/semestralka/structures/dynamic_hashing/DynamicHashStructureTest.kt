@@ -17,15 +17,15 @@ internal class DynamicHashStructureTest {
     @Test
     fun randomizedTest() {
         // initialization
-        val itemsCount = 10_000
+        val itemsCount = 25_000
         val operationsCount = 1_000
         val strName = "randomizedTest"
-        val blockFactor = 50
-        val overloadBlockFactor = 10
-        val modulo = 1_000L
+        val blockFactor = 10
+        val overloadBlockFactor = 25
+        val modulo = 2_000L
         val operationRatio = intArrayOf(1, 0, 0, 1)
         deleteDirectory("data/$strName")
-        val dynamicHash = DynamicHashStructure(strName, blockFactor, overloadBlockFactor, TestItem::class, moduloHashFunction(modulo), Long.SIZE_BYTES)
+        val dynamicHash = DynamicHashStructure(strName, blockFactor, overloadBlockFactor, TestItem::class, moduloHashFunction(modulo), 10)
 
         // generate items
         val items = generator.generateTestItems(itemsCount)
