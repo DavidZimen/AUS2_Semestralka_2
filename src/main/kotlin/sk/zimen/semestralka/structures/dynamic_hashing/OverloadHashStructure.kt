@@ -71,6 +71,17 @@ class OverloadHashStructure<K, T : IData<K>>(
     }
 
     /**
+     * Finds item for provided [key] in chain of
+     * overload block starting with [address].
+     * @return - true when item was deleted
+     *      *  - false when item was not deleted
+     */
+    fun delete(address: Long, key: K): Boolean {
+        // TODO implement logic
+        return false
+    }
+
+    /**
      * Check whether block contains provided [item].
      */
     fun contains(address: Long, item: T): Boolean {

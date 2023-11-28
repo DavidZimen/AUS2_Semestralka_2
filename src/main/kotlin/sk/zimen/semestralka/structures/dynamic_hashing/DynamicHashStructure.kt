@@ -13,8 +13,7 @@ import java.util.*
 import kotlin.reflect.KClass
 
 /**
- * Class that represents Dynamic hash data structure, where collision
- * are
+ * Class that represents Dynamic hash data structure.
  */
 class DynamicHashStructure<K, T : IData<K>>(
     name: String,
@@ -109,7 +108,24 @@ class DynamicHashStructure<K, T : IData<K>>(
      */
     @Throws(NoSuchElementException::class)
     fun delete(key: K) {
+        val hashNode = getTrieNode(hashFunction.invoke(key), false)
+        val block = loadBlock(hashNode.blockAddress)
 
+        var deleted = block.delete(key)
+
+        if (!deleted && block.hasNext()) {
+            deleted = overloadStructure.delete(block.next, key)
+            if (deleted) {
+                hashNode.overloadsSize--
+            }
+        } else {
+            hashNode.mainSize--
+        }
+
+        // TODO implement blocks merging
+
+        if (!deleted)
+            throw NoSuchElementException("Element with key ${key.toString()} does not exists.")
     }
 
     /**

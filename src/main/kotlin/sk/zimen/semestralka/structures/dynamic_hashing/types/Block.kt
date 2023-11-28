@@ -50,6 +50,22 @@ class Block<K, T : IData<K>>(
     }
 
     /**
+     * Deletes item with provided [key].
+     * @return - true when item was deleted
+     *  - false when item was not deleted
+     */
+    fun delete(key: K): Boolean {
+        for (i in 0 until validElements) {
+            if (data[i].key == key) {
+                data[i] = data[validElements - 1]
+                validElements--
+                return true
+            }
+        }
+        return false
+    }
+
+    /**
      * Check whether block contains provided [item].
      */
     fun contains(item: T): Boolean {
