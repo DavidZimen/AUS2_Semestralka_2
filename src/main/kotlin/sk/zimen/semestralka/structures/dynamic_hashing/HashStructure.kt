@@ -13,6 +13,7 @@ import kotlin.reflect.KClass
 abstract class HashStructure<K, T : IData<K>>(
     val dirName: String,
     fileName: String,
+    protected val allowedEmptyBlocks: Int,
     protected val blockFactor: Int,
     protected val clazz: KClass<T>
 ) {
@@ -91,20 +92,15 @@ abstract class HashStructure<K, T : IData<K>>(
         }
 
         // read block from position in file
-        val length = file.length()
         val freeBlock = loadBlock(firstEmpty)
 
         // check if it is really empty and first
         if (freeBlock.validElements > 0)
             throw IllegalArgumentException("Block is not empty !!!")
-//        if (freeBlock.previous != -1L)
-//            throw IllegalArgumentException("Block has some predecessor !!!")
 
         //adjust empty blocks in chain
         if (freeBlock.hasNext()) {
-            loadBlock(freeBlock.next)
-                .apply { previous = -1L }
-                .writeBlock()
+            freeBlock.removeFromChain()
             firstEmpty = freeBlock.next
             freeBlock.next = -1L
         } else if (!freeBlock.hasNext()) {
@@ -116,19 +112,41 @@ abstract class HashStructure<K, T : IData<K>>(
         return freeBlock
     }
 
+    //PRIVATE FUNCTIONS
+    /**
+     * Functions which clears empty block from the end of file,
+     * so last block will contain data.
+     */
+    private fun clearEmptyBlockFromEnd() {
+        var newLength = file.length() - blockSize
+
+        while (newLength > allowedEmptyBlocks * blockSize) {
+            val block = loadBlock(newLength - blockSize)
+            if (block.emptyAtEnd()) {
+                block.removeFromChain()
+            } else {
+                break
+            }
+            newLength -= blockSize
+        }
+
+        file.setLength(newLength)
+        if (firstEmpty > newLength) {
+            firstEmpty = newLength
+        }
+    }
+
     //EXTENSION FUNCTIONS
     /**
      * Extension function to add [Block] into chain of empty blocks.
      */
     protected fun Block<K, T>.addToEmptyBlocks() {
-        val length = file.length()
-        if (address + blockSize == file.length()) {
-            file.setLength(address)
+        if (emptyAtEnd()) {
+            removeFromChain()
+            clearEmptyBlockFromEnd()
             return
-            // TODO code to clear all empty from the end of file
         }
 
-        makeEmpty()
         if (firstEmpty != file.length()) {
             loadBlock(firstEmpty)
                 .apply { previous = address }
@@ -144,5 +162,24 @@ abstract class HashStructure<K, T : IData<K>>(
      */
     protected fun Block<K, T>.writeBlock() {
         file.writeAtPosition(address, getData())
+    }
+
+    private fun Block<K, T>.removeFromChain() {
+        if (hasPrevious()) {
+            loadBlock(previous)
+                .apply { next = this@removeFromChain.next }
+                .writeBlock()
+        }
+
+        if (hasNext()) {
+            loadBlock(next)
+                .apply { previous = this@removeFromChain.previous }
+                .writeBlock()
+        }
+    }
+
+    private fun Block<K, T>.emptyAtEnd(): Boolean {
+        return validElements == 0
+                && address + blockSize == file.length()
     }
 }

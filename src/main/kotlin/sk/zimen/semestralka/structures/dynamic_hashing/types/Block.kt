@@ -57,15 +57,6 @@ class Block<K, T : IData<K>>(
     }
 
     /**
-     * Makes [Block] empty and ready to be written to file.
-     */
-    fun makeEmpty() {
-        validElements = 0
-        next = -1L
-        previous = -1L
-    }
-
-    /**
      * Returns boolean whether [Block] is empty or not.
      */
     fun isEmpty(): Boolean {
