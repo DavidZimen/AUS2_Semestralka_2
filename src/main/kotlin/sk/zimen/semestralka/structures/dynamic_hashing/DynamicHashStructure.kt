@@ -101,6 +101,15 @@ class DynamicHashStructure<K, T : IData<K>>(
     }
 
     /**
+     * Deletes item for corresponding [key].
+     * @throws NoSuchElementException when no element with such key exists.
+     */
+    @Throws(NoSuchElementException::class)
+    fun delete(key: K) {
+
+    }
+
+    /**
      * Returns boolean value, whether item is present in structure.
      */
     fun contains(item: T): Boolean {
