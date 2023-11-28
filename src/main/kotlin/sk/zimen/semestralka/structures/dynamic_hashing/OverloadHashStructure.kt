@@ -1,5 +1,6 @@
 package sk.zimen.semestralka.structures.dynamic_hashing
 
+import sk.zimen.semestralka.exceptions.BlockIsFullException
 import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
 import sk.zimen.semestralka.utils.initializeDirectory
 import java.io.RandomAccessFile
@@ -23,10 +24,46 @@ class OverloadHashStructure<K, T : IData<K>>(
      * - false otherwise
      */
     fun insert(address: Long, item: T): Boolean {
-        // TODO implement logic
-        // allocate new block if address is -1
-        // allocate new block if all blocks in chain are full
-        return false
+        var newBlockInChain = false
+        var block = if (address == firstEmpty) {
+            newBlockInChain = true
+            getEmptyBlock()
+        } else {
+            loadBlock(address)
+        }
+
+        while (true) {
+            try {
+                block.insert(item)
+                block.writeBlock()
+                return newBlockInChain
+            } catch (e: BlockIsFullException) {
+                block = if (block.hasNext()) {
+                    loadBlock(block.next)
+                } else {
+                    newBlockInChain = true
+                    block.next = firstEmpty
+                    block.writeBlock()
+                    getEmptyBlock()
+                }
+            }
+        }
+    }
+
+    /**
+     * Finds item for provided key in the chain of
+     * overloading blocks.
+     */
+    fun find(address: Long, key: K): T? {
+        var block = loadBlock(address)
+        var item = block.find(key)
+
+        while (item == null && block.hasNext()) {
+            block = loadBlock(block.next)
+            item = block.find(key)
+        }
+
+        return item
     }
 
     // OVERRIDE FUNCTIONS
@@ -35,7 +72,7 @@ class OverloadHashStructure<K, T : IData<K>>(
         initializeDirectory(dir)
         file = RandomAccessFile("${dir}/${fileName}.bin", "rw")
         file.setLength(blockSize.toLong())
-        firstEmptyBlockAddress = file.length()
+        firstEmpty = file.length()
 
         //TODO logic when file is not empty at the start
     }

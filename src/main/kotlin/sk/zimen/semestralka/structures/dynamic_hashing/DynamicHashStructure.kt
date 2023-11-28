@@ -56,7 +56,7 @@ class DynamicHashStructure<K, T : IData<K>>(
      * [item] has to have a unique key.
      * @throws IllegalArgumentException when item with same key is already present in structure.
      */
-    @Throws(IllegalArgumentException::class, IllegalStateException::class)
+    @Throws(IllegalArgumentException::class)
     fun insert(item: T) {
         // find node in trie and divide if necessary
         val hashNode = getTrieNode(hashFunction.invoke(item.key)).divide(item)
@@ -69,11 +69,14 @@ class DynamicHashStructure<K, T : IData<K>>(
         try {
             block.insert(item)
         } catch (e: BlockIsFullException) {
+            if (!block.hasNext())
+                block.next = overloadStructure.firstEmpty
             if (overloadStructure.insert(block.next, item))
                 hashNode.increaseChainLength()
         }
         hashNode.increaseSize()
         size++
+        block.writeBlock()
     }
 
     /**
@@ -84,15 +87,13 @@ class DynamicHashStructure<K, T : IData<K>>(
     fun find(key: K): T {
         val hashNode = getTrieNode(hashFunction.invoke(key), false)
         val block = loadBlock(hashNode.blockAddress)
-        var item: T?
 
         //find in main block
-        item = block.find(key)
+        var item = block.find(key)
 
         //try overload block if not found
         if (item == null && block.hasNext()) {
-            // TODO search in overload blocks
-            throw NoResultFoundException("Overloading block not yet implemented for searching.")
+            item = overloadStructure.find(block.next, key)
         }
 
         return item ?: throw NoResultFoundException("No result for provided key: ${key.toString()}.")
@@ -121,10 +122,11 @@ class DynamicHashStructure<K, T : IData<K>>(
     fun printStructure() {
         println("\nDynamic hash structure: $dirName")
         println("File size: ${file.length()}")
-        println("First empty block at: $firstEmptyBlockAddress")
+        println("First empty block at: $firstEmpty")
         println("Size: $size")
         hashTrie.actionOnLeafs(true) { address ->
-            loadBlock(address).printData(hashFunction)
+            val block = loadBlock(address)
+            block.printData(hashFunction)
         }
         println("-------------------------------------------------------------------\n")
     }
@@ -135,7 +137,7 @@ class DynamicHashStructure<K, T : IData<K>>(
         initializeDirectory(dir)
         file = RandomAccessFile("${dir}/${fileName}.bin", "rw")
         file.setLength(blockSize.toLong() * 2)
-        firstEmptyBlockAddress = file.length()
+        firstEmpty = file.length()
         val block = Block(blockFactor, clazz)
         block.writeBlock()
         block.apply { address = blockSize.toLong() }.writeBlock()
@@ -169,9 +171,9 @@ class DynamicHashStructure<K, T : IData<K>>(
         // find correct node from hash and load its block
         if (shouldDivide && node is InternalTrieNode) {
             if (node.left == null) {
-                node = node.createLeftSon(firstEmptyBlockAddress)
+                node = node.createLeftSon(firstEmpty)
             } else if (node.right == null) {
-                node = node.createRightSon(firstEmptyBlockAddress)
+                node = node.createRightSon(firstEmpty)
             }
             getEmptyBlock()
         }
@@ -198,7 +200,7 @@ class DynamicHashStructure<K, T : IData<K>>(
             }
 
             // divide external node
-            val newParent = currentNode.divideNode(firstEmptyBlockAddress).also {
+            val newParent = currentNode.divideNode(firstEmpty).also {
                 getEmptyBlock()
             }
 

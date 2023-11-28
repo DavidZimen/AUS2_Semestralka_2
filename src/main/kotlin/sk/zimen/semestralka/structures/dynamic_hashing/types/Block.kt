@@ -78,6 +78,11 @@ class Block<K, T : IData<K>>(
      */
     fun hasNext(): Boolean = next > -1L
 
+    /**
+     * Return boolean flag whether block has some predecessor.
+     */
+    fun hasPrevious(): Boolean = previous > -1L
+
     //OVERRIDE FUNCTIONS
     override fun getSize(): Int {
         Byte.SIZE_BYTES

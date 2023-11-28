@@ -28,9 +28,4 @@ abstract class TrieNode(
         this.parent = parent
         this.level = level
     }
-
-    fun printNode() {
-        println("-------------------------------------------------------------------")
-        println("Hash route: $route")
-    }
 }

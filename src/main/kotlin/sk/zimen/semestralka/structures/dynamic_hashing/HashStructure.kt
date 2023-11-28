@@ -16,8 +16,20 @@ abstract class HashStructure<K, T : IData<K>>(
     protected val blockFactor: Int,
     protected val clazz: KClass<T>
 ) {
+    /**
+     * Address of a first block in chain of empty blocks.
+     */
+    var firstEmpty: Long = 0L
+        protected set
+
+    /**
+     * Number of items, that can be inserted into one block.
+     */
     protected val blockSize: Int = Block(blockFactor, clazz).getSize()
-    protected var firstEmptyBlockAddress: Long = 0L
+
+    /**
+     * File where data are being written and read from.
+     */
     protected lateinit var file: RandomAccessFile
 
     init {
@@ -62,40 +74,41 @@ abstract class HashStructure<K, T : IData<K>>(
     }
 
     /**
-     * Gets block at the [firstEmptyBlockAddress].
+     * Gets block at the [firstEmpty].
      * Also updates chain of empty blocks in the [file].
      */
     @Throws(IllegalArgumentException::class)
     protected fun getEmptyBlock(): Block<K, T> {
         // if at the end of file
-        if (firstEmptyBlockAddress == file.length()) {
+        if (firstEmpty == file.length()) {
             file.setLength(file.length() + blockSize)
             val freeBlock = Block(blockFactor, clazz).also {
-                it.address = firstEmptyBlockAddress
-                firstEmptyBlockAddress = file.length()
+                it.address = firstEmpty
+                firstEmpty = file.length()
             }
             freeBlock.writeBlock()
             return freeBlock
         }
 
         // read block from position in file
-        val freeBlock = loadBlock(firstEmptyBlockAddress)
+        val length = file.length()
+        val freeBlock = loadBlock(firstEmpty)
 
         // check if it is really empty and first
         if (freeBlock.validElements > 0)
             throw IllegalArgumentException("Block is not empty !!!")
-        if (freeBlock.previous != -1L)
-            throw IllegalArgumentException("Block has some predecessor !!!")
+//        if (freeBlock.previous != -1L)
+//            throw IllegalArgumentException("Block has some predecessor !!!")
 
         //adjust empty blocks in chain
         if (freeBlock.hasNext()) {
             loadBlock(freeBlock.next)
                 .apply { previous = -1L }
                 .writeBlock()
-            firstEmptyBlockAddress = freeBlock.next
+            firstEmpty = freeBlock.next
             freeBlock.next = -1L
         } else if (!freeBlock.hasNext()) {
-            firstEmptyBlockAddress = file.length()
+            firstEmpty = file.length()
         } else {
             throw IllegalArgumentException("Empty block next is less than -1 !!!")
         }
@@ -108,6 +121,7 @@ abstract class HashStructure<K, T : IData<K>>(
      * Extension function to add [Block] into chain of empty blocks.
      */
     protected fun Block<K, T>.addToEmptyBlocks() {
+        val length = file.length()
         if (address + blockSize == file.length()) {
             file.setLength(address)
             return
@@ -115,14 +129,14 @@ abstract class HashStructure<K, T : IData<K>>(
         }
 
         makeEmpty()
-        if (firstEmptyBlockAddress != file.length()) {
-            loadBlock(firstEmptyBlockAddress)
+        if (firstEmpty != file.length()) {
+            loadBlock(firstEmpty)
                 .apply { previous = address }
                 .writeBlock()
-            this.apply { next = firstEmptyBlockAddress}
+            this.apply { next = firstEmpty}
                 .writeBlock()
         }
-        firstEmptyBlockAddress = address
+        firstEmpty = address
     }
 
     /**

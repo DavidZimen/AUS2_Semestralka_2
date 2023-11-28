@@ -96,4 +96,9 @@ class ExternalTrieNode(
      * @return New length of chain of blocks.
      */
     fun decreaseChainLength() = --chainLength
+
+    fun printNode() {
+        println("-------------------------------------------------------------------")
+        println("Hash route: $route, Items: $size, Chain length: $chainLength")
+    }
 }
