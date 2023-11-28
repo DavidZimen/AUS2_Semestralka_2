@@ -70,17 +70,6 @@ class OverloadHashStructure<K, T : IData<K>>(
         return item
     }
 
-    // OVERRIDE FUNCTIONS
-    override fun initFile(dirName: String, fileName: String) {
-        val dir = "data/${dirName}"
-        initializeDirectory(dir)
-        file = RandomAccessFile("${dir}/${fileName}.bin", "rw")
-        file.setLength(0)
-        firstEmpty = file.length()
-
-        //TODO logic when file is not empty at the start
-    }
-
     /**
      * Check whether block contains provided [item].
      */
@@ -99,5 +88,16 @@ class OverloadHashStructure<K, T : IData<K>>(
         }
 
         return false
+    }
+
+    // OVERRIDE FUNCTIONS
+    override fun initFile(dirName: String, fileName: String) {
+        val dir = "data/${dirName}"
+        initializeDirectory(dir)
+        file = RandomAccessFile("${dir}/${fileName}.bin", "rw")
+        file.setLength(0)
+        firstEmpty = file.length()
+
+        //TODO logic when file is not empty at the start
     }
 }

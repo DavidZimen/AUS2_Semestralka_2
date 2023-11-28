@@ -69,13 +69,16 @@ class DynamicHashStructure<K, T : IData<K>>(
         val block = loadBlock(hashNode.blockAddress)
         try {
             block.insert(item)
+            hashNode.mainSize++
         } catch (e: BlockIsFullException) {
-            if (!block.hasNext())
+            if (!block.hasNext()) {
                 block.next = overloadStructure.firstEmpty
-            if (overloadStructure.insert(block.next, item))
-                hashNode.increaseChainLength()
+            }
+            if (overloadStructure.insert(block.next, item)) {
+                hashNode.chainLength++
+            }
+            hashNode.overloadsSize++
         }
-        hashNode.increaseSize()
         size++
         block.writeBlock()
     }
@@ -195,7 +198,7 @@ class DynamicHashStructure<K, T : IData<K>>(
         var currentNode = this
 
         // if full, divide node into two in cycle
-        while (currentNode.size == blockFactor && currentNode.canGoFurther(hashTrie.maxDepth)) {
+        while (currentNode.mainSize == blockFactor && currentNode.canGoFurther(hashTrie.maxDepth)) {
             //load data from that block
             val dataList = with(loadBlock(currentNode.blockAddress)) {
                 validElements = 0
@@ -218,10 +221,10 @@ class DynamicHashStructure<K, T : IData<K>>(
             dataList.forEach {
                 if (hashFunction.invoke(it.key)[newParent.level]) {
                     rightBlock.insert(it)
-                    right.increaseSize()
+                    right.mainSize++
                 } else {
                     leftBlock.insert(it)
-                    left.increaseSize()
+                    left.mainSize++
                 }
             }
 

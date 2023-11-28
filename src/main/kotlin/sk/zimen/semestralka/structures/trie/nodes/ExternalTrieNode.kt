@@ -25,13 +25,22 @@ class ExternalTrieNode(
      * Initial value is 1, because external node already has a block.
      */
     var chainLength: Int = 1
-        private set
 
     /**
-     * Count of elements inside of whole chain for current block.
+     * Number of elements inside of whole chain for current block.
      */
-    var size: Int = 0
-        private set
+    val size: Int
+        get() = mainSize + overloadsSize
+
+    /**
+     * Number of elements in block from main structure.
+     */
+    var mainSize: Int = 0
+
+    /**
+     * Number of elements in overload chain.
+     */
+    var overloadsSize: Int = 0
 
     init {
         this.blockAddress = blockAddress
@@ -72,30 +81,6 @@ class ExternalTrieNode(
         newParent.createRightSon(blockAddress)
         return newParent
     }
-
-    /**
-     * Increases [size] by 1.
-     * @return New size of blocks in chain.
-     */
-    fun increaseSize() = ++size
-
-    /**
-     * Decreases [size] by 1.
-     * @return New size of blocks in chain.
-     */
-    fun decreaseSize() = --size
-
-    /**
-     * Increases [chainLength] by 1.
-     * @return New length of chain of blocks.
-     */
-    fun increaseChainLength() = ++chainLength
-
-    /**
-     * Decreases [chainLength] by 1.
-     * @return New length of chain of blocks.
-     */
-    fun decreaseChainLength() = --chainLength
 
     fun printNode() {
         println("-------------------------------------------------------------------")
