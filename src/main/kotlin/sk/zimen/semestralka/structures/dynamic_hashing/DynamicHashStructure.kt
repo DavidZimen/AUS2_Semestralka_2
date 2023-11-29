@@ -109,7 +109,7 @@ class DynamicHashStructure<K, T : IData<K>>(
         val block = loadBlock(hashNode.blockAddress)
 
         val deleteBlock = block.delete(key)
-        val deleteOverload = if (!deleteBlock && block.hasNext()) {
+        val deleteOverload = if (!deleteBlock) {
             overloadStructure.delete(block.next, hashNode, key)
         } else {
             false

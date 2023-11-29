@@ -2,6 +2,7 @@ package sk.zimen.semestralka.structures.dynamic_hashing
 
 import sk.zimen.semestralka.exceptions.BlockIsFullException
 import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
+import sk.zimen.semestralka.structures.dynamic_hashing.types.Block
 import sk.zimen.semestralka.structures.trie.nodes.ExternalTrieNode
 import sk.zimen.semestralka.utils.initializeDirectory
 import java.io.RandomAccessFile
@@ -81,24 +82,25 @@ class OverloadHashStructure<K, T : IData<K>>(
      *  - false when item was not deleted
      */
     fun delete(address: Long, trieNode: ExternalTrieNode, key: K): Boolean {
-        // TODO implement logic
-        return false
-    }
+        if (address <= -1L)
+            return false
 
-    /**
-     * @return All data in chain of overloading blocks,
-     *  starting with [address].
-     */
-    fun getAllData(address: Long): List<T> {
+        var deleted: Boolean
+        var previousBlock: Block<K, T>? = null
         var block = loadBlock(address)
-        val dataList = block.getAllData() as MutableList<T>
 
-        while (block.hasNext()) {
+        while (true) {
+            deleted = block.delete(key)
+            if (deleted || !block.hasNext())
+                break
+            previousBlock = block
             block = loadBlock(block.next)
-            dataList.addAll(block.getAllData())
         }
 
-        return dataList
+        if (deleted)
+            mergeBlocks(previousBlock, block, trieNode)
+
+        return deleted
     }
 
     /**
@@ -137,6 +139,11 @@ class OverloadHashStructure<K, T : IData<K>>(
         }
 
         return false
+    }
+
+    //PRIVATE FUNCTIONS
+    private fun mergeBlocks(previous: Block<K, T>?, block: Block<K, T>, trieNode: ExternalTrieNode) {
+        //TODO implement logic
     }
 
     // OVERRIDE FUNCTIONS
