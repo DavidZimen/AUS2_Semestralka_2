@@ -51,7 +51,8 @@ class Block<K, T : IData<K>>(
 
     /**
      * Deletes item with provided [key].
-     * @return - true when item was deleted
+     * @return
+     *  - true when item was deleted
      *  - false when item was not deleted
      */
     fun delete(key: K): Boolean {

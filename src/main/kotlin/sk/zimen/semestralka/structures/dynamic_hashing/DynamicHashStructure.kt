@@ -73,10 +73,7 @@ class DynamicHashStructure<K, T : IData<K>>(
             if (!block.hasNext()) {
                 block.next = overloadStructure.firstEmpty
             }
-            if (overloadStructure.insert(block.next, item)) {
-                hashNode.chainLength++
-            }
-            hashNode.overloadsSize++
+            overloadStructure.insert(block.next, hashNode, item)
         }
         size++
         block.writeBlock()
@@ -113,7 +110,7 @@ class DynamicHashStructure<K, T : IData<K>>(
 
         val deleteBlock = block.delete(key)
         val deleteOverload = if (!deleteBlock && block.hasNext()) {
-            overloadStructure.delete(block.next, key)
+            overloadStructure.delete(block.next, hashNode, key)
         } else {
             false
         }
@@ -125,8 +122,8 @@ class DynamicHashStructure<K, T : IData<K>>(
         }
 
         //merge overloading block into main block if possible
-        if (hashNode.canMergeOverloads()) {
-            overloadStructure.getAllData(block.next).forEach {
+        if (hashNode.canMergeWithOverloads()) {
+            overloadStructure.deleteChain(block.next).forEach {
                 block.insert(it)
             }
             hashNode.mainSize = hashNode.size
@@ -135,28 +132,8 @@ class DynamicHashStructure<K, T : IData<K>>(
         }
 
         // merge tho brother blocks if possible
-        val brotherNode = hashNode.getBrother() as ExternalTrieNode?
-        if (brotherNode != null && hashNode.size + brotherNode.size <= blockFactor) {
-            val mergedNode = hashTrie.mergeNodes(hashNode, brotherNode)
-
-            // initialize blocks
-            val (sourceBlock, targetBlock) = if (mergedNode.blockAddress == hashNode.blockAddress) {
-                loadBlock(brotherNode.blockAddress) to block
-            } else {
-                block to loadBlock(mergedNode.blockAddress)
-            }
-
-            // move elements
-            sourceBlock.getAllData().forEach {
-                targetBlock.insert(it)
-            }
-
-            // write blocks
-            sourceBlock.addToEmptyBlocks()
-            targetBlock.writeBlock()
-        } else {
+        if (!mergeBlocks(hashNode, block))
             block.writeBlock()
-        }
     }
 
     /**
@@ -235,6 +212,40 @@ class DynamicHashStructure<K, T : IData<K>>(
         return node as ExternalTrieNode
     }
 
+    /**
+     * If possible on [node], it performs node merging to upper level
+     * and writes results to the [file].
+     * @return
+     *  - true if blocks were merged and changes written to file
+     *  - false otherwise
+     */
+    private fun mergeBlocks(node: ExternalTrieNode, block: Block<K, T>): Boolean {
+        // merge tho brother blocks if possible
+        val brotherNode = node.getBrother() as ExternalTrieNode?
+        if (node.canMergeWithBrother(brotherNode)) {
+            val mergedNode = hashTrie.mergeNodes(node, brotherNode!!)
+
+            // initialize blocks
+            val (sourceBlock, targetBlock) = if (mergedNode.blockAddress == node.blockAddress) {
+                loadBlock(brotherNode.blockAddress) to block
+            } else {
+                block to loadBlock(mergedNode.blockAddress)
+            }
+
+            // move elements
+            sourceBlock.getAllData().forEach {
+                targetBlock.insert(it)
+            }
+
+            // write blocks
+            sourceBlock.addToEmptyBlocks()
+            targetBlock.writeBlock()
+
+            return true
+        }
+        return false
+    }
+
     // EXTENSION FUNCTIONS
     /**
      * Divides [ExternalTrieNode] into two and changes it to [InternalTrieNode].
@@ -301,5 +312,14 @@ class DynamicHashStructure<K, T : IData<K>>(
     /**
      * Checks if data in overloading blocks, can be merged into node in main structure.
      */
-    private fun ExternalTrieNode.canMergeOverloads() = size <= blockFactor && chainLength > 1
+    private fun ExternalTrieNode.canMergeWithOverloads(): Boolean{
+        return size <= blockFactor && chainLength > 1
+    }
+
+    /**
+     * Checks if two sibling nodes can be merged into one.
+     */
+    private fun ExternalTrieNode.canMergeWithBrother(brother: ExternalTrieNode?): Boolean {
+        return brother != null && size + brother.size <= blockFactor
+    }
 }

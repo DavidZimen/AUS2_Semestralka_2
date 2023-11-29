@@ -2,6 +2,7 @@ package sk.zimen.semestralka.structures.dynamic_hashing
 
 import sk.zimen.semestralka.exceptions.BlockIsFullException
 import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
+import sk.zimen.semestralka.structures.trie.nodes.ExternalTrieNode
 import sk.zimen.semestralka.utils.initializeDirectory
 import java.io.RandomAccessFile
 import kotlin.reflect.KClass
@@ -24,10 +25,8 @@ class OverloadHashStructure<K, T : IData<K>>(
     /**
      * Inserts [item] to the chain of overloading blocks
      * starting with [address].
-     * @return - true if chain length must have been increased
-     * - false otherwise
      */
-    fun insert(address: Long, item: T): Boolean {
+    fun insert(address: Long, trieNode: ExternalTrieNode, item: T) {
         var newBlockInChain = false
         var block = if (address == firstEmpty) {
             newBlockInChain = true
@@ -40,7 +39,7 @@ class OverloadHashStructure<K, T : IData<K>>(
             try {
                 block.insert(item)
                 block.writeBlock()
-                return newBlockInChain
+                break
             } catch (e: BlockIsFullException) {
                 block = if (block.hasNext()) {
                     loadBlock(block.next)
@@ -52,6 +51,10 @@ class OverloadHashStructure<K, T : IData<K>>(
                 }
             }
         }
+
+        if (newBlockInChain)
+            trieNode.chainLength++
+        trieNode.overloadsSize++
     }
 
     /**
@@ -73,10 +76,11 @@ class OverloadHashStructure<K, T : IData<K>>(
     /**
      * Finds item for provided [key] in chain of
      * overload block starting with [address].
-     * @return - true when item was deleted
-     *      *  - false when item was not deleted
+     * @return
+     *  - true when item was delete
+     *  - false when item was not deleted
      */
-    fun delete(address: Long, key: K): Boolean {
+    fun delete(address: Long, trieNode: ExternalTrieNode, key: K): Boolean {
         // TODO implement logic
         return false
     }
@@ -92,6 +96,24 @@ class OverloadHashStructure<K, T : IData<K>>(
         while (block.hasNext()) {
             block = loadBlock(block.next)
             dataList.addAll(block.getAllData())
+        }
+
+        return dataList
+    }
+
+    /**
+     * Deletes all blocks in chain and returns data from all blocks.
+     */
+    fun deleteChain(address: Long): List<T> {
+        var block = loadBlock(address)
+        val dataList = block.getAllData() as MutableList<T>
+        var next = block.next
+
+        while (next > -1L) {
+            block = loadBlock(next)
+            next = block.next
+            dataList.addAll(block.getAllData())
+            block.addToEmptyBlocks()
         }
 
         return dataList
