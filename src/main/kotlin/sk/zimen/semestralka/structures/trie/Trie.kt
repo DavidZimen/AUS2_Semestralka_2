@@ -52,6 +52,32 @@ class Trie(
     }
 
     /**
+     * Merges two [ExternalTrieNode]s into one, on upper level.
+     */
+    fun mergeNodes(node1: ExternalTrieNode, node2: ExternalTrieNode): ExternalTrieNode {
+        if (node1.parent != node2.parent)
+            throw IllegalArgumentException("Cannot merge two nodes, that don't have same parent.")
+
+        val newParent = node1.parent?.parent
+                ?: throw IllegalArgumentException("Cannot merge further. Nodes parent is root of the trie.")
+
+        val parent = node1.parent
+        val newAddress = if (node1.blockAddress < node2.blockAddress) node1.blockAddress else node2.blockAddress
+        val newNode = ExternalTrieNode(parent.key!!, parent, newAddress, parent.level, parent.route).apply {
+            mainSize = node1.size + node2.size
+            chainLength = 1
+        }
+
+        if (parent.isLeft()) {
+            newParent.left = newNode
+        } else {
+            newParent.right = newNode
+        }
+
+        return newNode
+    }
+
+    /**
      * Traverses [Trie] and performs provided [func] on each
      * [ExternalTrieNode].
      */

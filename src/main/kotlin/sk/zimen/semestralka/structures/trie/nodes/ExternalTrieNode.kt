@@ -47,14 +47,6 @@ class ExternalTrieNode(
         this.route = route
     }
 
-    fun isLeft() = parent?.left == this
-
-    fun isRight() = parent?.right == this
-
-    fun getBrother(): TrieNode? {
-        return if (isLeft()) parent?.right else parent?.left
-    }
-
     fun canGoFurther(maxDepth: Int) = level < maxDepth
 
     /**

@@ -28,4 +28,12 @@ abstract class TrieNode(
         this.parent = parent
         this.level = level
     }
+
+    fun isLeft() = parent?.left == this
+
+    fun isRight() = parent?.right == this
+
+    fun getBrother(): TrieNode? {
+        return if (isLeft()) parent?.right else parent?.left
+    }
 }

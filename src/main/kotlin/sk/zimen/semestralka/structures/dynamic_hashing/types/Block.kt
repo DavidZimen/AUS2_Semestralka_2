@@ -73,6 +73,11 @@ class Block<K, T : IData<K>>(
     }
 
     /**
+     * Returns all valid elements is list of [data].
+     */
+    fun getAllData(): List<T> = data.subList(0, validElements)
+
+    /**
      * Returns boolean whether [Block] is empty or not.
      */
     fun isEmpty(): Boolean {

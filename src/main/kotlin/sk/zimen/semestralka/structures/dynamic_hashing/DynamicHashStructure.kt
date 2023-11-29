@@ -111,21 +111,52 @@ class DynamicHashStructure<K, T : IData<K>>(
         val hashNode = getTrieNode(hashFunction.invoke(key), false)
         val block = loadBlock(hashNode.blockAddress)
 
-        var deleted = block.delete(key)
-
-        if (!deleted && block.hasNext()) {
-            deleted = overloadStructure.delete(block.next, key)
-            if (deleted) {
-                hashNode.overloadsSize--
-            }
+        val deleteBlock = block.delete(key)
+        val deleteOverload = if (!deleteBlock && block.hasNext()) {
+            overloadStructure.delete(block.next, key)
         } else {
-            hashNode.mainSize--
+            false
         }
 
-        // TODO implement blocks merging
+        when {
+            deleteBlock -> hashNode.mainSize--
+            deleteOverload -> hashNode.overloadsSize--
+            else -> throw NoSuchElementException("Element with key ${key.toString()} does not exist.")
+        }
 
-        if (!deleted)
-            throw NoSuchElementException("Element with key ${key.toString()} does not exists.")
+        //merge overloading block into main block if possible
+        if (hashNode.canMergeOverloads()) {
+            overloadStructure.getAllData(block.next).forEach {
+                block.insert(it)
+            }
+            hashNode.mainSize = hashNode.size
+            hashNode.overloadsSize = 0
+            hashNode.chainLength = 1
+        }
+
+        // merge tho brother blocks if possible
+        val brotherNode = hashNode.getBrother() as ExternalTrieNode?
+        if (brotherNode != null && hashNode.size + brotherNode.size <= blockFactor) {
+            val mergedNode = hashTrie.mergeNodes(hashNode, brotherNode)
+
+            // initialize blocks
+            val (sourceBlock, targetBlock) = if (mergedNode.blockAddress == hashNode.blockAddress) {
+                loadBlock(brotherNode.blockAddress) to block
+            } else {
+                block to loadBlock(mergedNode.blockAddress)
+            }
+
+            // move elements
+            sourceBlock.getAllData().forEach {
+                targetBlock.insert(it)
+            }
+
+            // write blocks
+            sourceBlock.addToEmptyBlocks()
+            targetBlock.writeBlock()
+        } else {
+            block.writeBlock()
+        }
     }
 
     /**
@@ -266,4 +297,9 @@ class DynamicHashStructure<K, T : IData<K>>(
 
         return currentNode
     }
+
+    /**
+     * Checks if data in overloading blocks, can be merged into node in main structure.
+     */
+    private fun ExternalTrieNode.canMergeOverloads() = size <= blockFactor && chainLength > 1
 }

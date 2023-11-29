@@ -82,6 +82,22 @@ class OverloadHashStructure<K, T : IData<K>>(
     }
 
     /**
+     * @return All data in chain of overloading blocks,
+     *  starting with [address].
+     */
+    fun getAllData(address: Long): List<T> {
+        var block = loadBlock(address)
+        val dataList = block.getAllData() as MutableList<T>
+
+        while (block.hasNext()) {
+            block = loadBlock(block.next)
+            dataList.addAll(block.getAllData())
+        }
+
+        return dataList
+    }
+
+    /**
      * Check whether block contains provided [item].
      */
     fun contains(address: Long, item: T): Boolean {
