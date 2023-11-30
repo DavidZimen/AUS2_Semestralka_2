@@ -49,7 +49,7 @@ abstract class HashStructure<K, T : IData<K>>(
      * Function for testing purposes.
      * Return boolean whether last block in [file] has some items.
      */
-    fun isLastBlockOccupied(): Boolean {
+    open fun isLastBlockOccupied(): Boolean {
         return loadBlock(file.length() - blockSize).validElements > 0
     }
 
@@ -116,7 +116,7 @@ abstract class HashStructure<K, T : IData<K>>(
         var newLength = file.length() - blockSize
         file.setLength(newLength)
 
-        while (newLength > 0) {
+        while (newLength > allowedEmptyBlocks * blockSize) {
             val block = loadBlock(newLength - blockSize)
 
             if (!block.emptyAtEnd()) {
@@ -144,13 +144,20 @@ abstract class HashStructure<K, T : IData<K>>(
             return
         }
 
+        validElements = 0
+        previous = -1L
+        next = -1L
+
         if (firstEmpty != file.length()) {
             loadBlock(firstEmpty)
                 .apply { previous = address }
                 .writeBlock()
-            this.apply { next = firstEmpty}
+            this.apply { next = firstEmpty }
                 .writeBlock()
+        } else {
+            writeBlock()
         }
+
         firstEmpty = address
     }
 

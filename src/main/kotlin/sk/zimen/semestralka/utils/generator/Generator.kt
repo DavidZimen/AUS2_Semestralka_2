@@ -11,9 +11,9 @@ import kotlin.reflect.full.createInstance
 
 class Generator() {
     /**
-     * Instance of [RandomDataGenerator].
+     * Instance of [Random].
      */
-    val random = Random()
+    val random = Random(0)
     var leftX: Double = -180.0
     var topY: Double = 90.0
     var rightX: Double = 180.0

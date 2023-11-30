@@ -28,6 +28,9 @@ class OverloadHashStructure<K, T : IData<K>>(
      * starting with [address].
      */
     fun insert(address: Long, trieNode: ExternalTrieNode, item: T) {
+        if (item.key is Long && item.key == -5700258325248668935L) {
+            println("Inserting problem item in overload block.")
+        }
         var newBlockInChain = false
         var block = if (address == firstEmpty) {
             newBlockInChain = true
@@ -53,8 +56,9 @@ class OverloadHashStructure<K, T : IData<K>>(
             }
         }
 
-        if (newBlockInChain)
+        if (newBlockInChain) {
             trieNode.chainLength++
+        }
         trieNode.overloadsSize++
     }
 
@@ -97,8 +101,10 @@ class OverloadHashStructure<K, T : IData<K>>(
             block = loadBlock(block.next)
         }
 
-        if (deleted)
+        if (deleted) {
             mergeBlocks(previousBlock, block, trieNode)
+            trieNode.overloadsSize--
+        }
 
         return deleted
     }
@@ -143,7 +149,18 @@ class OverloadHashStructure<K, T : IData<K>>(
 
     //PRIVATE FUNCTIONS
     private fun mergeBlocks(previous: Block<K, T>?, block: Block<K, T>, trieNode: ExternalTrieNode) {
-        //TODO implement logic
+        if (previous != null) {
+            if (previous.validElements + block.validElements <= blockFactor) {
+                block.getAllData().forEach {
+                    previous.insert(it)
+                }
+                block.addToEmptyBlocks()
+                previous.writeBlock()
+                trieNode.chainLength--
+            }
+        } else {
+            block.writeBlock()
+        }
     }
 
     // OVERRIDE FUNCTIONS

@@ -1,7 +1,6 @@
 package sk.zimen.semestralka.structures.dynamic_hashing
 
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import sk.zimen.semestralka.api.types.TestItem
 import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
@@ -10,20 +9,20 @@ import sk.zimen.semestralka.utils.generator.GeneratedOperation
 import sk.zimen.semestralka.utils.generator.Generator
 import sk.zimen.semestralka.utils.moduloHashFunction
 
-internal class DynamicHashStructureTest {
+internal class DynamicHashStructureRandomizedTest {
 
     private val generator = Generator()
 
     @Test
     fun randomizedTest() {
         // initialization
-        val itemsCount = 25_000
+        val itemsCount = 5_000
         val operationsCount = 1_000
         val strName = "randomizedTest"
-        val blockFactor = 10
-        val overloadBlockFactor = 25
-        val modulo = 2_000L
-        val operationRatio = intArrayOf(1, 0, 0, 1)
+        val blockFactor = 6
+        val overloadBlockFactor = 15
+        val modulo = 1_000L
+        val operationRatio = intArrayOf(1, 1, 0, 1)
         deleteDirectory("data/$strName")
         val dynamicHash = DynamicHashStructure(strName, blockFactor, overloadBlockFactor, TestItem::class, moduloHashFunction(modulo), 10)
 
@@ -35,6 +34,7 @@ internal class DynamicHashStructureTest {
                 ?: throw IllegalArgumentException("Wrong number of operations or wrong ratio provided.")
 
         dynamicHash.initialize(items)
+        var deleteCount = 0
 
         while (!operations.isEmpty()) {
             val operation = operations.pop()!!
@@ -42,21 +42,31 @@ internal class DynamicHashStructureTest {
                 GeneratedOperation.FIND -> {
                     val item = items[generator.random.nextInt(0, items.size)]
                     val findItem = TestItem(item.key, item.desc.value)
-                    try {
-                        val foundItem = dynamicHash.find(findItem.key)
-                        assertEquals(findItem, foundItem)
-                    } catch (_: Exception) { }
+                    val foundItem = dynamicHash.find(findItem.key)
+                    assertEquals(findItem, foundItem)
                 }
                 GeneratedOperation.INSERT -> {
                     val item = generator.generateTestItems(1)[0]
                     try {
                         dynamicHash.insert(item)
+                        items.add(item)
                         assertTrue(dynamicHash.contains(item))
                         assertTrue(dynamicHash.isLastBlockOccupied())
-                    } catch (_: Exception) { }
+                    } catch (e: IllegalArgumentException) {
+                        println(e.message)
+                    }
                 }
                 GeneratedOperation.DELETE -> {
-                    // TODO so far not implemented, implement after DELETE function is done.
+                    println(++deleteCount)
+                    if (deleteCount == 126) {
+                        println("Another deleting problem")
+                    }
+                    val item = items.removeAt(generator.random.nextInt(0, items.size))
+                    if (item.key == -5700258325248668935L)
+                        println("Problem key was deleted")
+                    dynamicHash.delete(item.key)
+                    assertFalse(dynamicHash.contains(item))
+                    assertTrue(dynamicHash.isLastBlockOccupied())
                 }
                 GeneratedOperation.EDIT -> {
                     // TODO so far not implemented, implement after EDIT function is done.

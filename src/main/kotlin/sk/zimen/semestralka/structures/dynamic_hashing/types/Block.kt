@@ -30,7 +30,7 @@ class Block<K, T : IData<K>>(
      */
     @Throws(BlockIsFullException::class)
     fun insert(item: T) {
-        if (data.size < blockFactor) {
+        if (validElements < blockFactor) {
             data.add(validElements++, item)
         } else {
             throw BlockIsFullException("Current block is at its maximum capacity !!!")
@@ -76,7 +76,13 @@ class Block<K, T : IData<K>>(
     /**
      * Returns all valid elements is list of [data].
      */
-    fun getAllData(): List<T> = data.subList(0, validElements)
+    fun getAllData(): List<T> {
+        val items = ArrayList<T>(validElements)
+        for (i in 0 until validElements) {
+            items.add(data[i])
+        }
+        return items
+    }
 
     /**
      * Returns boolean whether [Block] is empty or not.

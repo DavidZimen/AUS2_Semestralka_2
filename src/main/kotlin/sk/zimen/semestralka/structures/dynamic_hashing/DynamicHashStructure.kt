@@ -7,6 +7,7 @@ import sk.zimen.semestralka.structures.dynamic_hashing.types.Block
 import sk.zimen.semestralka.structures.trie.Trie
 import sk.zimen.semestralka.structures.trie.nodes.ExternalTrieNode
 import sk.zimen.semestralka.structures.trie.nodes.InternalTrieNode
+import sk.zimen.semestralka.structures.trie.nodes.TrieNode
 import sk.zimen.semestralka.utils.*
 import java.io.RandomAccessFile
 import java.util.*
@@ -63,7 +64,7 @@ class DynamicHashStructure<K, T : IData<K>>(
             throw IllegalArgumentException("Item is already present.")
 
         // find node in trie and divide if necessary
-        val hashNode = getTrieNode(hashFunction.invoke(item.key)).divide(item)
+        val hashNode = (getTrieNode(hashFunction.invoke(item.key)) as ExternalTrieNode).divide(item)
 
         val block = loadBlock(hashNode.blockAddress)
         try {
@@ -86,7 +87,10 @@ class DynamicHashStructure<K, T : IData<K>>(
     @Throws(NoResultFoundException::class)
     fun find(key: K): T {
         val hashNode = getTrieNode(hashFunction.invoke(key), false)
-        val block = loadBlock(hashNode.blockAddress)
+        if (hashNode is InternalTrieNode)
+            throw NoResultFoundException("No result for provided key: ${key.toString()}.")
+
+        val block = loadBlock((hashNode as ExternalTrieNode).blockAddress)
 
         //find in main block
         var item = block.find(key)
@@ -105,7 +109,12 @@ class DynamicHashStructure<K, T : IData<K>>(
      */
     @Throws(NoSuchElementException::class)
     fun delete(key: K) {
-        val hashNode = getTrieNode(hashFunction.invoke(key), false)
+        var hashNode = getTrieNode(hashFunction.invoke(key), false)
+        if (hashNode is InternalTrieNode) {
+            throw NoSuchElementException("Element with key ${key.toString()} does not exist.")
+        }
+        hashNode = hashNode as ExternalTrieNode
+
         val block = loadBlock(hashNode.blockAddress)
 
         val deleteBlock = block.delete(key)
@@ -115,10 +124,12 @@ class DynamicHashStructure<K, T : IData<K>>(
             false
         }
 
-        when {
-            deleteBlock -> hashNode.mainSize--
-            deleteOverload -> hashNode.overloadsSize--
-            else -> throw NoSuchElementException("Element with key ${key.toString()} does not exist.")
+        if (deleteBlock) {
+            hashNode.mainSize--
+        }
+
+        if (!deleteBlock && !deleteOverload) {
+            throw NoSuchElementException("Element with key ${key.toString()} does not exist.")
         }
 
         //merge overloading block into main block if possible
@@ -134,6 +145,7 @@ class DynamicHashStructure<K, T : IData<K>>(
         // merge tho brother blocks if possible
         if (!mergeBlocks(hashNode, block))
             block.writeBlock()
+        size--
     }
 
     /**
@@ -141,7 +153,10 @@ class DynamicHashStructure<K, T : IData<K>>(
      */
     fun contains(item: T): Boolean {
         val hashNode = getTrieNode(hashFunction.invoke(item.key), false)
-        val block = loadBlock(hashNode.blockAddress)
+        if (hashNode is InternalTrieNode)
+            return false
+
+        val block = loadBlock((hashNode as ExternalTrieNode).blockAddress)
         val isPresent = block.contains(item)
         return if (isPresent) {
             true
@@ -191,12 +206,16 @@ class DynamicHashStructure<K, T : IData<K>>(
         //TODO logic when file is not empty at the start
     }
 
+    override fun isLastBlockOccupied(): Boolean {
+        return super.isLastBlockOccupied() && overloadStructure.isLastBlockOccupied()
+    }
+
     // PRIVATE FUNCTIONS
     /**
      * Traverses [Trie] and find node, which corresponds to [hash].
      * - [shouldDivide] is only used when inserting and node is internal.
      */
-    private fun getTrieNode(hash: BitSet, shouldDivide: Boolean = true): ExternalTrieNode {
+    private fun getTrieNode(hash: BitSet, shouldDivide: Boolean = true): TrieNode {
         var node = hashTrie.getLeaf(hash)
 
         // find correct node from hash and load its block
@@ -209,7 +228,7 @@ class DynamicHashStructure<K, T : IData<K>>(
             getEmptyBlock()
         }
 
-        return node as ExternalTrieNode
+        return node
     }
 
     /**
@@ -221,9 +240,16 @@ class DynamicHashStructure<K, T : IData<K>>(
      */
     private fun mergeBlocks(node: ExternalTrieNode, block: Block<K, T>): Boolean {
         // merge tho brother blocks if possible
-        val brotherNode = node.getBrother() as ExternalTrieNode?
+        var brotherNode = node.getBrother()
+        if (brotherNode is InternalTrieNode?)
+            return false
+        brotherNode = brotherNode as ExternalTrieNode
+        if (brotherNode.blockAddress == 142688L) {
+            println("MErging from problem hash node")
+        }
+
         if (node.canMergeWithBrother(brotherNode)) {
-            val mergedNode = hashTrie.mergeNodes(node, brotherNode!!)
+            val mergedNode = hashTrie.mergeNodes(node, brotherNode)
 
             // initialize blocks
             val (sourceBlock, targetBlock) = if (mergedNode.blockAddress == node.blockAddress) {
@@ -253,27 +279,31 @@ class DynamicHashStructure<K, T : IData<K>>(
      *   and its [ExternalTrieNode.level] is less than [Trie.maxDepth].
      */
     private fun ExternalTrieNode.divide(item: T): ExternalTrieNode {
+        if (route == "100110100") {
+            println("Dividing problem node")
+        }
         var currentNode = this
 
         // if full, divide node into two in cycle
         while (currentNode.mainSize == blockFactor && currentNode.canGoFurther(hashTrie.maxDepth)) {
             //load data from that block
-            val dataList = with(loadBlock(currentNode.blockAddress)) {
-                validElements = 0
-                writeBlock()
-                data
-            }
+
+            val block = loadBlock(currentNode.blockAddress)
+            val dataList = block.getAllData()
+            block.validElements = 0
 
             // divide external node
-            val newParent = currentNode.divideNode(firstEmpty).also {
-                getEmptyBlock()
-            }
+            val emptyBlock = getEmptyBlock()
+            val newParent = currentNode.divideNode(emptyBlock.address)
 
             // load left and right block of parent
             val right = newParent.right as ExternalTrieNode
             val left = newParent.left as ExternalTrieNode
-            val rightBlock = loadBlock(right.blockAddress)
-            val leftBlock = loadBlock(left.blockAddress)
+            val (rightBlock, leftBlock) = if (block.address == right.blockAddress) {
+                block to emptyBlock
+            } else {
+                emptyBlock to block
+            }
 
             // reinsert data
             dataList.forEach {
