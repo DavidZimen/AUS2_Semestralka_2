@@ -1,11 +1,11 @@
 package sk.zimen.semestralka.api.types
 
+import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.DynamicHashData
 import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IBlock
-import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
 import sk.zimen.semestralka.utils.*
 import java.util.*
 
-class TestItem() : IData<Long>() {
+class TestItem() : DynamicHashData<Long>() {
 
     override var key: Long = Long.MIN_VALUE
     var desc: StringData = StringData()

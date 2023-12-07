@@ -1,15 +1,85 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.VBox?>
-<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="sk.zimen.semestralka.ui.MainPageController">
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-    </padding>
-
-    <Label fx:id="welcomeText"/>
-    <Button text="Hello!" onAction="#onHelloButtonClick"/>
-</VBox>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="900.0" prefWidth="1610.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.zimen.semestralka.ui.MainPageController">
+   <top>
+      <HBox prefHeight="74.0" prefWidth="1280.0" BorderPane.alignment="CENTER">
+         <children>
+            <ImageView fitHeight="124.0" fitWidth="431.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@icons/FRI_H_S_sk_f.png" />
+               </image>
+            </ImageView>
+            <Label fx:id="mainTitle" alignment="CENTER" prefHeight="124.0" prefWidth="1235.0" text="Semestrálna práca AUS2" textFill="#153d65">
+               <font>
+                  <Font size="40.0" />
+               </font>
+            </Label>
+         </children>
+      </HBox>
+   </top>
+   <left>
+      <VBox maxHeight="-Infinity" minHeight="-Infinity" prefHeight="724.0" prefWidth="279.0" BorderPane.alignment="CENTER">
+         <children>
+            <HBox fx:id="parcelsTab" alignment="CENTER" onMouseClicked="#openParcels" prefHeight="60.0" prefWidth="261.0" userData="Open parcels work">
+               <children>
+                  <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@icons/icons8-land-24.png" />
+                     </image>
+                  </ImageView>
+                  <Label alignment="CENTER" contentDisplay="CENTER" text="Parcels">
+                     <font>
+                        <Font name="Berlin Sans FB Demi Bold" size="24.0" />
+                     </font>
+                  </Label>
+               </children>
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+            </HBox>
+            <HBox fx:id="properties" alignment="CENTER" onMouseClicked="#openProperties" prefHeight="60.0" prefWidth="261.0" userData="Open properties works">
+               <children>
+                  <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@icons/icons8-house-24.png" />
+                     </image>
+                  </ImageView>
+                  <Label text="Properties">
+                     <font>
+                        <Font size="24.0" />
+                     </font>
+                  </Label>
+               </children>
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+            </HBox>
+            <HBox fx:id="generatorTab" alignment="CENTER" layoutX="10.0" layoutY="130.0" onMouseClicked="#openGenerator" prefHeight="60.0" prefWidth="261.0">
+               <children>
+                  <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@icons/icons8-c-drive-2-50.png" />
+                     </image>
+                  </ImageView>
+                  <Label text="Storage">
+                     <font>
+                        <Font size="24.0" />
+                     </font>
+                  </Label>
+               </children>
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+            </HBox>
+         </children>
+      </VBox>
+   </left>
+   <center>
+      <AnchorPane fx:id="contentDetail" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" BorderPane.alignment="CENTER" />
+   </center>
+</BorderPane>

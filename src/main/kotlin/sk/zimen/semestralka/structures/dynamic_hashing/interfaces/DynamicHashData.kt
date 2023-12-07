@@ -4,7 +4,7 @@ package sk.zimen.semestralka.structures.dynamic_hashing.interfaces
  * Interface containing methods for data to be inserted in dynamic hashing structure.
  * @author David Zimen
  */
-abstract class IData<K>: IBlock<K> {
+abstract class DynamicHashData<K>: IBlock<K> {
     /**
      * Unique key of data to be stored in dynamic hashing structure.
      */

@@ -1,6 +1,6 @@
 package sk.zimen.semestralka.structures.dynamic_hashing
 
-import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
+import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.DynamicHashData
 import sk.zimen.semestralka.structures.dynamic_hashing.types.Block
 import sk.zimen.semestralka.utils.readAtPosition
 import sk.zimen.semestralka.utils.writeAtPosition
@@ -10,7 +10,7 @@ import kotlin.reflect.KClass
 /**
  * Generic structure for hashing in files.
  */
-abstract class HashStructure<K, T : IData<K>>(
+abstract class HashStructure<K, T : DynamicHashData<K>>(
     val dirName: String,
     fileName: String,
     protected val blockFactor: Int,

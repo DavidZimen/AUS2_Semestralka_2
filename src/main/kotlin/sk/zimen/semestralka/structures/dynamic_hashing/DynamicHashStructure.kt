@@ -2,7 +2,7 @@ package sk.zimen.semestralka.structures.dynamic_hashing
 
 import sk.zimen.semestralka.exceptions.BlockIsFullException
 import sk.zimen.semestralka.exceptions.NoResultFoundException
-import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
+import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.DynamicHashData
 import sk.zimen.semestralka.structures.dynamic_hashing.types.Block
 import sk.zimen.semestralka.structures.trie.Trie
 import sk.zimen.semestralka.structures.trie.nodes.ExternalTrieNode
@@ -16,7 +16,7 @@ import kotlin.reflect.KClass
 /**
  * Class that represents Dynamic hash data structure.
  */
-class DynamicHashStructure<K, T : IData<K>>(
+class DynamicHashStructure<K, T : DynamicHashData<K>>(
     name: String,
     blockFactor: Int,
     overloadBlockFactor: Int,

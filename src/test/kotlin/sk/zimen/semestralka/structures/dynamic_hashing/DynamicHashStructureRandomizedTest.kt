@@ -3,7 +3,7 @@ package sk.zimen.semestralka.structures.dynamic_hashing
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import sk.zimen.semestralka.api.types.TestItem
-import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
+import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.DynamicHashData
 import sk.zimen.semestralka.utils.deleteDirectory
 import sk.zimen.semestralka.utils.generator.GeneratedOperation
 import sk.zimen.semestralka.utils.generator.Generator
@@ -80,7 +80,7 @@ internal class DynamicHashStructureRandomizedTest {
         dynamicHash.save()
     }
 
-    private fun <K, T: IData<K>> DynamicHashStructure<K, T>.initialize(items: MutableList<T>) {
+    private fun <K, T: DynamicHashData<K>> DynamicHashStructure<K, T>.initialize(items: MutableList<T>) {
         val iterator = items.iterator()
 
         while (iterator.hasNext()) {
