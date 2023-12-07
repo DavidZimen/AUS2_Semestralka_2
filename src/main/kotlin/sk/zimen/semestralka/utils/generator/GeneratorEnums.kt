@@ -22,5 +22,5 @@ enum class GeneratedOperation {
     DELETE,
     INSERT,
     FIND,
-    EDIT
+    REPLACE
 }

@@ -138,19 +138,16 @@ abstract class HashStructure<K, T : IData<K>>(
      * Extension function to add [Block] into chain of empty blocks.
      */
     protected fun Block<K, T>.addToEmptyBlocks() {
+        removeFromChain()
         validElements = 0
-        previous = -1L
-        next = -1L
 
         if (emptyAtEnd()) {
-            removeFromChain()
             clearEmptyBlockFromEnd()
             return
         }
 
         if (firstEmpty != file.length()) {
-            loadBlock(firstEmpty)
-                .apply { previous = address }
+            loadBlock(firstEmpty).apply { previous = address }
                 .writeBlock()
             this.apply { next = firstEmpty }
                 .writeBlock()

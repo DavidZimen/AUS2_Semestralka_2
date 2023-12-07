@@ -15,13 +15,14 @@ internal class DynamicHashStructureRandomizedTest {
 
     @Test
     fun randomizedTest() {
+        println("Seed for generator is: ${generator.seed}")
         // initialization
-        val itemsCount = 5_000
-        val operationsCount = 1_000
+        val itemsCount = 10_000
+        val operationsCount = 2_000
         val strName = "randomizedTest"
         val blockFactor = 6
         val overloadBlockFactor = 15
-        val modulo = 1_000L
+        val modulo = 80L
         val operationRatio = intArrayOf(1, 1, 1, 1)
         deleteDirectory("data/$strName")
         val dynamicHash = DynamicHashStructure(strName, blockFactor, overloadBlockFactor, TestItem::class, moduloHashFunction(modulo), 10)
@@ -61,8 +62,16 @@ internal class DynamicHashStructureRandomizedTest {
                     assertFalse(dynamicHash.contains(item))
                     assertTrue(dynamicHash.isLastBlockOccupied())
                 }
-                GeneratedOperation.EDIT -> {
-                    // TODO so far not implemented, implement after EDIT function is done.
+                GeneratedOperation.REPLACE -> {
+                    val index = generator.random.nextInt(0, items.size)
+                    val oldItem = items[index]
+                    val newItem = TestItem(oldItem.key, generator.nextString(TestItem.MAX_STRING_LENGTH))
+                    items[index] = newItem
+
+                    dynamicHash.replace(oldItem, newItem)
+                    assertTrue(dynamicHash.contains(newItem))
+                    assertFalse(dynamicHash.contains(oldItem))
+                    assertEquals(newItem, dynamicHash.find(newItem.key))
                 }
             }
         }

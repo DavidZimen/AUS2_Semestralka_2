@@ -13,7 +13,8 @@ class Generator() {
     /**
      * Instance of [Random].
      */
-    val random = Random(0)
+    val random = Random()
+    val seed: Long = random.nextLong()
     var leftX: Double = -180.0
     var topY: Double = 90.0
     var rightX: Double = 180.0
@@ -21,6 +22,10 @@ class Generator() {
 
     constructor(quadrantWidth: Double, quadrantHeight: Double) : this() {
         setCoordinates(-quadrantWidth, quadrantHeight, quadrantWidth, -quadrantHeight)
+    }
+
+    init {
+        random.setSeed(seed)
     }
 
     fun generateTestItems(count: Int): MutableList<TestItem> {
@@ -91,12 +96,19 @@ class Generator() {
             } else if (probability < probs[0] + probs[1]) {
                 operations.push(GeneratedOperation.DELETE)
             } else if (probability < probs[0] + probs[1] + probs[2]) {
-                operations.push(GeneratedOperation.EDIT)
+                operations.push(GeneratedOperation.REPLACE)
             } else {
                 operations.push(GeneratedOperation.FIND)
             }
         }
         return operations
+    }
+
+    fun nextString(maxLength: Int): String {
+        val length = random.nextInt(1, maxLength)
+        return (1..length)
+            .map { CHARSET[random.nextInt(CHARSET.length)] }
+            .joinToString("")
     }
 
     private fun <T : Place> generateItem(clazz: KClass<T>): T {
@@ -107,7 +119,7 @@ class Generator() {
         return instance
     }
 
-    fun generateSize(): GeneratedSize {
+    private fun generateSize(): GeneratedSize {
         val probability = random.nextDouble()
         return if (probability < 0.2) {
             GeneratedSize.XXS
@@ -156,13 +168,6 @@ class Generator() {
         return if (higher == lower) {
             higher
         } else random.nextDouble(lower, higher)
-    }
-
-    private fun nextString(maxLength: Int): String {
-        val length = random.nextInt(1, maxLength)
-        return (1..length)
-                .map { CHARSET[random.nextInt(CHARSET.length)] }
-                .joinToString("")
     }
 
     private fun setCoordinates(boundary: Boundary?) {

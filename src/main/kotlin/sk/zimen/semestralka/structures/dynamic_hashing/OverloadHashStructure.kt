@@ -170,15 +170,18 @@ class OverloadHashStructure<K, T : IData<K>>(
 
     //PRIVATE FUNCTIONS
     private fun mergeBlocks(previous: Block<K, T>?, block: Block<K, T>, trieNode: ExternalTrieNode) {
-        if (previous != null) {
-            if (previous.validElements + block.validElements <= blockFactor) {
-                block.getAllData().forEach {
-                    previous.insert(it)
-                }
-                block.addToEmptyBlocks()
-                previous.writeBlock()
-                trieNode.chainLength--
+        if (previous == null) {
+            block.writeBlock()
+            return
+        }
+
+        if (previous.validElements + block.validElements <= blockFactor) {
+            block.getAllData().forEach {
+                previous.insert(it)
             }
+            block.addToEmptyBlocks()
+            previous.writeBlock()
+            trieNode.chainLength--
         } else {
             block.writeBlock()
         }
