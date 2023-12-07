@@ -1,6 +1,7 @@
 package sk.zimen.semestralka.structures.dynamic_hashing.types
 
 import sk.zimen.semestralka.exceptions.BlockIsFullException
+import sk.zimen.semestralka.exceptions.NoResultFoundException
 import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IBlock
 import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
 import sk.zimen.semestralka.utils.append
@@ -27,10 +28,15 @@ class Block<K, T : IData<K>>(
 
     /**
      * Inserts [item] into [data] if list size is less than [blockFactor].
+     * @throws IllegalArgumentException when block contains element with [item.key].
+     * @throws BlockIsFullException When no more items can be inserted into block.
      */
-    @Throws(BlockIsFullException::class)
+    @Throws(BlockIsFullException::class, IllegalArgumentException::class)
     fun insert(item: T) {
         if (validElements < blockFactor) {
+            if (contains(item))
+                throw IllegalArgumentException("Item is already present in block.")
+
             data.add(validElements++, item)
         } else {
             throw BlockIsFullException("Current block is at its maximum capacity !!!")
@@ -47,6 +53,22 @@ class Block<K, T : IData<K>>(
                 return data[i]
         }
         return null
+    }
+
+    /**
+     * Replaces [oldItem] with [newItem] in block.
+     * @throws NoResultFoundException if [oldItem] is not present in block.
+     */
+    @Throws(NoResultFoundException::class)
+    fun replace(oldItem: T, newItem: T) {
+        for (i in 0 until validElements) {
+            if (data[i] == oldItem) {
+                data[i] = newItem
+                return
+            }
+        }
+
+        throw NoResultFoundException("Old item not present in current block.")
     }
 
     /**

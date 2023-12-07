@@ -59,10 +59,6 @@ class DynamicHashStructure<K, T : IData<K>>(
      */
     @Throws(IllegalArgumentException::class)
     fun insert(item: T) {
-        // check if item with same key is already present
-        if (contains(item))
-            throw IllegalArgumentException("Item is already present.")
-
         // find node in trie and divide if necessary
         val hashNode = (getTrieNode(hashFunction.invoke(item.key)) as ExternalTrieNode).divide(item)
 
@@ -104,17 +100,41 @@ class DynamicHashStructure<K, T : IData<K>>(
     }
 
     /**
+     * Replaces [oldItem] with [newItem].
+     * @throws IllegalStateException when items have different keys.
+     * @throws NoResultFoundException when [oldItem] was not in structure.
+     */
+    @Throws(IllegalStateException::class)
+    fun replace(oldItem: T, newItem: T) {
+        if (oldItem.key != newItem.key)
+            throw IllegalStateException("Provided items have different keys.")
+
+        val hashNode = getTrieNode(hashFunction.invoke(oldItem.key), false)
+        if (hashNode is InternalTrieNode)
+            throw NoResultFoundException("Item with key: ${oldItem.key.toString()} is not in structure.")
+
+        val block = loadBlock((hashNode as ExternalTrieNode).blockAddress)
+        try {
+            block.replace(oldItem, newItem)
+            block.writeBlock()
+        } catch (e: NoResultFoundException) {
+            if (!block.hasNext())
+                throw e
+            overloadStructure.replace(block.next, oldItem, newItem)
+        }
+    }
+
+    /**
      * Deletes item for corresponding [key].
      * @throws NoSuchElementException when no element with such key exists.
      */
     @Throws(NoSuchElementException::class)
     fun delete(key: K) {
         var hashNode = getTrieNode(hashFunction.invoke(key), false)
-        if (hashNode is InternalTrieNode) {
+        if (hashNode is InternalTrieNode)
             throw NoSuchElementException("Element with key ${key.toString()} does not exist.")
-        }
-        hashNode = hashNode as ExternalTrieNode
 
+        hashNode = hashNode as ExternalTrieNode
         val block = loadBlock(hashNode.blockAddress)
 
         val deleteBlock = block.delete(key)
@@ -137,6 +157,7 @@ class DynamicHashStructure<K, T : IData<K>>(
             overloadStructure.deleteChain(block.next).forEach {
                 block.insert(it)
             }
+            block.next = -1L
             hashNode.mainSize = hashNode.size
             hashNode.overloadsSize = 0
             hashNode.chainLength = 1
@@ -243,10 +264,8 @@ class DynamicHashStructure<K, T : IData<K>>(
         var brotherNode = node.getBrother()
         if (brotherNode is InternalTrieNode?)
             return false
+
         brotherNode = brotherNode as ExternalTrieNode
-        if (brotherNode.blockAddress == 142688L) {
-            println("MErging from problem hash node")
-        }
 
         if (node.canMergeWithBrother(brotherNode)) {
             val mergedNode = hashTrie.mergeNodes(node, brotherNode)
@@ -279,15 +298,11 @@ class DynamicHashStructure<K, T : IData<K>>(
      *   and its [ExternalTrieNode.level] is less than [Trie.maxDepth].
      */
     private fun ExternalTrieNode.divide(item: T): ExternalTrieNode {
-        if (route == "100110100") {
-            println("Dividing problem node")
-        }
         var currentNode = this
 
         // if full, divide node into two in cycle
         while (currentNode.mainSize == blockFactor && currentNode.canGoFurther(hashTrie.maxDepth)) {
             //load data from that block
-
             val block = loadBlock(currentNode.blockAddress)
             val dataList = block.getAllData()
             block.validElements = 0

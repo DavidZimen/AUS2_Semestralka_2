@@ -1,6 +1,7 @@
 package sk.zimen.semestralka.structures.dynamic_hashing
 
 import sk.zimen.semestralka.exceptions.BlockIsFullException
+import sk.zimen.semestralka.exceptions.NoResultFoundException
 import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
 import sk.zimen.semestralka.structures.dynamic_hashing.types.Block
 import sk.zimen.semestralka.structures.trie.nodes.ExternalTrieNode
@@ -79,6 +80,26 @@ class OverloadHashStructure<K, T : IData<K>>(
     }
 
     /**
+     * Find [oldItem] in the chain of blocks and replaces it with [newItem].
+     */
+    @Throws(NoResultFoundException::class)
+    fun replace(address: Long, oldItem: T, newItem: T) {
+        var block = loadBlock(address)
+
+        while (true) {
+            try {
+                block.replace(oldItem, newItem)
+                block.writeBlock()
+                return
+            } catch (e: NoResultFoundException) {
+                if (!block.hasNext())
+                    throw e
+                block = loadBlock(block.next)
+            }
+        }
+    }
+
+    /**
      * Finds item for provided [key] in chain of
      * overload block starting with [address].
      * @return
@@ -113,9 +134,9 @@ class OverloadHashStructure<K, T : IData<K>>(
      * Deletes all blocks in chain and returns data from all blocks.
      */
     fun deleteChain(address: Long): List<T> {
-        var block = loadBlock(address)
-        val dataList = block.getAllData() as MutableList<T>
-        var next = block.next
+        var block: Block<K, T>
+        val dataList: MutableList<T> = mutableListOf()
+        var next = address
 
         while (next > -1L) {
             block = loadBlock(next)

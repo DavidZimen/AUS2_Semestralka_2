@@ -22,7 +22,7 @@ internal class DynamicHashStructureRandomizedTest {
         val blockFactor = 6
         val overloadBlockFactor = 15
         val modulo = 1_000L
-        val operationRatio = intArrayOf(1, 1, 0, 1)
+        val operationRatio = intArrayOf(1, 1, 1, 1)
         deleteDirectory("data/$strName")
         val dynamicHash = DynamicHashStructure(strName, blockFactor, overloadBlockFactor, TestItem::class, moduloHashFunction(modulo), 10)
 
@@ -34,7 +34,6 @@ internal class DynamicHashStructureRandomizedTest {
                 ?: throw IllegalArgumentException("Wrong number of operations or wrong ratio provided.")
 
         dynamicHash.initialize(items)
-        var deleteCount = 0
 
         while (!operations.isEmpty()) {
             val operation = operations.pop()!!
@@ -57,13 +56,7 @@ internal class DynamicHashStructureRandomizedTest {
                     }
                 }
                 GeneratedOperation.DELETE -> {
-                    println(++deleteCount)
-                    if (deleteCount == 126) {
-                        println("Another deleting problem")
-                    }
                     val item = items.removeAt(generator.random.nextInt(0, items.size))
-                    if (item.key == -5700258325248668935L)
-                        println("Problem key was deleted")
                     dynamicHash.delete(item.key)
                     assertFalse(dynamicHash.contains(item))
                     assertTrue(dynamicHash.isLastBlockOccupied())

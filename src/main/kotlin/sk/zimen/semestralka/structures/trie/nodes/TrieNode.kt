@@ -14,7 +14,8 @@ abstract class TrieNode(
     val key: Binary?
         get() = if (parent == null) null else field
 
-    val parent: InternalTrieNode?
+    var parent: InternalTrieNode?
+        protected set
 
     val level: Int
 

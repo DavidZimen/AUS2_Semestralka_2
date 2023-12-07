@@ -61,9 +61,9 @@ class Trie(
         val newParent = node1.parent?.parent
                 ?: throw IllegalArgumentException("Cannot merge further. Nodes parent is root of the trie.")
 
-        val parent = node1.parent
+        val parent = node1.parent!!
         val newAddress = if (node1.blockAddress < node2.blockAddress) node1.blockAddress else node2.blockAddress
-        val newNode = ExternalTrieNode(parent.key!!, parent, newAddress, parent.level, parent.route).apply {
+        val newNode = ExternalTrieNode(parent.key!!, newParent, newAddress, parent.level, parent.route).apply {
             mainSize = node1.size + node2.size
             chainLength = 1
         }

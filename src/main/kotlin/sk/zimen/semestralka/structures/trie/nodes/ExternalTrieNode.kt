@@ -63,6 +63,7 @@ class ExternalTrieNode(
             parent?.right = InternalTrieNode(key, parent, level, route)
             newParent = parent?.right as InternalTrieNode
         }
+        parent = null
 
         // when null throw exception
         if (newParent == null)
@@ -77,5 +78,19 @@ class ExternalTrieNode(
     fun printNode() {
         println("-------------------------------------------------------------------")
         println("Hash route: $route, Items: $size, Chain length: $chainLength")
+    }
+
+    // OVERRIDE FUNCTIONS
+    override fun equals(other: Any?): Boolean {
+        if (this === other)
+            return true
+
+        if (other !is ExternalTrieNode)
+            return false
+
+        return blockAddress == other.blockAddress
+                && mainSize == other.mainSize
+                && overloadsSize == other.overloadsSize
+                && chainLength == other.chainLength
     }
 }
