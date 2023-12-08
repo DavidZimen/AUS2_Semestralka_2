@@ -206,7 +206,7 @@ class DynamicHashStructure<K, T : IData<K>>(
         println("First empty block at: $firstEmpty")
         println("Size: $size")
         hashTrie.actionOnLeafs(true) { address ->
-            val block = loadBlock(address)
+            val block = loadBlock(address!!)
             if (block.hasNext())
                 block.printData(hashFunction)
         }
@@ -225,10 +225,6 @@ class DynamicHashStructure<K, T : IData<K>>(
         block.apply { address = blockSize.toLong() }.writeBlock()
 
         //TODO logic when file is not empty at the start
-    }
-
-    override fun isLastBlockOccupied(): Boolean {
-        return super.isLastBlockOccupied() && overloadStructure.isLastBlockOccupied()
     }
 
     // PRIVATE FUNCTIONS
@@ -267,28 +263,35 @@ class DynamicHashStructure<K, T : IData<K>>(
 
         brotherNode = brotherNode as ExternalTrieNode
 
-        if (node.canMergeWithBrother(brotherNode)) {
-            val mergedNode = hashTrie.mergeNodes(node, brotherNode)
+        // check if nodes can be merged
+        if (!node.canMergeWithBrother(brotherNode))
+            return false
 
-            // initialize blocks
-            val (sourceBlock, targetBlock) = if (mergedNode.blockAddress == node.blockAddress) {
-                loadBlock(brotherNode.blockAddress) to block
-            } else {
-                block to loadBlock(mergedNode.blockAddress)
-            }
-
-            // move elements
-            sourceBlock.getAllData().forEach {
-                targetBlock.insert(it)
-            }
-
-            // write blocks
-            sourceBlock.addToEmptyBlocks()
-            targetBlock.writeBlock()
-
-            return true
+        // return when nodes parent is root
+        val mergedNode: ExternalTrieNode
+        try {
+            mergedNode = hashTrie.mergeNodes(node, brotherNode)
+        } catch (e: IllegalStateException) {
+            return false
         }
-        return false
+
+        // initialize blocks
+        val (sourceBlock, targetBlock) = if (mergedNode.blockAddress == node.blockAddress) {
+            loadBlock(brotherNode.blockAddress) to block
+        } else {
+            block to loadBlock(mergedNode.blockAddress)
+        }
+
+        // move elements
+        sourceBlock.getAllData().forEach {
+            targetBlock.insert(it)
+        }
+
+        // write blocks
+        sourceBlock.addToEmptyBlocks()
+        targetBlock.writeBlock()
+
+        return true
     }
 
     // EXTENSION FUNCTIONS
@@ -366,5 +369,19 @@ class DynamicHashStructure<K, T : IData<K>>(
      */
     private fun ExternalTrieNode.canMergeWithBrother(brother: ExternalTrieNode?): Boolean {
         return brother != null && size + brother.size <= blockFactor
+    }
+
+    // TESTING METHODS
+    override fun isLastBlockOccupied(): Boolean {
+        return super.isLastBlockOccupied() && overloadStructure.isLastBlockOccupied()
+    }
+
+    fun isStateInitial(): Boolean {
+        return hashTrie.root.left != null
+                && hashTrie.root.right != null
+                && hashTrie.root.left is ExternalTrieNode
+                && hashTrie.root.right is ExternalTrieNode
+                && (hashTrie.root.left as ExternalTrieNode).size == 0
+                && (hashTrie.root.right as ExternalTrieNode).size == 0
     }
 }

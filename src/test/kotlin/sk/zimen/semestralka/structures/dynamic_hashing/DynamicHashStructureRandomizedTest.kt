@@ -3,11 +3,9 @@ package sk.zimen.semestralka.structures.dynamic_hashing
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import sk.zimen.semestralka.api.types.TestItem
-import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
-import sk.zimen.semestralka.utils.deleteDirectory
 import sk.zimen.semestralka.utils.generator.GeneratedOperation
 import sk.zimen.semestralka.utils.generator.Generator
-import sk.zimen.semestralka.utils.moduloHashFunction
+import sk.zimen.semestralka.utils.initHashStructure
 
 internal class DynamicHashStructureRandomizedTest {
 
@@ -17,24 +15,22 @@ internal class DynamicHashStructureRandomizedTest {
     fun randomizedTest() {
         println("Seed for generator is: ${generator.seed}")
         // initialization
-        val itemsCount = 10_000
-        val operationsCount = 2_000
-        val strName = "randomizedTest"
-        val blockFactor = 6
-        val overloadBlockFactor = 15
-        val modulo = 80L
         val operationRatio = intArrayOf(1, 1, 1, 1)
-        deleteDirectory("data/$strName")
-        val dynamicHash = DynamicHashStructure(strName, blockFactor, overloadBlockFactor, TestItem::class, moduloHashFunction(modulo), 10)
+        val operations = generator.generateOperations(2_000, operationRatio)
+            ?: throw IllegalArgumentException("Wrong number of operations or wrong ratio provided.")
 
-        // generate items
-        val items = generator.generateTestItems(itemsCount)
+        val testInit = initHashStructure(
+            itemsCount = 10_000,
+            structureName = "randomizedTest",
+            blockFactor = 6,
+            overloadBlockFactor = 10,
+            hashTrieDepth = 10,
+            modulo = 100L,
+            generator = generator
+        )
 
-        // generate operations
-        val operations = generator.generateOperations(operationsCount, operationRatio)
-                ?: throw IllegalArgumentException("Wrong number of operations or wrong ratio provided.")
-
-        dynamicHash.initialize(items)
+        val dynamicHash = testInit.structure
+        val items = testInit.insertedItems
 
         while (!operations.isEmpty()) {
             val operation = operations.pop()!!
@@ -78,19 +74,5 @@ internal class DynamicHashStructureRandomizedTest {
 
         dynamicHash.printStructure()
         dynamicHash.save()
-    }
-
-    private fun <K, T: IData<K>> DynamicHashStructure<K, T>.initialize(items: MutableList<T>) {
-        val iterator = items.iterator()
-
-        while (iterator.hasNext()) {
-            val item = iterator.next()
-
-            try {
-                insert(item)
-            } catch (e: IllegalStateException) {
-                iterator.remove()
-            }
-        }
     }
 }

@@ -24,7 +24,7 @@ class Trie(
     /**
      * Root of the [Trie], which is represented by [InternalTrieNode].
      */
-    private val root = InternalTrieNode(null, null, 0)
+    val root = InternalTrieNode(null, null, 0)
 
     init {
         root.apply {
@@ -53,13 +53,16 @@ class Trie(
 
     /**
      * Merges two [ExternalTrieNode]s into one, on upper level.
+     * @throws IllegalStateException when external nodes are on level 1.
+     * @throws IllegalArgumentException when nodes have different parent
      */
+    @Throws(IllegalArgumentException::class, IllegalStateException::class)
     fun mergeNodes(node1: ExternalTrieNode, node2: ExternalTrieNode): ExternalTrieNode {
         if (node1.parent != node2.parent)
             throw IllegalArgumentException("Cannot merge two nodes, that don't have same parent.")
 
         val newParent = node1.parent?.parent
-                ?: throw IllegalArgumentException("Cannot merge further. Nodes parent is root of the trie.")
+                ?: throw IllegalStateException("Cannot merge further. Nodes parent is root of the trie.")
 
         val parent = node1.parent!!
         val newAddress = if (node1.blockAddress < node2.blockAddress) node1.blockAddress else node2.blockAddress
@@ -81,7 +84,7 @@ class Trie(
      * Traverses [Trie] and performs provided [func] on each
      * [ExternalTrieNode].
      */
-    fun actionOnLeafs(isPrintout: Boolean = false, func: (address: Long) -> Unit) {
+    fun actionOnLeafs(isPrintout: Boolean = false, func: (address: Long?) -> Unit) {
         val stack = Stack<TrieNode>()
         stack.push(root)
 

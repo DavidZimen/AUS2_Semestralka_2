@@ -22,14 +22,14 @@ class QuadTree<T : QuadTreeData> (
     bottomRightY: Double,
 ) {
     var root: Node<T>
-        protected set
+        private set
     var maxAllowedDepth: Int
-        protected set
+        private set
     var size = 0
-        protected set
+        private set
     var health = 0.0
         get() = field * 100
-        protected set
+        private set
 
     init {
         this.maxAllowedDepth = maxDepth
