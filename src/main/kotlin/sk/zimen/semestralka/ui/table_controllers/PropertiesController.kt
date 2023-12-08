@@ -1,0 +1,52 @@
+package sk.zimen.semestralka.ui.table_controllers
+
+import javafx.fxml.Initializable
+import sk.zimen.semestralka.api.types.Property
+import sk.zimen.semestralka.ui.state.PropertyState
+
+class PropertiesController : Initializable, AbstractTableController<Property>() {
+
+//    private val propertyService = PropertyService.getInstance()
+    private val propertyState = PropertyState.getInstance()
+
+    override fun search() {
+        newSearchState()
+//        tableItems = propertyState.searchBar?.let { searchState ->
+//            with(searchState) {
+//                FXCollections.observableArrayList(
+//                    propertyService.find(GpsPosition(width, wPos, height, hPos))
+//                )
+//            }
+//        }
+
+        table.items = tableItems
+    }
+
+    override fun onAdd() {
+        propertyState.newEdit(null)
+        navigate("add-edit-property.fxml")
+    }
+
+    override fun loadAll() {
+        //tableItems = FXCollections.observableArrayList(propertyService.all())
+        table.items = tableItems
+    }
+
+    override fun initState() {
+        state = PropertyState.getInstance()
+        super.initState()
+    }
+
+    override fun onEdit() {
+        propertyState.newEdit(table.selectionModel.selectedItem)
+        navigate("add-edit-property.fxml")
+    }
+
+    override fun deleteFromService(item: Property) {
+        val delProperty = Property()
+        delProperty.number = item.number
+        delProperty.positions = item.positions
+        delProperty.description = item.description
+        //propertyService.delete(item)
+    }
+}
