@@ -1,22 +1,25 @@
 package sk.zimen.semestralka.ui.table_controllers
 
+import javafx.collections.FXCollections
 import javafx.fxml.Initializable
+import sk.zimen.semestralka.api.service.ParcelService
+import sk.zimen.semestralka.api.types.GpsPosition
 import sk.zimen.semestralka.api.types.Parcel
 import sk.zimen.semestralka.ui.state.ParcelState
 
 class ParcelController : Initializable, AbstractTableController<Parcel>() {
 
-    //private val parcelService = ParcelService.getInstance()
+    private val parcelService = ParcelService.getInstance()
 
     override fun search() {
         newSearchState()
-//        tableItems = state.searchBar?.let { searchState ->
-//            with(searchState) {
-//                FXCollections.observableArrayList(
-//                    parcelService.find(GpsPosition(width, wPos, height, hPos))
-//                )
-//            }
-//        }
+        tableItems = state.searchBar?.let { searchState ->
+            with(searchState) {
+                FXCollections.observableArrayList(
+                    parcelService.find(GpsPosition(width, wPos, height, hPos))
+                )
+            }
+        }
 
         table.items = tableItems
     }
@@ -32,7 +35,7 @@ class ParcelController : Initializable, AbstractTableController<Parcel>() {
     }
 
     override fun loadAll() {
-        //tableItems = FXCollections.observableArrayList(parcelService.all())
+        tableItems = FXCollections.observableArrayList(parcelService.all())
         table.items = tableItems
     }
 
@@ -42,6 +45,6 @@ class ParcelController : Initializable, AbstractTableController<Parcel>() {
     }
 
     override fun deleteFromService(item: Parcel) {
-        //parcelService.delete(item)
+        parcelService.delete(item)
     }
 }

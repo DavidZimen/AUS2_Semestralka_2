@@ -20,6 +20,7 @@ module sk.zimen.semestralka {
     opens sk.zimen.semestralka.structures.quadtree.node to kotlin.reflect;
     opens sk.zimen.semestralka.structures.quadtree to kotlin.reflect;
     opens sk.zimen.semestralka.api.types to kotlin.reflect, javafx.base;
+    opens sk.zimen.semestralka.utils to kotlin.reflect;
     opens sk.zimen.semestralka.utils.generator to kotlin.reflect;
     exports sk.zimen.semestralka;
 }

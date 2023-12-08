@@ -3,6 +3,8 @@ package sk.zimen.semestralka.ui.storage_controllers
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
 import javafx.scene.control.*
+import sk.zimen.semestralka.api.service.ParcelService
+import sk.zimen.semestralka.api.service.PropertyService
 import sk.zimen.semestralka.ui.util.allowOnlyDouble
 import sk.zimen.semestralka.ui.util.allowOnlyInt
 import sk.zimen.semestralka.ui.util.disable
@@ -13,11 +15,11 @@ import java.util.*
 abstract class AbstractStorageController : Initializable {
 
     protected abstract val operationType: String
-//    protected val parcelService = ParcelService.getInstance()
-//
-//    protected val propertyService = PropertyService.getInstance()
-//
-//    protected val combinedService = CombinedService.getInstance()
+
+    protected val parcelService = ParcelService.getInstance()
+
+    protected val propertyService = PropertyService.getInstance()
+
 
     // UI properties
     @FXML

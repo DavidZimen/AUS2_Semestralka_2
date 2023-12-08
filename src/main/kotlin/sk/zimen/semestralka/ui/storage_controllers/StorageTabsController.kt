@@ -1,8 +1,11 @@
 package sk.zimen.semestralka.ui.storage_controllers
 
+import javafx.application.Platform
 import javafx.fxml.FXML
 import javafx.scene.control.Tab
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import sk.zimen.semestralka.ui.util.disable
 import sk.zimen.semestralka.ui.util.setContent
 import sk.zimen.semestralka.ui.util.showSpinner
@@ -22,24 +25,24 @@ class StorageTabsController : AbstractStorageController() {
     @OptIn(DelicateCoroutinesApi::class)
     fun onSave() {
         disableAll(true)
-//        GlobalScope.launch {
-//            try {
-//                parcelService.saveToFile()
-//                propertyService.saveToFile()
-//
-//                // Once the background tasks are done, update the UI on the JavaFX application thread
-//                Platform.runLater {
-//                    disableAll(false)
-//                    showSuccessAlert()
-//                }
-//            } catch (_: Exception) {
-//                // Update the UI to indicate an error
-//                Platform.runLater {
-//                    disableAll(false)
-//                    showErrorAlert()
-//                }
-//            }
-//        }
+        GlobalScope.launch {
+            try {
+                parcelService.saveToFile()
+                propertyService.saveToFile()
+
+                // Once the background tasks are done, update the UI on the JavaFX application thread
+                Platform.runLater {
+                    disableAll(false)
+                    showSuccessAlert()
+                }
+            } catch (_: Exception) {
+                // Update the UI to indicate an error
+                Platform.runLater {
+                    disableAll(false)
+                    showErrorAlert()
+                }
+            }
+        }
     }
 
     override fun initialize(p0: URL?, p1: ResourceBundle?) {
