@@ -47,7 +47,6 @@ class Trie(
                 false -> node.left ?: break
             }
         }
-
         return node
     }
 
@@ -57,27 +56,36 @@ class Trie(
      * @throws IllegalArgumentException when nodes have different parent
      */
     @Throws(IllegalArgumentException::class, IllegalStateException::class)
-    fun mergeNodes(node1: ExternalTrieNode, node2: ExternalTrieNode): ExternalTrieNode {
-        if (node1.parent != node2.parent)
+    fun mergeNodes(node: ExternalTrieNode, brother: ExternalTrieNode?): ExternalTrieNode {
+        if (brother != null && node.parent != brother.parent)
             throw IllegalArgumentException("Cannot merge two nodes, that don't have same parent.")
 
-        val newParent = node1.parent?.parent
-                ?: throw IllegalStateException("Cannot merge further. Nodes parent is root of the trie.")
+        val newParent = node.parent?.parent
+            ?: throw IllegalStateException("Cannot merge further. Nodes parent is root of the trie.")
 
-        val parent = node1.parent!!
-        val newAddress = if (node1.blockAddress < node2.blockAddress) node1.blockAddress else node2.blockAddress
+        val parent = node.parent!!
+        val newAddress = brother?.let { minOf(node.blockAddress, it.blockAddress) }
+            ?: node.blockAddress
+
         val newNode = ExternalTrieNode(parent.key!!, newParent, newAddress, parent.level, parent.route).apply {
-            mainSize = node1.size + node2.size
-            chainLength = 1
+            if (brother == null) {
+                mainSize = node.mainSize
+                chainLength = node.chainLength
+                overloadsSize = node.overloadsSize
+            } else {
+                mainSize = node.size + (brother.size)
+            }
         }
 
-        if (parent.isLeft()) {
-            newParent.left = newNode
-        } else {
-            newParent.right = newNode
-        }
-
+        setNewSonToParent(parent, newNode)
         return newNode
+    }
+
+    /**
+     * Removes empty node from [Trie] if node level is greater than 1.
+     */
+    fun removeEmptyNode(node: ExternalTrieNode): Boolean {
+        return node.size == 0 && node.level > 1 && setNewSonToParent(node, null)
     }
 
     /**
@@ -104,5 +112,17 @@ class Trie(
                 }
             }
         }
+    }
+
+    // PRIVATE FUNCTIONS
+    private fun setNewSonToParent(node: TrieNode, newSon: ExternalTrieNode?): Boolean {
+        val parent = node.parent ?: return false
+
+        if (node.isLeft()) {
+            parent.left = newSon
+        } else {
+            parent.right = newSon
+        }
+        return true
     }
 }

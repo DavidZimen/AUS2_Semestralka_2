@@ -46,14 +46,6 @@ abstract class HashStructure<K, T : IData<K>>(
 
     // PUBLIC FUNCTIONS
     /**
-     * Function for testing purposes.
-     * Return boolean whether last block in [file] has some items.
-     */
-    open fun isLastBlockOccupied(): Boolean {
-        return loadBlock(file.length() - blockSize).validElements > 0
-    }
-
-    /**
      * Closes [file], so the buffer for it is released.
      */
     open fun save() = file.close()
@@ -147,7 +139,7 @@ abstract class HashStructure<K, T : IData<K>>(
         }
 
         if (firstEmpty != file.length()) {
-            loadBlock(firstEmpty).apply { previous = address }
+            loadBlock(firstEmpty).apply { previous = this@addToEmptyBlocks.address }
                 .writeBlock()
             this.apply { next = firstEmpty }
                 .writeBlock()
@@ -162,6 +154,8 @@ abstract class HashStructure<K, T : IData<K>>(
      * Writes block to [file].
      */
     protected fun Block<K, T>.writeBlock() {
+        if (address == next || address == previous)
+            throw IllegalStateException("Wrong addresses at block")
         file.writeAtPosition(address, getData())
     }
 
@@ -189,5 +183,16 @@ abstract class HashStructure<K, T : IData<K>>(
     private fun Block<K, T>.emptyAtEnd(): Boolean {
         return validElements == 0
                 && address + blockSize == file.length()
+    }
+
+    //TESTING FUNCTIONS
+    /**
+     * Function for testing purposes.
+     * Return boolean whether last block in [file] has some items.
+     */
+    open fun isLastBlockOccupied(): Boolean {
+        if (file.length() < blockSize)
+            return true
+        return loadBlock(file.length() - blockSize).validElements > 0
     }
 }

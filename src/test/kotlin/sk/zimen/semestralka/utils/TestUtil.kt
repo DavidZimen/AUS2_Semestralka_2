@@ -5,6 +5,18 @@ import sk.zimen.semestralka.structures.dynamic_hashing.DynamicHashStructure
 import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
 import sk.zimen.semestralka.utils.generator.Generator
 
+fun initHashStructure(generator: Generator = Generator()): TestInit<Long, TestItem> {
+    return initHashStructure(
+        itemsCount = 10_000,
+        structureName = "randomizedTest",
+        blockFactor = 6,
+        overloadBlockFactor = 10,
+        hashTrieDepth = 10,
+        modulo = 100L,
+        generator = generator
+    )
+}
+
 fun initHashStructure(
     itemsCount: Int,
     structureName: String,

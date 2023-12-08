@@ -29,6 +29,8 @@ class InternalTrieNode(
         this.route = route
     }
 
+    fun hasSon() = right != null || left != null
+
     /**
      * Creates son to the left.
      */

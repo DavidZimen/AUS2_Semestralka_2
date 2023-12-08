@@ -153,19 +153,10 @@ class DynamicHashStructure<K, T : IData<K>>(
         }
 
         //merge overloading block into main block if possible
-        if (hashNode.canMergeWithOverloads()) {
-            overloadStructure.deleteChain(block.next).forEach {
-                block.insert(it)
-            }
-            block.next = -1L
-            hashNode.mainSize = hashNode.size
-            hashNode.overloadsSize = 0
-            hashNode.chainLength = 1
-        }
+        mergeWithOverloads(hashNode, block)
 
-        // merge tho brother blocks if possible
-        if (!mergeBlocks(hashNode, block))
-            block.writeBlock()
+        // merge tho brother blocks if possible, block is written to file in method
+        mergeBlocks(hashNode, block)
         size--
     }
 
@@ -249,49 +240,82 @@ class DynamicHashStructure<K, T : IData<K>>(
     }
 
     /**
+     * Merges overload blocks from [overloadStructure] into main structure.
+     * All blocks in [overloadStructure] will be added to chain of empty blocks
+     * in that structure.
+     */
+    private fun mergeWithOverloads(node: ExternalTrieNode, block: Block<K, T>) {
+        if (node.canMergeWithOverloads()) {
+            overloadStructure.deleteChain(block.next).forEach {
+                block.insert(it)
+            }
+            block.next = -1L
+            node.mainSize = node.size
+            node.overloadsSize = 0
+            node.chainLength = 1
+        } else if (node.mainSize == 0 && node.chainLength > 1) {
+            val items = mutableListOf<T>()
+            val newOverload = overloadStructure.moveElementsToMain(block.next, blockFactor, items)
+            items.forEach {
+                block.insert(it)
+                node.mainSize++
+                node.overloadsSize--
+            }
+            newOverload?.let {
+                block.next = newOverload
+                node.chainLength --
+            }
+        }
+    }
+
+    /**
      * If possible on [node], it performs node merging to upper level
      * and writes results to the [file].
-     * @return
-     *  - true if blocks were merged and changes written to file
-     *  - false otherwise
+     * @return Block with data to be written into file.
      */
-    private fun mergeBlocks(node: ExternalTrieNode, block: Block<K, T>): Boolean {
+    private fun mergeBlocks(node: ExternalTrieNode, block: Block<K, T>) {
         // merge tho brother blocks if possible
-        var brotherNode = node.getBrother()
-        if (brotherNode is InternalTrieNode?)
-            return false
+        var currentNode = node
+        var currentBlock = block
+        var brotherNode = currentNode.getBrother()
 
-        brotherNode = brotherNode as ExternalTrieNode
+        while (currentNode.canMergeWithBrother(brotherNode)) {
+            // return when nodes parent is root
+            val mergedNode: ExternalTrieNode
+            try {
+                mergedNode = hashTrie.mergeNodes(currentNode, (brotherNode as ExternalTrieNode?))
+            } catch (e: IllegalStateException) {
+                break
+            }
 
-        // check if nodes can be merged
-        if (!node.canMergeWithBrother(brotherNode))
-            return false
+            // initialize blocks
+            val (sourceBlock, targetBlock) = if (mergedNode.blockAddress == currentNode.blockAddress) {
+                if (brotherNode == null) {
+                    null to currentBlock
+                } else {
+                    loadBlock(brotherNode.blockAddress) to currentBlock
+                }
+            } else {
+                currentBlock to loadBlock(mergedNode.blockAddress)
+            }
 
-        // return when nodes parent is root
-        val mergedNode: ExternalTrieNode
-        try {
-            mergedNode = hashTrie.mergeNodes(node, brotherNode)
-        } catch (e: IllegalStateException) {
-            return false
+            // move elements
+            sourceBlock?.getAllData()?.forEach {
+                targetBlock.insert(it)
+            }
+
+            // remove empty source block
+            sourceBlock?.addToEmptyBlocks()
+
+            currentNode = mergedNode
+            currentBlock = targetBlock
+            brotherNode = currentNode.getBrother()
         }
 
-        // initialize blocks
-        val (sourceBlock, targetBlock) = if (mergedNode.blockAddress == node.blockAddress) {
-            loadBlock(brotherNode.blockAddress) to block
-        } else {
-            block to loadBlock(mergedNode.blockAddress)
-        }
-
-        // move elements
-        sourceBlock.getAllData().forEach {
-            targetBlock.insert(it)
-        }
-
-        // write blocks
-        sourceBlock.addToEmptyBlocks()
-        targetBlock.writeBlock()
-
-        return true
+        if (hashTrie.removeEmptyNode(currentNode))
+            currentBlock.addToEmptyBlocks()
+        else
+            currentBlock.writeBlock()
     }
 
     // EXTENSION FUNCTIONS
@@ -358,22 +382,36 @@ class DynamicHashStructure<K, T : IData<K>>(
     }
 
     /**
+     * Checks if two sibling nodes can be merged into one.
+     */
+    private fun ExternalTrieNode.canMergeWithBrother(brother: TrieNode?): Boolean {
+        if (brother == null)
+            return true
+
+        if (brother is InternalTrieNode)
+            return false
+
+        if (brother !is ExternalTrieNode)
+            return false
+
+        return chainLength == 1
+                && brother.chainLength == 1
+                && overloadsSize == 0
+                && brother.overloadsSize == 0
+                && mainSize + brother.mainSize <= blockFactor
+    }
+
+    /**
      * Checks if data in overloading blocks, can be merged into node in main structure.
      */
     private fun ExternalTrieNode.canMergeWithOverloads(): Boolean{
         return size <= blockFactor && chainLength > 1
     }
 
-    /**
-     * Checks if two sibling nodes can be merged into one.
-     */
-    private fun ExternalTrieNode.canMergeWithBrother(brother: ExternalTrieNode?): Boolean {
-        return brother != null && size + brother.size <= blockFactor
-    }
-
     // TESTING METHODS
     override fun isLastBlockOccupied(): Boolean {
-        return super.isLastBlockOccupied() && overloadStructure.isLastBlockOccupied()
+        val occupied = if (file.length() <= 2 * blockSize) true else super.isLastBlockOccupied()
+        return occupied && overloadStructure.isLastBlockOccupied()
     }
 
     fun isStateInitial(): Boolean {
@@ -383,5 +421,6 @@ class DynamicHashStructure<K, T : IData<K>>(
                 && hashTrie.root.right is ExternalTrieNode
                 && (hashTrie.root.left as ExternalTrieNode).size == 0
                 && (hashTrie.root.right as ExternalTrieNode).size == 0
+                && file.length() == 2L * blockSize
     }
 }

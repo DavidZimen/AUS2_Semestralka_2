@@ -29,9 +29,6 @@ class OverloadHashStructure<K, T : IData<K>>(
      * starting with [address].
      */
     fun insert(address: Long, trieNode: ExternalTrieNode, item: T) {
-        if (item.key is Long && item.key == -5700258325248668935L) {
-            println("Inserting problem item in overload block.")
-        }
         var newBlockInChain = false
         var block = if (address == firstEmpty) {
             newBlockInChain = true
@@ -52,7 +49,9 @@ class OverloadHashStructure<K, T : IData<K>>(
                     newBlockInChain = true
                     block.next = firstEmpty
                     block.writeBlock()
-                    getEmptyBlock()
+                    val newBlock = getEmptyBlock()
+                    newBlock.previous = block.address
+                    newBlock
                 }
             }
         }
@@ -149,6 +148,30 @@ class OverloadHashStructure<K, T : IData<K>>(
     }
 
     /**
+     * Moves [elementsCount] items from overload structure into main.
+     * @return New address of first block in chain, if it was changed.
+     */
+    fun moveElementsToMain(address: Long, itemsCount: Int, items: MutableList<T>): Long? {
+        val block = loadBlock(address)
+        val validElements = block.validElements
+        val endIndex = if (itemsCount < validElements) validElements - itemsCount else 0
+
+        for (i in validElements - 1 downTo endIndex) {
+            items.add(block.data.removeAt(i))
+            block.validElements--
+        }
+
+        return if (block.isEmpty()) {
+            val nextBlock = block.next
+            block.addToEmptyBlocks()
+            nextBlock
+        } else {
+            block.writeBlock()
+            null
+        }
+    }
+
+    /**
      * Check whether block contains provided [item].
      */
     fun contains(address: Long, item: T): Boolean {
@@ -170,6 +193,9 @@ class OverloadHashStructure<K, T : IData<K>>(
 
     //PRIVATE FUNCTIONS
     private fun mergeBlocks(previous: Block<K, T>?, block: Block<K, T>, trieNode: ExternalTrieNode) {
+//        if (previous?.address == 208032L || block.address == 208032L || block.next == 208032L)
+//            println("Merging problem node")
+
         if (previous == null) {
             block.writeBlock()
             return
@@ -179,8 +205,8 @@ class OverloadHashStructure<K, T : IData<K>>(
             block.getAllData().forEach {
                 previous.insert(it)
             }
-            block.addToEmptyBlocks()
             previous.writeBlock()
+            block.addToEmptyBlocks()
             trieNode.chainLength--
         } else {
             block.writeBlock()
