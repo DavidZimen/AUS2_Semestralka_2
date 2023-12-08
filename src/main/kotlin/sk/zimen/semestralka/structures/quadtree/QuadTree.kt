@@ -274,7 +274,7 @@ class QuadTree<T : QuadTreeData> (
      * weight given to attributes of [metrics].
      * Result is value in interval <0, 1>
      */
-    fun updateHealth(metrics: QuadTreeMetrics) {
+    open fun updateHealth(metrics: QuadTreeMetrics) {
         with(metrics) {
             health = MetricsConsts.WEIGHT_BALANCE_X * (1.0 - abs(dataBalanceFactorX)) +
                     MetricsConsts.WEIGHT_BALANCE_Y * (1.0 - abs(dataBalanceFactorY)) +

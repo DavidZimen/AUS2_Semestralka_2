@@ -9,7 +9,7 @@ import sk.zimen.semestralka.utils.Mapper
  * Implements [QuadTreeData] interface, so it can be inserted into QuadTree.
  * @author David Zimen
  */
-open class Place() : QuadTreeData {
+open class Place() : QuadTreeData() {
 
     var number: Int = 0
     var description: String? = null
@@ -24,7 +24,6 @@ open class Place() : QuadTreeData {
         this.description = description
     }
 
-    //OVERRIDE FUNCTIONS
     override fun getBoundary(): Boundary = Mapper.toBoundary(positions)
 
     override fun setBoundary(boundary: Boundary) {
