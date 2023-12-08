@@ -1,6 +1,7 @@
 package sk.zimen.semestralka.structures.trie.nodes
 
 import sk.zimen.semestralka.structures.trie.enums.Binary
+import sk.zimen.semestralka.utils.file.CsvExclude
 
 /**
  * External node, which represents leaf in Trie.
@@ -18,7 +19,8 @@ class ExternalTrieNode(
     /**
      * Address in file, where to find block.
      */
-    val blockAddress: Long
+    var blockAddress: Long
+        private set
 
     /**
      * How many blocks are chained on address of this block.
@@ -29,6 +31,7 @@ class ExternalTrieNode(
     /**
      * Number of elements inside of whole chain for current block.
      */
+    @CsvExclude
     val size: Int
         get() = mainSize + overloadsSize
 

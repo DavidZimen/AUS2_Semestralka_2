@@ -5,7 +5,7 @@ import sk.zimen.semestralka.exceptions.NoResultFoundException
 import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
 import sk.zimen.semestralka.structures.dynamic_hashing.types.Block
 import sk.zimen.semestralka.structures.trie.nodes.ExternalTrieNode
-import sk.zimen.semestralka.utils.initializeDirectory
+import sk.zimen.semestralka.utils.file.initializeDirectory
 import java.io.RandomAccessFile
 import kotlin.reflect.KClass
 

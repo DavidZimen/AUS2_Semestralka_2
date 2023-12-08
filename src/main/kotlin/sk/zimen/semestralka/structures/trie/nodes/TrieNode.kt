@@ -11,13 +11,13 @@ abstract class TrieNode(
     parent: InternalTrieNode? = null,
     level: Int
 ) {
-    val key: Binary?
+    var key: Binary?
         get() = if (parent == null) null else field
 
     var parent: InternalTrieNode?
         protected set
 
-    val level: Int
+    var level: Int
 
     /**
      * Represents route of 0 and 1 to get from root to leaf.

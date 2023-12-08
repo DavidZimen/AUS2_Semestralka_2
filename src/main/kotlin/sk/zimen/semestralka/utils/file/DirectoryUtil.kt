@@ -1,6 +1,5 @@
-package sk.zimen.semestralka.utils
+package sk.zimen.semestralka.utils.file
 
-import java.io.RandomAccessFile
 import java.nio.file.FileAlreadyExistsException
 import java.nio.file.Files
 import java.nio.file.NoSuchFileException
@@ -20,16 +19,4 @@ fun deleteDirectory(path: String) {
                 .map { it.toFile() }
                 .forEach { it.delete() }
     } catch (_: NoSuchFileException) { }
-}
-
-fun RandomAccessFile.writeAtPosition(position: Long, bytesToWrite: ByteArray) {
-    seek(position)
-    write(bytesToWrite)
-}
-
-fun RandomAccessFile.readAtPosition(position: Long, bytesCount: Int): ByteArray {
-    seek(position)
-    val bytes = ByteArray(bytesCount)
-    read(bytes)
-    return bytes
 }

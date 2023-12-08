@@ -3,6 +3,7 @@ package sk.zimen.semestralka.utils
 import sk.zimen.semestralka.api.types.TestItem
 import sk.zimen.semestralka.structures.dynamic_hashing.DynamicHashStructure
 import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
+import sk.zimen.semestralka.utils.file.deleteDirectory
 import sk.zimen.semestralka.utils.generator.Generator
 
 fun initHashStructure(generator: Generator = Generator()): TestInit<Long, TestItem> {

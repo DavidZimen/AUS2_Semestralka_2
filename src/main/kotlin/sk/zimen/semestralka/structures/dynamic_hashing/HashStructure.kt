@@ -2,8 +2,8 @@ package sk.zimen.semestralka.structures.dynamic_hashing
 
 import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
 import sk.zimen.semestralka.structures.dynamic_hashing.types.Block
-import sk.zimen.semestralka.utils.readAtPosition
-import sk.zimen.semestralka.utils.writeAtPosition
+import sk.zimen.semestralka.utils.file.readAtPosition
+import sk.zimen.semestralka.utils.file.writeAtPosition
 import java.io.RandomAccessFile
 import kotlin.reflect.KClass
 

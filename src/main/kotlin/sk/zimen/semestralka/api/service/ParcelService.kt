@@ -5,8 +5,9 @@ import sk.zimen.semestralka.api.types.GpsPositions
 import sk.zimen.semestralka.api.types.Parcel
 import sk.zimen.semestralka.exceptions.NoResultFoundException
 import sk.zimen.semestralka.structures.quadtree.QuadTree
-import sk.zimen.semestralka.utils.CsvUtils
 import sk.zimen.semestralka.utils.Mapper
+import sk.zimen.semestralka.utils.file.readDataFromCSV
+import sk.zimen.semestralka.utils.file.writeDataToCSV
 import sk.zimen.semestralka.utils.generator.Generator
 
 
@@ -68,13 +69,13 @@ class ParcelService private constructor(){
             gpsPositions.add(it.positions.topLeft)
             gpsPositions.add(it.positions.bottomRight)
         }
-        CsvUtils.writeDataToCSV("parcels.csv", Parcel::class, items)
-        CsvUtils.writeDataToCSV("parcels-positions.csv", GpsPosition::class, gpsPositions)
+        writeDataToCSV("data", "parcels.csv", Parcel::class, items)
+        writeDataToCSV("data", "parcels-positions.csv", GpsPosition::class, gpsPositions)
     }
 
     fun loadFromFile() {
-        val items = CsvUtils.readDataFromCSV("parcels.csv", Parcel::class)
-        val gpsPositions = CsvUtils.readDataFromCSV("parcels-positions.csv", GpsPosition::class)
+        val items = readDataFromCSV("data", "parcels.csv", Parcel::class)
+        val gpsPositions = readDataFromCSV("data", "parcels-positions.csv", GpsPosition::class)
         gpsPositions.reverse()
         items.forEach {
             val topLeft = gpsPositions.removeAt(gpsPositions.size - 1)

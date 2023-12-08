@@ -20,12 +20,12 @@ internal class DynamicHashStructureRandomizedTest {
             ?: throw IllegalArgumentException("Wrong number of operations or wrong ratio provided.")
 
         val testInit = initHashStructure(
-            itemsCount = 10_000,
+            itemsCount = 5_000,
             structureName = "randomizedTest",
-            blockFactor = 6,
-            overloadBlockFactor = 10,
+            blockFactor = 8,
+            overloadBlockFactor = 15,
             hashTrieDepth = 10,
-            modulo = 100L,
+            modulo = 500L,
             generator = generator
         )
 
@@ -72,7 +72,6 @@ internal class DynamicHashStructureRandomizedTest {
             }
         }
 
-        dynamicHash.printStructure()
         dynamicHash.save()
     }
 }

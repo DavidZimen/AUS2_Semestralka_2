@@ -1,8 +1,10 @@
 package sk.zimen.semestralka.structures.trie
 
+import sk.zimen.semestralka.structures.trie.helper.TrieNodeRoute
 import sk.zimen.semestralka.structures.trie.nodes.ExternalTrieNode
 import sk.zimen.semestralka.structures.trie.nodes.InternalTrieNode
 import sk.zimen.semestralka.structures.trie.nodes.TrieNode
+import sk.zimen.semestralka.utils.file.writeDataToCSV
 import java.util.*
 
 /**
@@ -19,7 +21,7 @@ class Trie(
     /**
      * Maximum allowed depth for the Trie.
      */
-    val maxDepth: Int
+    var maxDepth: Int
 
     /**
      * Root of the [Trie], which is represented by [InternalTrieNode].
@@ -27,6 +29,9 @@ class Trie(
     val root = InternalTrieNode(null, null, 0)
 
     init {
+        if (maxDepth < 1)
+            throw IllegalArgumentException("Max depth cannot be less than 1.")
+
         root.apply {
             createLeftSon(leftBlockAddress)
             createRightSon(rightBlockAddress)
@@ -92,8 +97,9 @@ class Trie(
      * Traverses [Trie] and performs provided [func] on each
      * [ExternalTrieNode].
      */
-    fun actionOnLeafs(isPrintout: Boolean = false, func: (address: Long?) -> Unit) {
+    fun actionOnLeafs(isPrintout: Boolean = false, func: (() -> ExternalTrieNode)? = null): List<ExternalTrieNode> {
         val stack = Stack<TrieNode>()
+        val leafs = mutableListOf<ExternalTrieNode>()
         stack.push(root)
 
         while (stack.isNotEmpty()) {
@@ -103,7 +109,8 @@ class Trie(
                 true -> {
                     if (isPrintout)
                         node.printNode()
-                    func.invoke(node.blockAddress)
+                    func?.invoke()
+                    leafs.add(node)
                 }
                 false -> {
                     val internal = node as InternalTrieNode
@@ -112,6 +119,12 @@ class Trie(
                 }
             }
         }
+
+        return leafs
+    }
+
+    fun saveToFile(directory: String, fileName: String) {
+        writeDataToCSV(directory, fileName, TrieNodeRoute::class, actionOnLeafs().map { TrieNodeRoute(it.route) })
     }
 
     // PRIVATE FUNCTIONS

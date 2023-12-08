@@ -9,6 +9,8 @@ import sk.zimen.semestralka.structures.trie.nodes.ExternalTrieNode
 import sk.zimen.semestralka.structures.trie.nodes.InternalTrieNode
 import sk.zimen.semestralka.structures.trie.nodes.TrieNode
 import sk.zimen.semestralka.utils.*
+import sk.zimen.semestralka.utils.file.CsvExclude
+import sk.zimen.semestralka.utils.file.initializeDirectory
 import java.io.RandomAccessFile
 import java.util.*
 import kotlin.reflect.KClass
@@ -39,11 +41,13 @@ class DynamicHashStructure<K, T : IData<K>>(
     /**
      * Trie to quickly find correct [Block] from [hashFunction] function.
      */
+    @CsvExclude
     private val hashTrie = Trie(0, blockSize.toLong(), hashTrieDepth)
 
     /**
      * File for storing colliding [Block]s, when [Trie.maxDepth] level has been hit.
      */
+    @CsvExclude
     private val overloadStructure = OverloadHashStructure(name, overloadBlockFactor, clazz)
 
     /**
@@ -70,10 +74,12 @@ class DynamicHashStructure<K, T : IData<K>>(
             if (!block.hasNext()) {
                 block.next = overloadStructure.firstEmpty
             }
+            if (hashNode.level < hashTrie.maxDepth)
+                throw IllegalStateException("Dont insert into overload yet")
             overloadStructure.insert(block.next, hashNode, item)
         }
-        size++
         block.writeBlock()
+        size++
     }
 
     /**
@@ -180,14 +186,6 @@ class DynamicHashStructure<K, T : IData<K>>(
     }
 
     /**
-     * Closes the files and saves metadata into separate text file.
-     */
-    override fun save() {
-        super.save()
-        overloadStructure.save()
-    }
-
-    /**
      * Prints structure to the console for purposes of checking,
      * whether everything works correctly.
      */
@@ -196,12 +194,21 @@ class DynamicHashStructure<K, T : IData<K>>(
         println("File size: ${file.length()}")
         println("First empty block at: $firstEmpty")
         println("Size: $size")
-        hashTrie.actionOnLeafs(true) { address ->
-            val block = loadBlock(address!!)
-            if (block.hasNext())
-                block.printData(hashFunction)
-        }
+//        hashTrie.actionOnLeafs(true) { address ->
+//            val block = loadBlock(address!!)
+//            if (block.hasNext())
+//                block.printData(hashFunction)
+//        }
         println("-------------------------------------------------------------------\n")
+    }
+
+    /**
+     * Closes the files and saves metadata into separate text file.
+     */
+    override fun save() {
+        super.save()
+        overloadStructure.save()
+        hashTrie.saveToFile("data/$dirName", "hash_trie.csv")
     }
 
     // OVERRIDE FUNCTIONS
@@ -385,20 +392,17 @@ class DynamicHashStructure<K, T : IData<K>>(
      * Checks if two sibling nodes can be merged into one.
      */
     private fun ExternalTrieNode.canMergeWithBrother(brother: TrieNode?): Boolean {
-        if (brother == null)
-            return true
-
-        if (brother is InternalTrieNode)
+        if (brother is InternalTrieNode?)
             return false
 
-        if (brother !is ExternalTrieNode)
+        if (brother !is ExternalTrieNode?)
             return false
 
         return chainLength == 1
-                && brother.chainLength == 1
+                && brother?.chainLength == 1
                 && overloadsSize == 0
-                && brother.overloadsSize == 0
-                && mainSize + brother.mainSize <= blockFactor
+                && brother?.overloadsSize == 0
+                && mainSize + brother?.mainSize!! <= blockFactor
     }
 
     /**
