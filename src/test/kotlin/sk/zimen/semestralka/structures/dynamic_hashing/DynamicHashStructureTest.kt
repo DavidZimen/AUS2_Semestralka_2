@@ -16,12 +16,7 @@ class DynamicHashStructureTest {
 
         println("Seed for generator is: ${generator.seed}")
 
-        var deleteCount = 0
         while (items.isNotEmpty()) {
-            println(++deleteCount)
-            if (deleteCount == 10000)
-                println("Problem item")
-
             val deleteItem = items.removeAt(generator.random.nextInt(0, items.size))
             structure.delete(deleteItem.key)
 
