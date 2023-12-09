@@ -15,7 +15,6 @@ abstract class TrieNode() {
 
     @CsvExclude
     var parent: InternalTrieNode? = null
-        protected set
 
     var level: Int = 0
 

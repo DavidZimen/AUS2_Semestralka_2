@@ -2,6 +2,8 @@ package sk.zimen.semestralka.structures.dynamic_hashing
 
 import sk.zimen.semestralka.exceptions.BlockIsFullException
 import sk.zimen.semestralka.exceptions.NoResultFoundException
+import sk.zimen.semestralka.structures.dynamic_hashing.constants.OVERLOAD_FILE
+import sk.zimen.semestralka.structures.dynamic_hashing.constants.ROOT_DIRECTORY
 import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
 import sk.zimen.semestralka.structures.dynamic_hashing.types.Block
 import sk.zimen.semestralka.structures.trie.nodes.ExternalTrieNode
@@ -18,7 +20,6 @@ class OverloadHashStructure<K, T : IData<K>>(
     clazz: KClass<T>
 ) : HashStructure<K, T>(
     name,
-    "overload_file",
     blockFactor,
     0,
     clazz
@@ -191,11 +192,19 @@ class OverloadHashStructure<K, T : IData<K>>(
         return false
     }
 
+    // OVERRIDE FUNCTIONS
+    override fun initialize() {
+        val dir = "$ROOT_DIRECTORY/$dirName"
+        initializeDirectory(dir)
+        file = RandomAccessFile("${dir}/$OVERLOAD_FILE", "rw")
+        file.setLength(0)
+        firstEmpty = file.length()
+
+        //TODO logic when file is not empty at the start
+    }
+
     //PRIVATE FUNCTIONS
     private fun mergeBlocks(previous: Block<K, T>?, block: Block<K, T>, trieNode: ExternalTrieNode) {
-//        if (previous?.address == 208032L || block.address == 208032L || block.next == 208032L)
-//            println("Merging problem node")
-
         if (previous == null) {
             block.writeBlock()
             return
@@ -211,16 +220,5 @@ class OverloadHashStructure<K, T : IData<K>>(
         } else {
             block.writeBlock()
         }
-    }
-
-    // OVERRIDE FUNCTIONS
-    override fun initFile(dirName: String, fileName: String) {
-        val dir = "data/${dirName}"
-        initializeDirectory(dir)
-        file = RandomAccessFile("${dir}/${fileName}.bin", "rw")
-        file.setLength(0)
-        firstEmpty = file.length()
-
-        //TODO logic when file is not empty at the start
     }
 }

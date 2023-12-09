@@ -2,6 +2,8 @@ package sk.zimen.semestralka.structures.dynamic_hashing
 
 import sk.zimen.semestralka.exceptions.BlockIsFullException
 import sk.zimen.semestralka.exceptions.NoResultFoundException
+import sk.zimen.semestralka.structures.dynamic_hashing.constants.MAIN_FILE
+import sk.zimen.semestralka.structures.dynamic_hashing.constants.ROOT_DIRECTORY
 import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
 import sk.zimen.semestralka.structures.dynamic_hashing.types.Block
 import sk.zimen.semestralka.structures.trie.Trie
@@ -9,7 +11,6 @@ import sk.zimen.semestralka.structures.trie.nodes.ExternalTrieNode
 import sk.zimen.semestralka.structures.trie.nodes.InternalTrieNode
 import sk.zimen.semestralka.structures.trie.nodes.TrieNode
 import sk.zimen.semestralka.utils.*
-import sk.zimen.semestralka.utils.file.CsvExclude
 import sk.zimen.semestralka.utils.file.initializeDirectory
 import java.io.RandomAccessFile
 import java.util.*
@@ -27,7 +28,6 @@ class DynamicHashStructure<K, T : IData<K>>(
     hashTrieDepth: Int = 5
 ) : HashStructure<K, T>(
     name,
-    "main_file",
     blockFactor,
     2,
     clazz
@@ -41,19 +41,16 @@ class DynamicHashStructure<K, T : IData<K>>(
     /**
      * Trie to quickly find correct [Block] from [hashFunction] function.
      */
-    @CsvExclude
     private val hashTrie = Trie(0, blockSize.toLong(), hashTrieDepth)
 
     /**
      * File for storing colliding [Block]s, when [Trie.maxDepth] level has been hit.
      */
-    @CsvExclude
     private val overloadStructure = OverloadHashStructure(name, overloadBlockFactor, clazz)
 
     /**
      * Function to be used together with key, to make [BitSet] from key of type [K].
      */
-    @Suppress("CanBePrimaryConstructorProperty")
     private val hashFunction: (K) -> BitSet = hashFunction
 
     /**
@@ -202,20 +199,20 @@ class DynamicHashStructure<K, T : IData<K>>(
         println("-------------------------------------------------------------------\n")
     }
 
+    // OVERRIDE FUNCTIONS
     /**
      * Closes the files and saves metadata into separate text file.
      */
     override fun save() {
         super.save()
         overloadStructure.save()
-        hashTrie.saveToFile("data/$dirName", "hash_trie.csv")
+        hashTrie.saveToFile(dirName)
     }
 
-    // OVERRIDE FUNCTIONS
-    override fun initFile(dirName: String, fileName: String) {
-        val dir = "data/${dirName}"
+    override fun initialize() {
+        val dir = "$ROOT_DIRECTORY/$dirName"
         initializeDirectory(dir)
-        file = RandomAccessFile("${dir}/${fileName}.bin", "rw")
+        file = RandomAccessFile("$dir/$MAIN_FILE", "rw")
         file.setLength(blockSize.toLong() * 2)
         firstEmpty = file.length()
         val block = Block(blockFactor, clazz)

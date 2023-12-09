@@ -12,7 +12,6 @@ import kotlin.reflect.KClass
  */
 abstract class HashStructure<K, T : IData<K>>(
     val dirName: String,
-    fileName: String,
     protected val blockFactor: Int,
     private val allowedEmptyBlocks: Int,
     protected val clazz: KClass<T>
@@ -34,15 +33,14 @@ abstract class HashStructure<K, T : IData<K>>(
     protected lateinit var file: RandomAccessFile
 
     init {
-        @Suppress("LeakingThis")
-        initFile(dirName, fileName)
+        initialize()
     }
 
     // ABSTRACT FUNCTIONS
     /**
      * Initializes file based on every implementing class needs.
      */
-    protected abstract fun initFile(dirName: String, fileName: String)
+    protected abstract fun initialize()
 
     // PUBLIC FUNCTIONS
     /**

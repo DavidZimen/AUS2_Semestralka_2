@@ -1,8 +1,12 @@
 package sk.zimen.semestralka.structures.trie
 
+import sk.zimen.semestralka.structures.dynamic_hashing.constants.ROOT_DIRECTORY
+import sk.zimen.semestralka.structures.dynamic_hashing.constants.TRIE_FILE
+import sk.zimen.semestralka.structures.trie.enums.Binary
 import sk.zimen.semestralka.structures.trie.nodes.ExternalTrieNode
 import sk.zimen.semestralka.structures.trie.nodes.InternalTrieNode
 import sk.zimen.semestralka.structures.trie.nodes.TrieNode
+import sk.zimen.semestralka.utils.file.existsFileInDirectory
 import sk.zimen.semestralka.utils.file.readDataFromCSV
 import sk.zimen.semestralka.utils.file.writeDataToCSV
 import java.util.*
@@ -26,7 +30,8 @@ class Trie(
     /**
      * Root of the [Trie], which is represented by [InternalTrieNode].
      */
-    val root = InternalTrieNode(null, null, 0)
+    var root = InternalTrieNode(null, null, 0)
+        private set
 
     init {
         if (maxDepth < 1)
@@ -123,13 +128,42 @@ class Trie(
         return leafs
     }
 
-    fun saveToFile(directory: String, fileName: String) {
-        writeDataToCSV(directory, fileName, ExternalTrieNode::class, actionOnLeafs())
+    fun saveToFile(directory: String) {
+        writeDataToCSV("$ROOT_DIRECTORY/$directory", TRIE_FILE, ExternalTrieNode::class, actionOnLeafs())
     }
 
-    fun loadFromFile(directory: String, fileName: String) {
-        val list = readDataFromCSV(directory, fileName, ExternalTrieNode::class)
-        println(list.size)
+    @Throws(IllegalStateException::class)
+    fun loadFromFile(directory: String) {
+        val dir = "$ROOT_DIRECTORY/$directory"
+        if (!existsFileInDirectory(dir, TRIE_FILE))
+            throw IllegalStateException("File does not exists in provided directory.")
+
+        root = InternalTrieNode(null, null, 0)
+        val leafs = readDataFromCSV(dir, TRIE_FILE, ExternalTrieNode::class)
+        leafs.forEach {
+            var parent = root
+            for (i in 0 until it.route.length) {
+                if (parent.level == it.level - 1) {
+                    if (it.route[i] == '0')
+                        parent.left = it
+                    else
+                        parent.right = it
+                    it.parent = parent
+                    break
+                }
+
+                if (it.route[i] == '0') {
+                    if (parent.left == null)
+                        parent.left = InternalTrieNode(Binary.ZERO, parent, parent.level + 1, parent.route + "0")
+                    parent = parent.left!! as InternalTrieNode
+                }
+                else {
+                    if (parent.right == null)
+                        parent.right = InternalTrieNode(Binary.ONE, parent, parent.level + 1, parent.route + "1")
+                    parent = parent.right!! as InternalTrieNode
+                }
+            }
+        }
     }
 
     // PRIVATE FUNCTIONS
