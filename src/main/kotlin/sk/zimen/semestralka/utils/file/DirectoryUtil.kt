@@ -20,3 +20,7 @@ fun deleteDirectory(path: String) {
                 .forEach { it.delete() }
     } catch (_: NoSuchFileException) { }
 }
+
+fun existsFileInDirectory(directory: String, filename: String): Boolean {
+    return Files.exists(Path.of(directory, filename))
+}

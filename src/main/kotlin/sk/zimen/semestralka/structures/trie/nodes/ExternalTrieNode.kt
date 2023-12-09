@@ -8,32 +8,18 @@ import sk.zimen.semestralka.utils.file.CsvExclude
  * Holds information about its block.
  * @author David Zimen
  */
-class ExternalTrieNode(
-    key: Binary,
-    parent: InternalTrieNode,
-    blockAddress: Long,
-    level: Int,
-    route: String
-) : TrieNode(key, parent, level) {
+class ExternalTrieNode() : TrieNode() {
 
     /**
      * Address in file, where to find block.
      */
-    var blockAddress: Long
-        private set
+    var blockAddress: Long = -1L
 
     /**
      * How many blocks are chained on address of this block.
      * Initial value is 1, because external node already has a block.
      */
     var chainLength: Int = 1
-
-    /**
-     * Number of elements inside of whole chain for current block.
-     */
-    @CsvExclude
-    val size: Int
-        get() = mainSize + overloadsSize
 
     /**
      * Number of elements in block from main structure.
@@ -45,8 +31,18 @@ class ExternalTrieNode(
      */
     var overloadsSize: Int = 0
 
-    init {
+    /**
+     * Number of elements inside of whole chain for current block.
+     */
+    @CsvExclude
+    val size: Int
+        get() = mainSize + overloadsSize
+
+    constructor(key: Binary, parent: InternalTrieNode, blockAddress: Long, level: Int, route: String) : this() {
+        this.key = key
+        this.parent = parent
         this.blockAddress = blockAddress
+        this.level = level
         this.route = route
     }
 

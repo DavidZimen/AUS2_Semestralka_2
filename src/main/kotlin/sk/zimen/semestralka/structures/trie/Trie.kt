@@ -1,9 +1,9 @@
 package sk.zimen.semestralka.structures.trie
 
-import sk.zimen.semestralka.structures.trie.helper.TrieNodeRoute
 import sk.zimen.semestralka.structures.trie.nodes.ExternalTrieNode
 import sk.zimen.semestralka.structures.trie.nodes.InternalTrieNode
 import sk.zimen.semestralka.structures.trie.nodes.TrieNode
+import sk.zimen.semestralka.utils.file.readDataFromCSV
 import sk.zimen.semestralka.utils.file.writeDataToCSV
 import java.util.*
 
@@ -124,7 +124,12 @@ class Trie(
     }
 
     fun saveToFile(directory: String, fileName: String) {
-        writeDataToCSV(directory, fileName, TrieNodeRoute::class, actionOnLeafs().map { TrieNodeRoute(it.route) })
+        writeDataToCSV(directory, fileName, ExternalTrieNode::class, actionOnLeafs())
+    }
+
+    fun loadFromFile(directory: String, fileName: String) {
+        val list = readDataFromCSV(directory, fileName, ExternalTrieNode::class)
+        println(list.size)
     }
 
     // PRIVATE FUNCTIONS

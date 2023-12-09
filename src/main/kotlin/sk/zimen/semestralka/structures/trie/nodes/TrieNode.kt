@@ -1,30 +1,30 @@
 package sk.zimen.semestralka.structures.trie.nodes
 
 import sk.zimen.semestralka.structures.trie.enums.Binary
+import sk.zimen.semestralka.utils.file.CsvExclude
 
 /**
  * Abstract node for the digital trie data structure.
  * @author David Zimen
  */
-abstract class TrieNode(
-    key: Binary? = null,
-    parent: InternalTrieNode? = null,
-    level: Int
-) {
-    var key: Binary?
+abstract class TrieNode() {
+
+    @CsvExclude
+    var key: Binary? = null
         get() = if (parent == null) null else field
 
-    var parent: InternalTrieNode?
+    @CsvExclude
+    var parent: InternalTrieNode? = null
         protected set
 
-    var level: Int
+    var level: Int = 0
 
     /**
      * Represents route of 0 and 1 to get from root to leaf.
      */
     var route: String = ""
 
-    init {
+    constructor(key: Binary? = null, parent: InternalTrieNode? = null, level: Int) : this() {
         this.key = key
         this.parent = parent
         this.level = level

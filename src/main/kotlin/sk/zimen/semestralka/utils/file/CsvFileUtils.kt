@@ -63,6 +63,7 @@ fun <T : Any> readDataFromCSV(directory: String, fileName: String, clazz: KClass
                             }
                             property.returnType == Int::class.starProjectedType -> value.toInt()
                             property.returnType == Double::class.starProjectedType -> value.toDouble()
+                            property.returnType == Long::class.starProjectedType -> value.toLong()
                             property.returnType == String::class.starProjectedType -> value
                             property.returnType == String::class.starProjectedType.withNullability(true) -> value
                             else -> throw IllegalArgumentException("Unsupported type: ${property.returnType}")
