@@ -2,7 +2,7 @@ package sk.zimen.semestralka.structures.dynamic_hashing
 
 import sk.zimen.semestralka.exceptions.BlockIsFullException
 import sk.zimen.semestralka.exceptions.NoResultFoundException
-import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
+import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.HashData
 import sk.zimen.semestralka.structures.dynamic_hashing.types.Block
 import sk.zimen.semestralka.structures.dynamic_hashing.util.*
 import sk.zimen.semestralka.structures.trie.nodes.ExternalTrieNode
@@ -16,7 +16,7 @@ import kotlin.reflect.KClass
 /**
  * Implementation of overloading hash structure for [DynamicHashStructure].
  */
-class OverloadHashStructure<K, T : IData<K>>(
+class OverloadHashStructure<K, T : HashData<K>>(
     name: String,
     blockFactor: Int,
     clazz: KClass<T>
@@ -26,6 +26,10 @@ class OverloadHashStructure<K, T : IData<K>>(
     0,
     clazz
 ) {
+
+    init {
+        initialize()
+    }
 
     /**
      * Inserts [item] to the chain of overloading blocks

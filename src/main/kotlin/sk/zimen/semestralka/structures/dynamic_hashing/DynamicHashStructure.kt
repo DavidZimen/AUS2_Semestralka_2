@@ -2,7 +2,7 @@ package sk.zimen.semestralka.structures.dynamic_hashing
 
 import sk.zimen.semestralka.exceptions.BlockIsFullException
 import sk.zimen.semestralka.exceptions.NoResultFoundException
-import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
+import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.HashData
 import sk.zimen.semestralka.structures.dynamic_hashing.types.Block
 import sk.zimen.semestralka.structures.dynamic_hashing.util.*
 import sk.zimen.semestralka.structures.trie.Trie
@@ -21,7 +21,7 @@ import kotlin.reflect.KClass
 /**
  * Class that represents Dynamic hash data structure.
  */
-class DynamicHashStructure<K, T : IData<K>>(
+class DynamicHashStructure<K, T : HashData<K>>(
     name: String,
     blockFactor: Int,
     overloadBlockFactor: Int,
@@ -43,7 +43,7 @@ class DynamicHashStructure<K, T : IData<K>>(
     /**
      * Trie to quickly find correct [Block] from [hashFunction] function.
      */
-    private lateinit var hashTrie: Trie
+    private var hashTrie = Trie(0, blockSize.toLong(), hashTrieDepth)
 
     /**
      * File for storing colliding [Block]s, when [Trie.maxDepth] level has been hit.
@@ -56,9 +56,7 @@ class DynamicHashStructure<K, T : IData<K>>(
     private val hashFunction: (K) -> BitSet = hashFunction
 
     init {
-        if (hashTrie == null) {
-            hashTrie = Trie(0, blockSize.toLong(), hashTrieDepth)
-        }
+        initialize()
     }
 
     /**
@@ -227,7 +225,6 @@ class DynamicHashStructure<K, T : IData<K>>(
             compareMetaData(metadata)
             firstEmpty = metadata.firstEmptyBlock
             size = metadata.size
-            hashTrie = Trie(0, blockSize.toLong(), metadata.trieDepth)
             hashTrie.loadFromFile(dir)
             file = RandomAccessFile("$dir/$MAIN_FILE", "rw")
             println("Main file length: ${file.length()}")
@@ -240,6 +237,13 @@ class DynamicHashStructure<K, T : IData<K>>(
             block.writeBlock()
             block.apply { address = blockSize.toLong() }.writeBlock()
         }
+    }
+
+    @Throws(IllegalStateException::class)
+    override fun compareMetaData(metaData: HashMetadata) {
+        super.compareMetaData(metaData)
+        if ((metaData as DynamicHashMetadata).trieDepth != hashTrie.maxDepth)
+            throw IllegalStateException("Trie depth is different in metadata compared to provided.")
     }
 
     // PRIVATE FUNCTIONS

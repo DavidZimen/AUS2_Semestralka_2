@@ -1,11 +1,10 @@
 package sk.zimen.semestralka.api.types
 
-import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IBlock
-import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
+import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.HashData
 import sk.zimen.semestralka.utils.*
 import java.util.*
 
-class TestItem() : IData<Long>() {
+class TestItem() : HashData<Long> {
 
     override var key: Long = Long.MIN_VALUE
     var desc: StringData = StringData()
@@ -45,8 +44,6 @@ class TestItem() : IData<Long>() {
         }
         desc.formData(bytes.copyOfRange(index, index + StringData.getSize(MAX_STRING_LENGTH)), MAX_STRING_LENGTH)
     }
-
-    override fun createInstance(): IBlock<Long> = TestItem()
 
     override fun printData(hashFunc: (Long) -> BitSet) = println("Hash: ${hashFunc.invoke(key).toOwnString()}, Id: ${key}, Description: ${desc.value}")
 

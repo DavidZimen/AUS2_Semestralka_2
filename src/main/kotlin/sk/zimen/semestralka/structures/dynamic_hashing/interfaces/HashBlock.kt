@@ -6,7 +6,7 @@ import java.util.*
  * Interface that holds every method needed in block for dynamic hashing structure.
  * @author David Zimen
  */
-interface IBlock<K> {
+interface HashBlock<K> {
     /**
      * Size of implementing object in bytes representation.
      */
@@ -22,11 +22,6 @@ interface IBlock<K> {
      * Converts provided [ByteArray].
      */
     fun formData(bytes: ByteArray)
-
-    /**
-     * Creates a new empty instance of the implementing class.
-     */
-    fun createInstance(): IBlock<K>
 
     /**
      * Method for printing object to console.

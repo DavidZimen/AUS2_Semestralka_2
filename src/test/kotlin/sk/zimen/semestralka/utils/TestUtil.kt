@@ -2,7 +2,7 @@ package sk.zimen.semestralka.utils
 
 import sk.zimen.semestralka.api.types.TestItem
 import sk.zimen.semestralka.structures.dynamic_hashing.DynamicHashStructure
-import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
+import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.HashData
 import sk.zimen.semestralka.utils.file.deleteDirectory
 import sk.zimen.semestralka.utils.generator.Generator
 
@@ -37,7 +37,7 @@ fun initHashStructure(
     return TestInit(dynamicHash, items)
 }
 
-fun <K, T: IData<K>> DynamicHashStructure<K, T>.initialize(items: MutableList<T>) {
+fun <K, T: HashData<K>> DynamicHashStructure<K, T>.initialize(items: MutableList<T>) {
     val iterator = items.iterator()
 
     while (iterator.hasNext()) {
@@ -46,7 +46,7 @@ fun <K, T: IData<K>> DynamicHashStructure<K, T>.initialize(items: MutableList<T>
     }
 }
 
-data class TestInit <K, T : IData<K>> (
+data class TestInit <K, T : HashData<K>> (
     val structure: DynamicHashStructure<K, T>,
     val insertedItems: MutableList<T>
 )

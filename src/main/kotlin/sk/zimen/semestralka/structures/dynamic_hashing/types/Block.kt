@@ -2,8 +2,8 @@ package sk.zimen.semestralka.structures.dynamic_hashing.types
 
 import sk.zimen.semestralka.exceptions.BlockIsFullException
 import sk.zimen.semestralka.exceptions.NoResultFoundException
-import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IBlock
-import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
+import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.HashBlock
+import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.HashData
 import sk.zimen.semestralka.utils.append
 import sk.zimen.semestralka.utils.toByteArray
 import sk.zimen.semestralka.utils.toNumber
@@ -15,10 +15,10 @@ import kotlin.reflect.full.createInstance
  * Class that represents one block inside file for dynamic hashing structure.
  * @author David Zimen
  */
-class Block<K, T : IData<K>>(
+class Block<K, T : HashData<K>>(
     private val blockFactor: Int,
     private val clazz: KClass<T>
-) : IBlock<K> {
+) : HashBlock<K> {
 
     var address = 0L
     var validElements = 0
@@ -180,6 +180,4 @@ class Block<K, T : IData<K>>(
             data[i].printData(hashFunc)
         }
     }
-
-    override fun createInstance(): IBlock<K> = Block(blockFactor, clazz)
 }
