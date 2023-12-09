@@ -49,7 +49,7 @@ class Generator() {
             itemClass: KClass<T>,
             count: Int,
             boundary: Boundary? = null
-    ): MutableList<QuadTreePlace> {
+    ): MutableList<T> {
         setCoordinates(boundary)
         val items = ArrayList<QuadTreePlace>(count)
         val keys = HashSet<Long>(count)
@@ -61,11 +61,17 @@ class Generator() {
             }
             keys.add(key)
             val item = if (itemClass.isSubclassOf(Property::class)) {
+                generateProperty()
+            } else if (itemClass.isSubclassOf(Parcel::class)) {
                 generateParcel()
-            }
+            } else null
 
+            item?.also {
+                it.key = key
+                items.add(item)
+            }
         }
-        return items
+        return items as MutableList<T>
     }
 
     fun generateBoundaries(count: Int, boundary: Boundary? = null): MutableList<Boundary> {
