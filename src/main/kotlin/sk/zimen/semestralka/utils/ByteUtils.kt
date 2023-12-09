@@ -12,6 +12,14 @@ class ByteToNumber(
     val newIndex: Int
 )
 
+/**
+ * Class, that returns char loaded from [ByteArray] and new value of index.
+ */
+class ByteToChar(
+    val char: Char,
+    val newIndex: Int
+)
+
 fun ByteArray.append(array: ByteArray, index: Int): Int {
     array.copyInto(this, index)
     return index + array.size
@@ -28,6 +36,8 @@ fun <T : Number> ByteArray.toNumber(index: Int, clazz: KClass<T>): ByteToNumber 
         else -> ByteToNumber(-1, -1)
     }
 }
+
+fun ByteArray.toChar(index: Int) = ByteToChar(rewind(Char.SIZE_BYTES).getChar(), index + Char.SIZE_BYTES)
 
 fun ByteArray.rewind(size: Int): ByteBuffer {
     val buffer = ByteBuffer.allocate(size)
@@ -48,6 +58,10 @@ fun Number.toByteArray(): ByteArray {
         is Byte -> ByteBuffer.allocate(Byte.SIZE_BYTES).put(this)
         else -> throw IllegalArgumentException("Unsupported numeric type")
     }.array()
+}
+
+fun Char.toByteArray(): ByteArray {
+    return ByteBuffer.allocate(Char.SIZE_BYTES).putChar(this).array()
 }
 
 /**

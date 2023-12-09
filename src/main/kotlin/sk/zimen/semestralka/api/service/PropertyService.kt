@@ -1,61 +1,80 @@
 package sk.zimen.semestralka.api.service
 
-import sk.zimen.semestralka.api.types.GpsPosition
-import sk.zimen.semestralka.api.types.GpsPositions
-import sk.zimen.semestralka.api.types.Property
+import sk.zimen.semestralka.api.types.*
 import sk.zimen.semestralka.exceptions.NoResultFoundException
+import sk.zimen.semestralka.structures.dynamic_hashing.DynamicHashStructure
+import sk.zimen.semestralka.structures.dynamic_hashing.util.ROOT_DIRECTORY
 import sk.zimen.semestralka.structures.quadtree.QuadTree
 import sk.zimen.semestralka.utils.Mapper
+import sk.zimen.semestralka.utils.file.initializeDirectory
 import sk.zimen.semestralka.utils.file.loadFromCsv
 import sk.zimen.semestralka.utils.file.writeToCsv
 import sk.zimen.semestralka.utils.generator.Generator
+import sk.zimen.semestralka.utils.moduloHashFunction
 
 class PropertyService private constructor() {
+
+    private val directory = "$ROOT_DIRECTORY/$NAME/quad_tree"
+
     /**
-     * Main structure for holding all [Property]ies of the application.
+     * QuadTree structure for holding all [Property]ies of the application.
      */
-    private val properties: QuadTree<Property> = QuadTree(10)
+    private val propertiesQuadTree: QuadTree<QuadTreePlace> = QuadTree(10)
+
+    /**
+     * DynamicHashStructure for holding all [Property]ies of the application.
+     */
+    private val propertiesHash = DynamicHashStructure(NAME, 5, 5, Property::class, moduloHashFunction(1000L), 15)
+
+    init {
+        initializeDirectory(directory)
+    }
 
     fun add(property: Property) {
         associateParcels(property)
-        properties.insert(property)
+        propertiesQuadTree.insert(property as QuadTreePlace)
+        propertiesQuadTree.insert(property)
     }
 
     fun edit(propertyBefore: Property, propertyAfter: Property) {
-        if (propertyBefore.positions != propertyAfter.positions) {
+        if (propertyBefore.topLeft != propertyAfter.topLeft || propertyBefore.bottomRight != propertyAfter.bottomRight) {
             associateParcels(propertyAfter)
         }
-        properties.edit(propertyBefore, propertyAfter)
+        propertiesQuadTree.edit(propertyBefore as QuadTreePlace, propertyAfter as QuadTreePlace)
+        propertiesHash.replace(propertyBefore, propertyAfter)
     }
 
-    fun find(position: GpsPosition): MutableList<Property> {
+    fun find(key: Long): Property = propertiesHash.find(key)
+
+    fun find(position: GpsPosition): MutableList<QuadTreePlace> {
         return try {
-            properties.find(Mapper.toBoundary(position)) as MutableList
+            propertiesQuadTree.find(Mapper.toBoundary(position)) as MutableList
         } catch (e: NoResultFoundException) {
             mutableListOf()
         }
     }
 
-    fun find(positions: GpsPositions): MutableList<Property> {
+    fun find(positions: GpsPositions): MutableList<QuadTreePlace> {
         return try {
-            properties.find(Mapper.toBoundary(positions)) as MutableList
+            propertiesQuadTree.find(Mapper.toBoundary(positions)) as MutableList
         } catch (e: NoResultFoundException) {
             mutableListOf()
         }
     }
 
-    fun all(): MutableList<Property> = properties.all() as MutableList
+    fun all(): MutableList<QuadTreePlace> = propertiesQuadTree.all() as MutableList
 
-    fun delete(property: Property) {
-        properties.delete(property)
+    fun delete(property: QuadTreePlace) {
+        propertiesQuadTree.delete(property)
+        propertiesHash.delete(property.key)
     }
 
     fun changeParameters(maxDepth: Int, topLeftX: Double, topLeftY: Double, bottomRightX: Double, bottomRightY: Double)
-        = properties.changeParameters(maxDepth, topLeftX, topLeftY, bottomRightX, bottomRightY)
+        = propertiesQuadTree.changeParameters(maxDepth, topLeftX, topLeftY, bottomRightX, bottomRightY)
 
     fun generateData(count: Int, maxDepth: Int, topLeftX: Double, topLeftY: Double, bottomRightX: Double, bottomRightY: Double) {
         changeParameters(maxDepth, topLeftX, topLeftY, bottomRightX, bottomRightY)
-        val items = Generator().generateItems(Property::class, count, properties.root.boundary,)
+        val items = Generator().generateItems(Property::class, count, propertiesQuadTree.root.boundary,)
         items.forEach {
             add(it)
         }
@@ -65,34 +84,44 @@ class PropertyService private constructor() {
         val items = all()
         val gpsPositions = ArrayList<GpsPosition>(items.size * 2)
         items.forEach {
-            gpsPositions.add(it.positions.topLeft)
-            gpsPositions.add(it.positions.bottomRight)
+            gpsPositions.add(it.topLeft)
+            gpsPositions.add(it.bottomRight)
         }
-        writeToCsv("data","properties.csv", Property::class, items)
-        writeToCsv("data", "properties-positions.csv", GpsPosition::class, gpsPositions)
+        writeToCsv(directory,"properties.csv", QuadTreePlace::class, items)
+        writeToCsv(directory, "properties-positions.csv", GpsPosition::class, gpsPositions)
+
+        propertiesHash.save()
     }
 
     fun loadFromFile() {
-        val items = loadFromCsv("data", "properties.csv", Property::class)
-        val gpsPositions = loadFromCsv("data", "properties-positions.csv", GpsPosition::class)
+        val items = loadFromCsv(directory, "properties.csv", QuadTreePlace::class)
+        val gpsPositions = loadFromCsv(directory, "properties-positions.csv", GpsPosition::class)
         gpsPositions.reverse()
         items.forEach {
             val topLeft = gpsPositions.removeAt(gpsPositions.size - 1)
             val bottomRightX = gpsPositions.removeAt(gpsPositions.size - 1)
-            it.positions = GpsPositions(topLeft, bottomRightX)
-            add(it)
+            it.topLeft = topLeft
+            it.bottomRight = bottomRightX
+            propertiesQuadTree.insert(it)
         }
     }
 
     private fun associateParcels(property: Property) {
-        property.parcelsForProperty = ParcelService.getInstance().find(property.positions)
-        property.parcelsForProperty.forEach {
-            it.propertiesForParcel.add(property)
-        }
+        property.parcelsForProperty = ParcelService.getInstance()
+            .find(GpsPositions(property.topLeft, property.bottomRight))
+            .map { AssociatedPlace(it.key) }
+            .toMutableList()
+
+        if (property.parcelsForProperty.size > Property.MAX_ASSOCIATED_PARCELS)
+            throw IllegalStateException("Property cannot have more than ${Property.MAX_ASSOCIATED_PARCELS} parcels associated.")
+
+        // TODO associate also other way arround
     }
 
     companion object {
         private var instance: PropertyService? = null
+
+        private const val NAME = "properties"
 
         fun getInstance(): PropertyService {
             if (instance == null) {

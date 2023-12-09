@@ -4,10 +4,10 @@ import javafx.collections.FXCollections
 import javafx.fxml.Initializable
 import sk.zimen.semestralka.api.service.ParcelService
 import sk.zimen.semestralka.api.types.GpsPosition
-import sk.zimen.semestralka.api.types.Parcel
+import sk.zimen.semestralka.api.types.QuadTreePlace
 import sk.zimen.semestralka.ui.state.ParcelState
 
-class ParcelController : Initializable, AbstractTableController<Parcel>() {
+class ParcelController : Initializable, AbstractTableController() {
 
     private val parcelService = ParcelService.getInstance()
 
@@ -44,7 +44,7 @@ class ParcelController : Initializable, AbstractTableController<Parcel>() {
         super.initState()
     }
 
-    override fun deleteFromService(item: Parcel) {
+    override fun deleteFromService(item: QuadTreePlace) {
         parcelService.delete(item)
     }
 }

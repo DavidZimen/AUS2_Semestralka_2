@@ -57,7 +57,7 @@
             <RowConstraints maxHeight="54.0" minHeight="10.0" prefHeight="49.0" vgrow="SOMETIMES" />
          </rowConstraints>
          <children>
-            <Label text="Number:">
+            <Label text="Key:">
                <font>
                   <Font size="14.0" />
                </font>
@@ -87,7 +87,7 @@
                   <Font size="14.0" />
                </font>
             </Label>
-            <TextField fx:id="number" prefHeight="32.0" prefWidth="403.0" GridPane.columnIndex="1">
+            <TextField fx:id="key" prefHeight="32.0" prefWidth="403.0" GridPane.columnIndex="1">
                <font>
                   <Font size="14.0" />
                </font>
@@ -210,10 +210,9 @@
                   <Font name="System Bold" size="14.0" />
                </font>
             </Label>
-            <TableView fx:id="associatedTable" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="225.0" prefWidth="400.0">
+            <TableView fx:id="associatedTable" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="225.0" prefWidth="200.0">
                <columns>
-                  <TableColumn fx:id="numberCol" editable="false" maxWidth="150.0" prefWidth="150.0" text="Number" />
-                  <TableColumn fx:id="descCol" editable="false" maxWidth="250.0" prefWidth="250.0" text="Description" />
+                  <TableColumn fx:id="keyCol" editable="false" maxWidth="200.0" prefWidth="200.0" text="Key" />
                </columns>
             </TableView>
          </children>

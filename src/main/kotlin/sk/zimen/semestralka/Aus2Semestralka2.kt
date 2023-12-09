@@ -5,9 +5,6 @@ import javafx.fxml.FXMLLoader
 import javafx.scene.Scene
 import javafx.scene.image.Image
 import javafx.stage.Stage
-import sk.zimen.semestralka.api.types.TestItem
-import sk.zimen.semestralka.structures.dynamic_hashing.DynamicHashStructure
-import sk.zimen.semestralka.utils.moduloHashFunction
 
 class Aus2Semestralka2 : Application() {
     override fun start(stage: Stage) {
@@ -23,8 +20,8 @@ class Aus2Semestralka2 : Application() {
 }
 
 fun main() {
-    //Application.launch(Aus2Semestralka2::class.java)
-    val hash = DynamicHashStructure("randomizedTest", 8, 15, TestItem::class, moduloHashFunction(500L), 10)
-    val item = hash.find(8019468532429308957L)
-    println("Found item - key: ${item.key}, desc: ${item.desc.value}")
+    Application.launch(Aus2Semestralka2::class.java)
+//    val hash = DynamicHashStructure("randomizedTest", 8, 15, TestItem::class, moduloHashFunction(500L), 10)
+//    val item = hash.find(8019468532429308957L)
+//    println("Found item - key: ${item.key}, desc: ${item.desc.value}")
 }

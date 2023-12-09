@@ -10,17 +10,17 @@ import javafx.scene.control.cell.PropertyValueFactory
 import javafx.scene.layout.BorderPane
 import sk.zimen.semestralka.Aus2Semestralka2
 import sk.zimen.semestralka.api.types.HeightPos
-import sk.zimen.semestralka.api.types.Place
+import sk.zimen.semestralka.api.types.QuadTreePlace
 import sk.zimen.semestralka.api.types.WidthPos
 import sk.zimen.semestralka.ui.state.AbstractState
 import sk.zimen.semestralka.ui.util.allowOnlyDouble
 import java.net.URL
 import java.util.*
 
-abstract class AbstractTableController<T : Place> : Initializable {
+abstract class AbstractTableController : Initializable {
 
-    protected var tableItems = FXCollections.observableArrayList<T>()
-    protected lateinit var state: AbstractState<T>
+    protected var tableItems = FXCollections.observableArrayList<QuadTreePlace>()
+    protected lateinit var state: AbstractState<QuadTreePlace>
     @FXML
     protected lateinit var borderPane: BorderPane
     @FXML
@@ -40,27 +40,25 @@ abstract class AbstractTableController<T : Place> : Initializable {
     @FXML
     protected lateinit var jPos: RadioButton
     @FXML
-    protected lateinit var table: TableView<T>
+    protected lateinit var table: TableView<QuadTreePlace>
     @FXML
-    protected lateinit var bottomHeightPos: TableColumn<T, String>
+    protected lateinit var bottomHeightPos: TableColumn<QuadTreePlace, String>
     @FXML
-    protected lateinit var bottomHeightValue: TableColumn<T, String>
+    protected lateinit var bottomHeightValue: TableColumn<QuadTreePlace, String>
     @FXML
-    protected lateinit var number: TableColumn<T, Double>
+    protected lateinit var key: TableColumn<QuadTreePlace, Double>
     @FXML
-    protected lateinit var desc: TableColumn<T, String>
+    protected lateinit var topWidthValue: TableColumn<QuadTreePlace, String>
     @FXML
-    protected lateinit var topWidthValue: TableColumn<T, String>
+    protected lateinit var topWidthPos: TableColumn<QuadTreePlace, String>
     @FXML
-    protected lateinit var topWidthPos: TableColumn<T, String>
+    protected lateinit var topHeightValue: TableColumn<QuadTreePlace, String>
     @FXML
-    protected lateinit var topHeightValue: TableColumn<T, String>
+    protected lateinit var topHeightPos: TableColumn<QuadTreePlace, String>
     @FXML
-    protected lateinit var topHeightPos: TableColumn<T, String>
+    protected lateinit var bottomWidthValue: TableColumn<QuadTreePlace, String>
     @FXML
-    protected lateinit var bottomWidthValue: TableColumn<T, String>
-    @FXML
-    protected lateinit var bottomWidthPos: TableColumn<T, String>
+    protected lateinit var bottomWidthPos: TableColumn<QuadTreePlace, String>
 
     abstract fun search()
 
@@ -70,7 +68,7 @@ abstract class AbstractTableController<T : Place> : Initializable {
 
     abstract fun loadAll()
 
-    abstract fun deleteFromService(item: T)
+    abstract fun deleteFromService(item: QuadTreePlace)
 
     open fun initState() {
         state.searchBar?.let {
@@ -110,16 +108,15 @@ abstract class AbstractTableController<T : Place> : Initializable {
 
     override fun initialize(p0: URL?, p1: ResourceBundle?) {
         table.selectionModel.selectionMode = SelectionMode.SINGLE
-        desc.setCellValueFactory { cellData -> SimpleStringProperty(cellData.value.description) }
-        number.cellValueFactory = PropertyValueFactory("number")
-        topWidthValue.setCellValueFactory { cellData -> SimpleStringProperty(cellData.value.positions.topLeft.width.toString()) }
-        topWidthPos.setCellValueFactory { cellData -> SimpleStringProperty(cellData.value.positions.topLeft.widthPosition.toString()) }
-        topHeightValue.setCellValueFactory { cellData -> SimpleStringProperty(cellData.value.positions.topLeft.height.toString()) }
-        topHeightPos.setCellValueFactory { cellData -> SimpleStringProperty(cellData.value.positions.topLeft.heightPosition.toString()) }
-        bottomWidthValue.setCellValueFactory { cellData -> SimpleStringProperty(cellData.value.positions.bottomRight.width.toString()) }
-        bottomWidthPos.setCellValueFactory { cellData -> SimpleStringProperty(cellData.value.positions.bottomRight.widthPosition.toString()) }
-        bottomHeightValue.setCellValueFactory { cellData -> SimpleStringProperty(cellData.value.positions.bottomRight.height.toString()) }
-        bottomHeightPos.setCellValueFactory { cellData -> SimpleStringProperty(cellData.value.positions.bottomRight.heightPosition.toString()) }
+        key.cellValueFactory = PropertyValueFactory("key")
+        topWidthValue.setCellValueFactory { cellData -> SimpleStringProperty(cellData.value.topLeft.width.toString()) }
+        topWidthPos.setCellValueFactory { cellData -> SimpleStringProperty(cellData.value.topLeft.widthPosition.toString()) }
+        topHeightValue.setCellValueFactory { cellData -> SimpleStringProperty(cellData.value.topLeft.height.toString()) }
+        topHeightPos.setCellValueFactory { cellData -> SimpleStringProperty(cellData.value.topLeft.heightPosition.toString()) }
+        bottomWidthValue.setCellValueFactory { cellData -> SimpleStringProperty(cellData.value.bottomRight.width.toString()) }
+        bottomWidthPos.setCellValueFactory { cellData -> SimpleStringProperty(cellData.value.bottomRight.widthPosition.toString()) }
+        bottomHeightValue.setCellValueFactory { cellData -> SimpleStringProperty(cellData.value.bottomRight.height.toString()) }
+        bottomHeightPos.setCellValueFactory { cellData -> SimpleStringProperty(cellData.value.bottomRight.heightPosition.toString()) }
         deleteButton?.isVisible = false
         editButton?.isVisible = false
         width.allowOnlyDouble()

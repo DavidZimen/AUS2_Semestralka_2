@@ -1,12 +1,14 @@
 package sk.zimen.semestralka.api.types
 
-import sk.zimen.semestralka.utils.DoubleUtils
+import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.HashData
+import sk.zimen.semestralka.utils.*
+import java.util.*
 
 /**
  * Class to hold data about GPS position on map.
  * @author David Zimen
  */
-class GpsPosition() {
+class GpsPosition() : HashData<Byte?> {
 
     var width: Double = 0.0
     var widthPosition: WidthPos = WidthPos.Z
@@ -20,6 +22,10 @@ class GpsPosition() {
         this.heightPosition = heightPosition
     }
 
+    /**
+     * Not necessary to implement because it will not be directly inserted into structure.
+     */
+    override var key: Byte? = null
 
     override fun equals(other: Any?): Boolean {
         if (this === other) {
@@ -33,6 +39,42 @@ class GpsPosition() {
                 height, other.height
             ) && heightPosition == other.heightPosition
         } else false
+    }
+
+    override fun getSize(): Int {
+        return 2 * Double.SIZE_BYTES + 2 * Char.SIZE_BYTES
+    }
+
+    override fun getData(): ByteArray {
+        var index = 0
+        val bytes = ByteArray(getSize())
+
+        index = bytes.append(width.toByteArray(), index)
+        index = bytes.append(widthPosition.value.toByteArray(), index)
+        index = bytes.append(height.toByteArray(), index)
+        bytes.append(heightPosition.value.toByteArray(), index)
+
+        return bytes
+    }
+
+    override fun formData(bytes: ByteArray) {
+        var index = 0
+        bytes.copyOfRange(index, Double.SIZE_BYTES).toNumber(index, Double::class).also {
+            width = it.number as Double
+            index = it.newIndex
+        }
+        bytes.copyOfRange(index, index + Char.SIZE_BYTES).toChar(index).also {
+            widthPosition = WidthPos.getByVal(it.char)
+            index = it.newIndex
+        }
+        bytes.copyOfRange(index, index + Double.SIZE_BYTES).toNumber(index, Double::class).also {
+            height = it.number as Double
+            index = it.newIndex
+        }
+        bytes.copyOfRange(index, index + Char.SIZE_BYTES).toChar(index).also {
+            heightPosition = HeightPos.getByVal(it.char)
+            index = it.newIndex
+        }
     }
 
     override fun hashCode(): Int {
@@ -69,15 +111,27 @@ data class GpsPositions(val topLeft: GpsPosition, val bottomRight: GpsPosition) 
 /**
  * Enum with possibilities for width in [GpsPosition].
  */
-enum class WidthPos {
-    Z,
-    V
+enum class WidthPos(val value: Char) {
+    Z('Z'),
+    V('V');
+
+    companion object {
+        fun getByVal(value: Char): WidthPos {
+            return if (value == 'Z') Z else V
+        }
+    }
 }
 
 /**
  * Enum with possibilities for height in [GpsPosition].
  */
-enum class HeightPos {
-    S,
-    J
+enum class HeightPos(val value: Char) {
+    S('S'),
+    J('J');
+
+    companion object {
+        fun getByVal(value: Char): HeightPos {
+            return if (value == 'S') S else J
+        }
+    }
 }

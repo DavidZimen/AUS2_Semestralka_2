@@ -1,12 +1,10 @@
 package sk.zimen.semestralka.structures.dynamic_hashing.interfaces
 
-import java.util.*
-
 /**
  * Interface that holds every method needed in block for dynamic hashing structure.
  * @author David Zimen
  */
-interface HashBlock<K> {
+interface HashBlock {
     /**
      * Size of implementing object in bytes representation.
      */
@@ -22,9 +20,4 @@ interface HashBlock<K> {
      * Converts provided [ByteArray].
      */
     fun formData(bytes: ByteArray)
-
-    /**
-     * Method for printing object to console.
-     */
-    fun printData(hashFunc: (K) -> BitSet)
 }

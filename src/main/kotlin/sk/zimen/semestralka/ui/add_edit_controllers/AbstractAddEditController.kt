@@ -1,6 +1,5 @@
 package sk.zimen.semestralka.ui.add_edit_controllers
 
-import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
@@ -10,24 +9,21 @@ import javafx.scene.control.cell.PropertyValueFactory
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.Pane
 import sk.zimen.semestralka.Aus2Semestralka2
-import sk.zimen.semestralka.api.types.GpsPosition
-import sk.zimen.semestralka.api.types.HeightPos
-import sk.zimen.semestralka.api.types.Place
-import sk.zimen.semestralka.api.types.WidthPos
+import sk.zimen.semestralka.api.types.*
 import sk.zimen.semestralka.ui.state.AbstractState
 import java.net.URL
 import java.util.*
 
-abstract class AbstractAddEditController<T : Place> : Initializable {
+abstract class AbstractAddEditController<T : QuadTreePlace> : Initializable {
 
-    protected lateinit var state: AbstractState<T>
+    protected lateinit var state: AbstractState<QuadTreePlace>
     protected var editBefore: T? = null
     protected lateinit var type: String
-    protected var associatedItems = FXCollections.observableArrayList<Place>()!!
+    protected var associatedItems = FXCollections.observableArrayList<AssociatedPlace>()!!
     @FXML
     protected lateinit var borderPane: BorderPane
     @FXML
-    protected lateinit var number: TextField
+    protected lateinit var key: TextField
     @FXML
     protected lateinit var desc: TextArea
     @FXML
@@ -57,11 +53,9 @@ abstract class AbstractAddEditController<T : Place> : Initializable {
     @FXML
     protected lateinit var header: Label
     @FXML
-    protected lateinit var numberCol: TableColumn<Place, Int>
+    protected lateinit var keyCol: TableColumn<QuadTreePlace, Int>
     @FXML
-    protected lateinit var descCol: TableColumn<Place, String>
-    @FXML
-    protected lateinit var associatedTable: TableView<Place>
+    protected lateinit var associatedTable: TableView<AssociatedPlace>
     @FXML
     protected lateinit var label: Label
 
@@ -69,16 +63,17 @@ abstract class AbstractAddEditController<T : Place> : Initializable {
 
     abstract fun onCancel()
 
+    abstract fun init()
+
     abstract fun initState()
 
     override fun initialize(p0: URL?, p1: ResourceBundle?) {
         initState()
-        editBefore = state.editItem
+        init()
         if (editBefore == null) header.text = "New" else header.text = "Editing"
         editBefore?.also {
-            number.text = it.number.toString()
-            desc.text = it.description
-            with(it.positions.topLeft) {
+            key.text = it.key.toString()
+            with(it.topLeft) {
                 widthTop.text = width.toString()
                 zPos.isSelected = widthPosition == WidthPos.Z
                 vPos.isSelected = widthPosition == WidthPos.V
@@ -86,7 +81,7 @@ abstract class AbstractAddEditController<T : Place> : Initializable {
                 sPos.isSelected = heightPosition == HeightPos.S
                 jPos.isSelected = heightPosition == HeightPos.J
             }
-            with(it.positions.bottomRight) {
+            with(it.bottomRight) {
                 widthBottom.text = width.toString()
                 zPosBottom.isSelected = widthPosition == WidthPos.Z
                 vPosBottom.isSelected = widthPosition == WidthPos.V
@@ -95,8 +90,7 @@ abstract class AbstractAddEditController<T : Place> : Initializable {
                 jPosBottom.isSelected = heightPosition == HeightPos.J
             }
         }
-        descCol.setCellValueFactory { cellData -> SimpleStringProperty(cellData.value.description) }
-        numberCol.cellValueFactory = PropertyValueFactory("number")
+        keyCol.cellValueFactory = PropertyValueFactory("key")
         associatedTable.items = associatedItems
         if (state.editItem == null) {
             label.isVisible = false

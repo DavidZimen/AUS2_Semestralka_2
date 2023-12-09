@@ -1,8 +1,10 @@
 package sk.zimen.semestralka.api.types
 
 import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.HashData
-import sk.zimen.semestralka.utils.*
-import java.util.*
+import sk.zimen.semestralka.utils.StringData
+import sk.zimen.semestralka.utils.append
+import sk.zimen.semestralka.utils.toByteArray
+import sk.zimen.semestralka.utils.toNumber
 
 class TestItem() : HashData<Long> {
 
@@ -38,15 +40,12 @@ class TestItem() : HashData<Long> {
 
     override fun formData(bytes: ByteArray) {
         var index = 0
-        bytes.copyOfRange(index, index + Long.SIZE_BYTES).toNumber(index, Long::class).also {
+        bytes.copyOfRange(index, Long.SIZE_BYTES).toNumber(index, Long::class).also {
             key = it.number as Long
             index = it.newIndex
         }
         desc.formData(bytes.copyOfRange(index, index + StringData.getSize(MAX_STRING_LENGTH)), MAX_STRING_LENGTH)
     }
-
-    override fun printData(hashFunc: (Long) -> BitSet) = println("Hash: ${hashFunc.invoke(key).toOwnString()}, Id: ${key}, Description: ${desc.value}")
-
 
     companion object {
         const val MAX_STRING_LENGTH = 20

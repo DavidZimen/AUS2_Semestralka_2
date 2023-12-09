@@ -3,7 +3,6 @@ package sk.zimen.semestralka.ui.add_edit_controllers
 import javafx.collections.FXCollections
 import sk.zimen.semestralka.api.service.ParcelService
 import sk.zimen.semestralka.api.types.Parcel
-import sk.zimen.semestralka.api.types.Place
 import sk.zimen.semestralka.ui.state.ParcelState
 
 class AddEditParcelController : AbstractAddEditController<Parcel>() {
@@ -14,7 +13,7 @@ class AddEditParcelController : AbstractAddEditController<Parcel>() {
         if (editBefore == null) {
             try {
                 parcelService.add(
-                    Parcel(number.text.toInt(), desc.text, getGpsPosition(true), getGpsPosition(false))
+                    Parcel(desc.text, getGpsPosition(true), getGpsPosition(false))
                 )
                 showSuccessAlert(true)
             } catch (e: Exception) {
@@ -24,7 +23,7 @@ class AddEditParcelController : AbstractAddEditController<Parcel>() {
             try {
                 parcelService.edit(
                     editBefore!!,
-                    Parcel(number.text.toInt(), desc.text, getGpsPosition(true), getGpsPosition(false))
+                    Parcel(desc.text, getGpsPosition(true), getGpsPosition(false))
                 )
                 showSuccessAlert(false)
             } catch (e: Exception) {
@@ -39,8 +38,12 @@ class AddEditParcelController : AbstractAddEditController<Parcel>() {
 
     override fun initState() {
         state = ParcelState.getInstance()
-        if (state.editItem != null) {
-            associatedItems = FXCollections.observableArrayList(state.editItem?.propertiesForParcel as List<Place>)
-        }
+    }
+
+    override fun init() {
+        val key = state.editItem?.key ?: return
+
+        editBefore = parcelService.find(key)
+        associatedItems = FXCollections.observableArrayList(editBefore?.propertiesForParcel)
     }
 }

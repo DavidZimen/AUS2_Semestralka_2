@@ -1,14 +1,16 @@
 package sk.zimen.semestralka.ui.state
 
-import sk.zimen.semestralka.api.types.*
+import sk.zimen.semestralka.api.types.HeightPos
+import sk.zimen.semestralka.api.types.QuadTreePlace
+import sk.zimen.semestralka.api.types.WidthPos
 
 
-class ParcelState private constructor() : AbstractState<Parcel>() {
+class ParcelState private constructor() : AbstractState<QuadTreePlace>() {
     companion object {
         @Volatile
         private var instance: ParcelState? = null
 
-        fun getInstance(): ParcelState {
+        fun getInstance(): AbstractState<QuadTreePlace> {
             return instance
                 ?: synchronized(this) {
                     instance ?: ParcelState().also { instance = it }
@@ -17,12 +19,12 @@ class ParcelState private constructor() : AbstractState<Parcel>() {
     }
 }
 
-class PropertyState private constructor() : AbstractState<Property>() {
+class PropertyState private constructor() : AbstractState<QuadTreePlace>() {
     companion object {
         @Volatile
         private var instance: PropertyState? = null
 
-        fun getInstance(): PropertyState {
+        fun getInstance(): AbstractState<QuadTreePlace> {
             return instance
                 ?: synchronized(this) {
                     instance ?: PropertyState().also { instance = it }
@@ -31,7 +33,7 @@ class PropertyState private constructor() : AbstractState<Property>() {
     }
 }
 
-abstract class AbstractState<T :Place> {
+abstract class AbstractState<T : QuadTreePlace> {
     var searchBar: SearchState? = null
         private set
     var editItem: T? = null

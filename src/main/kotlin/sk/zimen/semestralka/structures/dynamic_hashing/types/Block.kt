@@ -18,7 +18,7 @@ import kotlin.reflect.full.createInstance
 class Block<K, T : HashData<K>>(
     private val blockFactor: Int,
     private val clazz: KClass<T>
-) : HashBlock<K> {
+) : HashBlock {
 
     var address = 0L
     var validElements = 0
@@ -126,7 +126,6 @@ class Block<K, T : HashData<K>>(
 
     //OVERRIDE FUNCTIONS
     override fun getSize(): Int {
-        Byte.SIZE_BYTES
         return 2 * Int.SIZE_BYTES +
                 3 * Long.SIZE_BYTES +
                 blockFactor * clazz.createInstance().getSize()
@@ -172,12 +171,12 @@ class Block<K, T : HashData<K>>(
         }
     }
 
-    override fun printData(hashFunc: (K) -> BitSet) {
-        println("Address: $address, Valid items: $validElements, Prev: $previous, Next: $next")
-        println("Data items:")
-        for (i in 0 until  validElements) {
-            print("\t")
-            data[i].printData(hashFunc)
-        }
-    }
+//    override fun printData(hashFunc: (K) -> BitSet) {
+//        println("Address: $address, Valid items: $validElements, Prev: $previous, Next: $next")
+//        println("Data items:")
+//        for (i in 0 until  validElements) {
+//            print("\t")
+//            data[i].printData(hashFunc)
+//        }
+//    }
 }

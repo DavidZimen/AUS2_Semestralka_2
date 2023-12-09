@@ -1,13 +1,16 @@
 package sk.zimen.semestralka.utils.generator
 
-import sk.zimen.semestralka.api.types.Place
+import sk.zimen.semestralka.api.types.Parcel
+import sk.zimen.semestralka.api.types.Property
+import sk.zimen.semestralka.api.types.QuadTreePlace
 import sk.zimen.semestralka.api.types.TestItem
 import sk.zimen.semestralka.structures.quadtree.types.Boundary
 import sk.zimen.semestralka.utils.DoubleUtils
 import sk.zimen.semestralka.utils.Mapper
+import sk.zimen.semestralka.utils.StringData
 import java.util.*
 import kotlin.reflect.KClass
-import kotlin.reflect.full.createInstance
+import kotlin.reflect.full.isSubclassOf
 
 class Generator() {
     /**
@@ -42,18 +45,25 @@ class Generator() {
         return items
     }
 
-    fun <T : Place> generateItems(
+    fun <T : QuadTreePlace> generateItems(
             itemClass: KClass<T>,
             count: Int,
             boundary: Boundary? = null
-    ): MutableList<T> {
+    ): MutableList<QuadTreePlace> {
         setCoordinates(boundary)
-        val items = ArrayList<T>(count)
-        while(items.size < count) {
-            try {
-                val item = generateItem(itemClass)
-                items.add(item)
-            } catch (_: Exception) {}
+        val items = ArrayList<QuadTreePlace>(count)
+        val keys = HashSet<Long>(count)
+
+        while (items.size < count) {
+            val key = random.nextLong()
+            if (keys.contains(key)) {
+                continue
+            }
+            keys.add(key)
+            val item = if (itemClass.isSubclassOf(Property::class)) {
+                generateParcel()
+            }
+
         }
         return items
     }
@@ -111,11 +121,22 @@ class Generator() {
             .joinToString("")
     }
 
-    private fun <T : Place> generateItem(clazz: KClass<T>): T {
-        val instance = clazz.createInstance()
-        instance.positions = Mapper.toPositions(nextBoundary(generateSize()))
-        instance.number = random.nextInt(0, Int.MAX_VALUE)
-        instance.description = nextString(20)
+    private fun generateParcel(): Parcel {
+        val instance = Parcel()
+        val positions = Mapper.toPositions(nextBoundary(generateSize()))
+        instance.topLeft = positions.topLeft
+        instance.bottomRight = positions.bottomRight
+        instance.description = StringData(nextString(Parcel.MAX_STRING_LENGTH))
+        return instance
+    }
+
+    private fun generateProperty(): Property {
+        val instance = Property()
+        val positions = Mapper.toPositions(nextBoundary(generateSize()))
+        instance.topLeft = positions.topLeft
+        instance.bottomRight = positions.bottomRight
+        instance.description = StringData(nextString(Property.MAX_STRING_LENGTH))
+        instance.number = random.nextInt()
         return instance
     }
 

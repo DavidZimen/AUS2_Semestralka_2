@@ -7,6 +7,7 @@ package sk.zimen.semestralka.utils
 class StringData() {
 
     private var validChars: Int = 0
+
     var value: String = ""
         set(value) {
             field = value

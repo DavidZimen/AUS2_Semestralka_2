@@ -4,10 +4,10 @@ import javafx.collections.FXCollections
 import javafx.fxml.Initializable
 import sk.zimen.semestralka.api.service.PropertyService
 import sk.zimen.semestralka.api.types.GpsPosition
-import sk.zimen.semestralka.api.types.Property
+import sk.zimen.semestralka.api.types.QuadTreePlace
 import sk.zimen.semestralka.ui.state.PropertyState
 
-class PropertiesController : Initializable, AbstractTableController<Property>() {
+class PropertiesController : Initializable, AbstractTableController() {
 
     private val propertyService = PropertyService.getInstance()
     private val propertyState = PropertyState.getInstance()
@@ -45,7 +45,7 @@ class PropertiesController : Initializable, AbstractTableController<Property>() 
         navigate("add-edit-property.fxml")
     }
 
-    override fun deleteFromService(item: Property) {
+    override fun deleteFromService(item: QuadTreePlace) {
         propertyService.delete(item)
     }
 }

@@ -1,14 +1,18 @@
 package sk.zimen.semestralka.ui.add_edit_controllers
 
 import javafx.collections.FXCollections
+import javafx.fxml.FXML
+import javafx.scene.control.TextField
 import sk.zimen.semestralka.api.service.PropertyService
-import sk.zimen.semestralka.api.types.Place
 import sk.zimen.semestralka.api.types.Property
 import sk.zimen.semestralka.ui.state.PropertyState
 
 class AddEditPropertyController : AbstractAddEditController<Property>() {
 
     private val propertyService = PropertyService.getInstance()
+
+    @FXML
+    private lateinit var number: TextField
 
     override fun onSave() {
         if (editBefore == null) {
@@ -24,7 +28,9 @@ class AddEditPropertyController : AbstractAddEditController<Property>() {
             try {
                 propertyService.edit(
                     editBefore!!,
-                    Property(number.text.toInt(), desc.text, getGpsPosition(true), getGpsPosition(false))
+                    Property(number.text.toInt(), desc.text, getGpsPosition(true), getGpsPosition(false)).apply {
+                        key = this@AddEditPropertyController.key.text.toLong()
+                    }
                 )
                 showSuccessAlert(false)
             } catch (e: Exception) {
@@ -39,8 +45,15 @@ class AddEditPropertyController : AbstractAddEditController<Property>() {
 
     override fun initState() {
         state = PropertyState.getInstance()
-        if (state.editItem != null) {
-            associatedItems = FXCollections.observableArrayList(state.editItem?.parcelsForProperty as List<Place>)
+    }
+
+    override fun init() {
+        val key = state.editItem?.key ?: return
+
+        editBefore = propertyService.find(key)
+        editBefore?.let {
+            associatedItems = FXCollections.observableArrayList(editBefore!!.parcelsForProperty)
+            number.text = editBefore!!.number.toString()
         }
     }
 }

@@ -196,6 +196,16 @@
                   <Font name="System Bold" size="14.0" />
                </font>
             </Label>
+            <Label layoutX="10.0" layoutY="29.0" text="Key:" GridPane.columnIndex="2">
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Label>
+            <TextField fx:id="key" layoutX="190.0" layoutY="23.0" prefHeight="32.0" prefWidth="403.0" GridPane.columnIndex="3">
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </TextField>
          </children>
       </GridPane>
    </center>
@@ -207,10 +217,9 @@
                   <Font name="System Bold" size="14.0" />
                </font>
             </Label>
-            <TableView fx:id="associatedTable" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="225.0" prefWidth="400.0">
+            <TableView fx:id="associatedTable" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="225.0" prefWidth="200.0">
               <columns>
-                <TableColumn fx:id="numberCol" editable="false" maxWidth="150.0" prefWidth="150.0" text="Number" />
-                <TableColumn fx:id="descCol" editable="false" maxWidth="250.0" prefWidth="250.0" text="Description" />
+                <TableColumn fx:id="keyCol" editable="false" maxWidth="200.0" prefWidth="200.0" text="Key" />
               </columns>
             </TableView>
          </children>
