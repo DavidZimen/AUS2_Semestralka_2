@@ -1,5 +1,6 @@
 package sk.zimen.semestralka.api.types
 
+import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.HashData
 import sk.zimen.semestralka.utils.StringData
 import sk.zimen.semestralka.utils.append
 import sk.zimen.semestralka.utils.toByteArray
@@ -10,7 +11,7 @@ import kotlin.reflect.full.createInstance
  * Class with data representing Parcel from assignment.
  * @author David Zimen
  */
-class Parcel() : QuadTreePlace() {
+class Parcel() : QuadTreePlace(), HashData<Long> {
 
     var description: StringData = StringData()
     var validAssociated: Short = 0
@@ -27,19 +28,28 @@ class Parcel() : QuadTreePlace() {
     }
 
     override fun getSize(): Int {
-        return super.getSize() +
-                Short.SIZE_BYTES +
+        return Short.SIZE_BYTES +
+                Long.SIZE_BYTES +
+                2 * GpsPosition::class.createInstance().getSize() +
                 MAX_ASSOCIATED_PROPERTIES * AssociatedPlace::class.createInstance().getSize()
     }
 
+    override fun equals(other: Any?): Boolean {
+        return super.equals(other)
+                && other is Parcel
+                && description == other.description
+                && validAssociated == other.validAssociated
+    }
+
     override fun getData(): ByteArray {
-        println("Size of whole: ${getSize()}, size of super: ${super.getSize()}")
         var index = 0
         val bytes = ByteArray(getSize())
 
-        index = bytes.append(super.getData(), index)
         index = bytes.append(validAssociated.toByteArray(), index)
         index = bytes.append(description.getData(MAX_STRING_LENGTH), index)
+        index = bytes.append(key.toByteArray(), index)
+        index = bytes.append(topLeft.getData(), index)
+        bytes.append(bottomRight.getData(), index)
 
         val elementSize = AssociatedPlace::class.createInstance().getSize()
         for (i in 0 until validAssociated) {
@@ -54,10 +64,7 @@ class Parcel() : QuadTreePlace() {
     override fun formData(bytes: ByteArray) {
         var index = 0
 
-        super.formData(bytes)
-        index += super.getSize()
-
-        bytes.copyOfRange(index, index + Short.SIZE_BYTES).toNumber(index, Short::class).also {
+        bytes.copyOfRange(index, Short.SIZE_BYTES).toNumber(index, Short::class).also {
             validAssociated = it.number as Short
             index = it.newIndex
         }
@@ -65,6 +72,19 @@ class Parcel() : QuadTreePlace() {
         val stringSize = StringData.getSize(MAX_STRING_LENGTH)
         description.formData(bytes.copyOfRange(index, index + stringSize), MAX_STRING_LENGTH)
         index += stringSize
+
+        bytes.copyOfRange(index, Long.SIZE_BYTES).toNumber(index, Long::class).also {
+            key = it.number as Long
+            index = it.newIndex
+        }
+
+        topLeft = GpsPosition::class.createInstance()
+        val posSize = topLeft.getSize()
+        topLeft.formData(bytes.copyOfRange(index, index + posSize))
+        index += posSize
+        bottomRight = GpsPosition::class.createInstance()
+        bottomRight.formData(bytes.copyOfRange(index, index + posSize))
+        index += posSize
 
         for (i in 0 until validAssociated) {
             val element = AssociatedPlace::class.createInstance()
