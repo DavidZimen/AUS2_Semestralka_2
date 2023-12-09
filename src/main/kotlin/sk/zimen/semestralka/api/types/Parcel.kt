@@ -27,18 +27,18 @@ class Parcel() : QuadTreePlace(), HashData<Long> {
             this.description.value = description
     }
 
-    override fun getSize(): Int {
-        return Short.SIZE_BYTES +
-                Long.SIZE_BYTES +
-                2 * GpsPosition::class.createInstance().getSize() +
-                MAX_ASSOCIATED_PROPERTIES * AssociatedPlace::class.createInstance().getSize()
-    }
-
     override fun equals(other: Any?): Boolean {
         return super.equals(other)
                 && other is Parcel
                 && description == other.description
                 && validAssociated == other.validAssociated
+    }
+
+    override fun getSize(): Int {
+        return Short.SIZE_BYTES +
+                Long.SIZE_BYTES +
+                2 * GpsPosition::class.createInstance().getSize() +
+                MAX_ASSOCIATED_PROPERTIES * AssociatedPlace::class.createInstance().getSize()
     }
 
     override fun getData(): ByteArray {
@@ -73,7 +73,7 @@ class Parcel() : QuadTreePlace(), HashData<Long> {
         description.formData(bytes.copyOfRange(index, index + stringSize), MAX_STRING_LENGTH)
         index += stringSize
 
-        bytes.copyOfRange(index, Long.SIZE_BYTES).toNumber(index, Long::class).also {
+        bytes.copyOfRange(index, index + Long.SIZE_BYTES).toNumber(index, Long::class).also {
             key = it.number as Long
             index = it.newIndex
         }

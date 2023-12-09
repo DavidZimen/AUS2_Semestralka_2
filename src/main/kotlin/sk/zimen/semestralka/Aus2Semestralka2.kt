@@ -5,6 +5,8 @@ import javafx.fxml.FXMLLoader
 import javafx.scene.Scene
 import javafx.scene.image.Image
 import javafx.stage.Stage
+import sk.zimen.semestralka.api.types.Parcel
+import sk.zimen.semestralka.utils.generator.Generator
 
 class Aus2Semestralka2 : Application() {
     override fun start(stage: Stage) {
@@ -24,8 +26,11 @@ class Aus2Semestralka2 : Application() {
 }
 
 fun main() {
-    Application.launch(Aus2Semestralka2::class.java)
-//    val hash = DynamicHashStructure("randomizedTest", 8, 15, TestItem::class, moduloHashFunction(500L), 10)
-//    val item = hash.find(8019468532429308957L)
-//    println("Found item - key: ${item.key}, desc: ${item.desc.value}")
+//    Application.launch(Aus2Semestralka2::class.java)
+
+    val item = Generator().generateItems(Parcel::class, 1)[0]
+    val data = item.getData()
+    val newItem = Parcel()
+    newItem.formData(data)
+    println(item.key)
 }
