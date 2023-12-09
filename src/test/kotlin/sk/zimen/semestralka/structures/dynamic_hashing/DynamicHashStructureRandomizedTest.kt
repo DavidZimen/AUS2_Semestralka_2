@@ -72,6 +72,8 @@ internal class DynamicHashStructureRandomizedTest {
             }
         }
 
+        println(items[0].key)
+
         dynamicHash.save()
     }
 }

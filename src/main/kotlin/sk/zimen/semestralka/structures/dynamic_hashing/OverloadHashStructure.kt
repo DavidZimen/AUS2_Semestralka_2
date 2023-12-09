@@ -2,12 +2,14 @@ package sk.zimen.semestralka.structures.dynamic_hashing
 
 import sk.zimen.semestralka.exceptions.BlockIsFullException
 import sk.zimen.semestralka.exceptions.NoResultFoundException
-import sk.zimen.semestralka.structures.dynamic_hashing.constants.OVERLOAD_FILE
-import sk.zimen.semestralka.structures.dynamic_hashing.constants.ROOT_DIRECTORY
 import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
 import sk.zimen.semestralka.structures.dynamic_hashing.types.Block
+import sk.zimen.semestralka.structures.dynamic_hashing.util.*
 import sk.zimen.semestralka.structures.trie.nodes.ExternalTrieNode
+import sk.zimen.semestralka.utils.file.existsFileInDirectory
 import sk.zimen.semestralka.utils.file.initializeDirectory
+import sk.zimen.semestralka.utils.file.loadFromCsv
+import sk.zimen.semestralka.utils.file.writeToCsv
 import java.io.RandomAccessFile
 import kotlin.reflect.KClass
 
@@ -193,14 +195,30 @@ class OverloadHashStructure<K, T : IData<K>>(
     }
 
     // OVERRIDE FUNCTIONS
+    /**
+     * Closes the files and saves metadata into separate text file.
+     */
+    override fun save() {
+        super.save()
+        val metadata = HashMetadata(blockFactor, firstEmpty, blockSize)
+        writeToCsv("$ROOT_DIRECTORY/$dirName", OVERLOAD_META_DATA, HashMetadata::class, listOf(metadata))
+    }
+
     override fun initialize() {
         val dir = "$ROOT_DIRECTORY/$dirName"
-        initializeDirectory(dir)
-        file = RandomAccessFile("${dir}/$OVERLOAD_FILE", "rw")
-        file.setLength(0)
-        firstEmpty = file.length()
 
-        //TODO logic when file is not empty at the start
+        if (existsFileInDirectory(dir, OVERLOAD_META_DATA)) {
+            val metaData = loadFromCsv(dir, OVERLOAD_META_DATA, HashMetadata::class)[0]
+            compareMetaData(metaData)
+            firstEmpty = metaData.firstEmptyBlock
+            file = RandomAccessFile("$dir/$OVERLOAD_FILE", "rw")
+            println("Overload file length: ${file.length()}")
+        } else {
+            initializeDirectory(dir)
+            file = RandomAccessFile("${dir}/$OVERLOAD_FILE", "rw")
+            file.setLength(0)
+            firstEmpty = file.length()
+        }
     }
 
     //PRIVATE FUNCTIONS

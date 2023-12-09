@@ -6,8 +6,8 @@ import sk.zimen.semestralka.api.types.Property
 import sk.zimen.semestralka.exceptions.NoResultFoundException
 import sk.zimen.semestralka.structures.quadtree.QuadTree
 import sk.zimen.semestralka.utils.Mapper
-import sk.zimen.semestralka.utils.file.readDataFromCSV
-import sk.zimen.semestralka.utils.file.writeDataToCSV
+import sk.zimen.semestralka.utils.file.loadFromCsv
+import sk.zimen.semestralka.utils.file.writeToCsv
 import sk.zimen.semestralka.utils.generator.Generator
 
 class PropertyService private constructor() {
@@ -68,13 +68,13 @@ class PropertyService private constructor() {
             gpsPositions.add(it.positions.topLeft)
             gpsPositions.add(it.positions.bottomRight)
         }
-        writeDataToCSV("data","properties.csv", Property::class, items)
-        writeDataToCSV("data", "properties-positions.csv", GpsPosition::class, gpsPositions)
+        writeToCsv("data","properties.csv", Property::class, items)
+        writeToCsv("data", "properties-positions.csv", GpsPosition::class, gpsPositions)
     }
 
     fun loadFromFile() {
-        val items = readDataFromCSV("data", "properties.csv", Property::class)
-        val gpsPositions = readDataFromCSV("data", "properties-positions.csv", GpsPosition::class)
+        val items = loadFromCsv("data", "properties.csv", Property::class)
+        val gpsPositions = loadFromCsv("data", "properties-positions.csv", GpsPosition::class)
         gpsPositions.reverse()
         items.forEach {
             val topLeft = gpsPositions.removeAt(gpsPositions.size - 1)

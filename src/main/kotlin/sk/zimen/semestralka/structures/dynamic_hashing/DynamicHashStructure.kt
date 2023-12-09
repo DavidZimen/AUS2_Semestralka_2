@@ -2,16 +2,18 @@ package sk.zimen.semestralka.structures.dynamic_hashing
 
 import sk.zimen.semestralka.exceptions.BlockIsFullException
 import sk.zimen.semestralka.exceptions.NoResultFoundException
-import sk.zimen.semestralka.structures.dynamic_hashing.constants.MAIN_FILE
-import sk.zimen.semestralka.structures.dynamic_hashing.constants.ROOT_DIRECTORY
 import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
 import sk.zimen.semestralka.structures.dynamic_hashing.types.Block
+import sk.zimen.semestralka.structures.dynamic_hashing.util.*
 import sk.zimen.semestralka.structures.trie.Trie
 import sk.zimen.semestralka.structures.trie.nodes.ExternalTrieNode
 import sk.zimen.semestralka.structures.trie.nodes.InternalTrieNode
 import sk.zimen.semestralka.structures.trie.nodes.TrieNode
 import sk.zimen.semestralka.utils.*
+import sk.zimen.semestralka.utils.file.existsFileInDirectory
 import sk.zimen.semestralka.utils.file.initializeDirectory
+import sk.zimen.semestralka.utils.file.loadFromCsv
+import sk.zimen.semestralka.utils.file.writeToCsv
 import java.io.RandomAccessFile
 import java.util.*
 import kotlin.reflect.KClass
@@ -41,7 +43,7 @@ class DynamicHashStructure<K, T : IData<K>>(
     /**
      * Trie to quickly find correct [Block] from [hashFunction] function.
      */
-    private val hashTrie = Trie(0, blockSize.toLong(), hashTrieDepth)
+    private lateinit var hashTrie: Trie
 
     /**
      * File for storing colliding [Block]s, when [Trie.maxDepth] level has been hit.
@@ -52,6 +54,12 @@ class DynamicHashStructure<K, T : IData<K>>(
      * Function to be used together with key, to make [BitSet] from key of type [K].
      */
     private val hashFunction: (K) -> BitSet = hashFunction
+
+    init {
+        if (hashTrie == null) {
+            hashTrie = Trie(0, blockSize.toLong(), hashTrieDepth)
+        }
+    }
 
     /**
      * Inserts [item] to the correct block in [file].
@@ -202,24 +210,36 @@ class DynamicHashStructure<K, T : IData<K>>(
     // OVERRIDE FUNCTIONS
     /**
      * Closes the files and saves metadata into separate text file.
+     * Saves [hashTrie] into separate csv file.
      */
     override fun save() {
         super.save()
+        val metaData = DynamicHashMetadata(blockFactor, firstEmpty, blockSize, size, hashTrie.maxDepth)
+        writeToCsv("$ROOT_DIRECTORY/$dirName", MAIN_META_DATA, DynamicHashMetadata::class, listOf(metaData))
         overloadStructure.save()
         hashTrie.saveToFile(dirName)
     }
 
     override fun initialize() {
         val dir = "$ROOT_DIRECTORY/$dirName"
-        initializeDirectory(dir)
-        file = RandomAccessFile("$dir/$MAIN_FILE", "rw")
-        file.setLength(blockSize.toLong() * 2)
-        firstEmpty = file.length()
-        val block = Block(blockFactor, clazz)
-        block.writeBlock()
-        block.apply { address = blockSize.toLong() }.writeBlock()
-
-        //TODO logic when file is not empty at the start
+        if (existsFileInDirectory(dir, MAIN_META_DATA)) {
+            val metadata = loadFromCsv(dir, MAIN_META_DATA, DynamicHashMetadata::class)[0]
+            compareMetaData(metadata)
+            firstEmpty = metadata.firstEmptyBlock
+            size = metadata.size
+            hashTrie = Trie(0, blockSize.toLong(), metadata.trieDepth)
+            hashTrie.loadFromFile(dir)
+            file = RandomAccessFile("$dir/$MAIN_FILE", "rw")
+            println("Main file length: ${file.length()}")
+        } else {
+            initializeDirectory(dir)
+            file = RandomAccessFile("$dir/$MAIN_FILE", "rw")
+            file.setLength(blockSize.toLong() * 2)
+            firstEmpty = file.length()
+            val block = Block(blockFactor, clazz)
+            block.writeBlock()
+            block.apply { address = blockSize.toLong() }.writeBlock()
+        }
     }
 
     // PRIVATE FUNCTIONS

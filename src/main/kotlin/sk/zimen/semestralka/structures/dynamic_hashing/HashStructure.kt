@@ -2,6 +2,7 @@ package sk.zimen.semestralka.structures.dynamic_hashing
 
 import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.IData
 import sk.zimen.semestralka.structures.dynamic_hashing.types.Block
+import sk.zimen.semestralka.structures.dynamic_hashing.util.HashMetadata
 import sk.zimen.semestralka.utils.file.readAtPosition
 import sk.zimen.semestralka.utils.file.writeAtPosition
 import java.io.RandomAccessFile
@@ -12,7 +13,7 @@ import kotlin.reflect.KClass
  */
 abstract class HashStructure<K, T : IData<K>>(
     val dirName: String,
-    protected val blockFactor: Int,
+    protected var blockFactor: Int,
     private val allowedEmptyBlocks: Int,
     protected val clazz: KClass<T>
 ) {
@@ -49,6 +50,16 @@ abstract class HashStructure<K, T : IData<K>>(
     open fun save() = file.close()
 
     // PROTECTED FUNCTIONS
+    /**
+     * Compares loaded metadata to created instance in runtime.
+     * @throws IllegalStateException when some parameters are not correct.
+     */
+    @Throws(IllegalStateException::class)
+    protected open fun compareMetaData(metaData: HashMetadata) {
+        if (metaData.blockSize != blockSize || metaData.blockFactor != blockFactor)
+            throw IllegalStateException("Inserted item are different size than ones saved in file.")
+    }
+
     /**
      * Load block from [file] from provided [address] with size of [blockSize].
      */

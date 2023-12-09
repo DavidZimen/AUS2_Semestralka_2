@@ -1,4 +1,4 @@
-package sk.zimen.semestralka.structures.dynamic_hashing.constants
+package sk.zimen.semestralka.structures.dynamic_hashing.util
 
 /**
  * Constant names for files inside hash structure.

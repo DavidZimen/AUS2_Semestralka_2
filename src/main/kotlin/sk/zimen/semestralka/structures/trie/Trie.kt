@@ -1,14 +1,14 @@
 package sk.zimen.semestralka.structures.trie
 
-import sk.zimen.semestralka.structures.dynamic_hashing.constants.ROOT_DIRECTORY
-import sk.zimen.semestralka.structures.dynamic_hashing.constants.TRIE_FILE
+import sk.zimen.semestralka.structures.dynamic_hashing.util.ROOT_DIRECTORY
+import sk.zimen.semestralka.structures.dynamic_hashing.util.TRIE_FILE
 import sk.zimen.semestralka.structures.trie.enums.Binary
 import sk.zimen.semestralka.structures.trie.nodes.ExternalTrieNode
 import sk.zimen.semestralka.structures.trie.nodes.InternalTrieNode
 import sk.zimen.semestralka.structures.trie.nodes.TrieNode
 import sk.zimen.semestralka.utils.file.existsFileInDirectory
-import sk.zimen.semestralka.utils.file.readDataFromCSV
-import sk.zimen.semestralka.utils.file.writeDataToCSV
+import sk.zimen.semestralka.utils.file.loadFromCsv
+import sk.zimen.semestralka.utils.file.writeToCsv
 import java.util.*
 
 /**
@@ -129,17 +129,16 @@ class Trie(
     }
 
     fun saveToFile(directory: String) {
-        writeDataToCSV("$ROOT_DIRECTORY/$directory", TRIE_FILE, ExternalTrieNode::class, actionOnLeafs())
+        writeToCsv("$ROOT_DIRECTORY/$directory", TRIE_FILE, ExternalTrieNode::class, actionOnLeafs())
     }
 
     @Throws(IllegalStateException::class)
     fun loadFromFile(directory: String) {
-        val dir = "$ROOT_DIRECTORY/$directory"
-        if (!existsFileInDirectory(dir, TRIE_FILE))
+        if (!existsFileInDirectory(directory, TRIE_FILE))
             throw IllegalStateException("File does not exists in provided directory.")
 
         root = InternalTrieNode(null, null, 0)
-        val leafs = readDataFromCSV(dir, TRIE_FILE, ExternalTrieNode::class)
+        val leafs = loadFromCsv(directory, TRIE_FILE, ExternalTrieNode::class)
         leafs.forEach {
             var parent = root
             for (i in 0 until it.route.length) {

@@ -20,7 +20,7 @@ private const val DELIMITER = ";"
  * Uses kotlin-reflection library to get all
  * properties, that are not annotated with [CsvExclude].
  */
-fun <T : Any> writeDataToCSV(directory: String, fileName: String, clazz: KClass<T>, data: List<T>) {
+fun <T : Any> writeToCsv(directory: String, fileName: String, clazz: KClass<T>, data: List<T>) {
     if (data.isEmpty()) return
 
     val classProperties = getValidProperties(clazz)
@@ -39,7 +39,7 @@ fun <T : Any> writeDataToCSV(directory: String, fileName: String, clazz: KClass<
  * Header must match property name.
  * Supports reading of [String], [Int], [Double] and simple string [Enum] values.
  */
-fun <T : Any> readDataFromCSV(directory: String, fileName: String, clazz: KClass<T>): MutableList<T> {
+fun <T : Any> loadFromCsv(directory: String, fileName: String, clazz: KClass<T>): MutableList<T> {
     val lines = File(directory, fileName).readText().lines()
     val objects = mutableListOf<T>()
 
