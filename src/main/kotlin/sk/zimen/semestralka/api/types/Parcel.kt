@@ -33,6 +33,7 @@ class Parcel() : QuadTreePlace() {
     }
 
     override fun getData(): ByteArray {
+        println("Size of whole: ${getSize()}, size of super: ${super.getSize()}")
         var index = 0
         val bytes = ByteArray(getSize())
 

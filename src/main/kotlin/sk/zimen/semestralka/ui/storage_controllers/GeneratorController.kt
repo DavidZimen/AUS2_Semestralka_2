@@ -39,7 +39,8 @@ class GeneratorController : AbstractStorageController() {
                     disableAll(false)
                     showSuccessAlert()
                 }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                e.printStackTrace()
                 // Update the UI to indicate an error
                 Platform.runLater {
                     disableAll(false)

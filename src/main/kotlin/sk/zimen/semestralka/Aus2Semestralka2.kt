@@ -14,7 +14,11 @@ class Aus2Semestralka2 : Application() {
         stage.icons.add(Image(Aus2Semestralka2::class.java.getResourceAsStream("icons/SYMBOL_T_biela.png")))
         stage.scene = scene
 
-        stage.setOnCloseRequest { println("Application is closing.") }
+        stage.setOnCloseRequest {
+            println("Application is closing.")
+            //PropertyService.getInstance().saveToFile()
+            //ParcelService.getInstance().saveToFile()
+        }
         stage.show()
     }
 }

@@ -41,13 +41,14 @@ open class QuadTreePlace() : QuadTreeData, HashData<Long> {
 
     override fun getSize(): Int {
         return Long.SIZE_BYTES +
-                2 * topLeft.getSize()
+                2 * GpsPosition::class.createInstance().getSize()
     }
 
     override fun getData(): ByteArray {
         var index = 0
-        val bytes = ByteArray(getSize())
+        val bytes = ByteArray(this@QuadTreePlace.getSize())
 
+        println("QuadTreePlace size: ${this@QuadTreePlace.getSize()}")
         index = bytes.append(key.toByteArray(), index)
         index = bytes.append(topLeft.getData(), index)
         bytes.append(bottomRight.getData(), index)
