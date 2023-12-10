@@ -126,12 +126,12 @@ class DynamicHashStructure<K, T : HashData<K>>(
 
         val block = loadBlock((hashNode as ExternalTrieNode).blockAddress)
         try {
-            block.replace(oldItem, newItem)
+            block.edit(oldItem, newItem)
             block.writeBlock()
         } catch (e: NoResultFoundException) {
             if (!block.hasNext())
                 throw e
-            overloadStructure.replace(block.next, oldItem, newItem)
+            overloadStructure.edit(block.next, oldItem, newItem)
         }
     }
 

@@ -89,12 +89,12 @@ class OverloadHashStructure<K, T : HashData<K>>(
      * Find [oldItem] in the chain of blocks and replaces it with [newItem].
      */
     @Throws(NoResultFoundException::class)
-    fun replace(address: Long, oldItem: T, newItem: T) {
+    fun edit(address: Long, oldItem: T, newItem: T) {
         var block = loadBlock(address)
 
         while (true) {
             try {
-                block.replace(oldItem, newItem)
+                block.edit(oldItem, newItem)
                 block.writeBlock()
                 return
             } catch (e: NoResultFoundException) {
@@ -155,7 +155,7 @@ class OverloadHashStructure<K, T : HashData<K>>(
     }
 
     /**
-     * Moves [elementsCount] items from overload structure into main.
+     * Moves [itemsCount] items from overload structure into main.
      * @return New address of first block in chain, if it was changed.
      */
     fun moveElementsToMain(address: Long, itemsCount: Int, items: MutableList<T>): Long? {

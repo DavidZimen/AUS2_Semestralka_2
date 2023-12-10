@@ -60,7 +60,7 @@ class Block<K, T : HashData<K>>(
      * @throws NoResultFoundException if [oldItem] is not present in block.
      */
     @Throws(NoResultFoundException::class)
-    fun replace(oldItem: T, newItem: T) {
+    fun edit(oldItem: T, newItem: T) {
         for (i in 0 until validElements) {
             if (data[i] == oldItem) {
                 data[i] = newItem
@@ -74,8 +74,8 @@ class Block<K, T : HashData<K>>(
     /**
      * Deletes item with provided [key].
      * @return
-     *  - true when item was deleted
-     *  - false when item was not deleted
+     *  - Deleted item when item was deleted
+     *  - null when item was not deleted
      */
     fun delete(key: K): T? {
         for (i in 0 until validElements) {
