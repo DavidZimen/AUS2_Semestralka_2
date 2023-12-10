@@ -4,6 +4,7 @@ import sk.zimen.semestralka.api.types.*
 import sk.zimen.semestralka.exceptions.NoResultFoundException
 import sk.zimen.semestralka.structures.dynamic_hashing.DynamicHashStructure
 import sk.zimen.semestralka.structures.dynamic_hashing.util.DynamicHashMetadata
+import sk.zimen.semestralka.structures.dynamic_hashing.util.HashPrint
 import sk.zimen.semestralka.structures.dynamic_hashing.util.ROOT_DIRECTORY
 import sk.zimen.semestralka.structures.quadtree.QuadTree
 import sk.zimen.semestralka.utils.Mapper
@@ -69,6 +70,11 @@ class PropertyService private constructor() {
     fun delete(property: QuadTreePlace) {
         propertiesQuadTree.delete(property)
         propertiesHash.delete(property.key)
+    }
+
+    fun hashStructurePrint(): HashPrint {
+        return HashPrint("This is main property", "This is overload property")
+//        return propertiesHash.sequentialPrint()
     }
 
     fun changeParameters(maxDepth: Int, topLeftX: Double, topLeftY: Double, bottomRightX: Double, bottomRightY: Double)

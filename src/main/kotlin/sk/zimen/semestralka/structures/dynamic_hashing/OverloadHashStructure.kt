@@ -217,7 +217,6 @@ class OverloadHashStructure<K, T : HashData<K>>(
             blockSize = metaData.blockSize
             firstEmpty = metaData.firstEmptyBlock
             file = RandomAccessFile("$dir/$OVERLOAD_FILE", "rw")
-            println("Overload file length: ${file.length()}")
         } else {
             initializeDirectory(dir)
             file = RandomAccessFile("${dir}/$OVERLOAD_FILE", "rw")

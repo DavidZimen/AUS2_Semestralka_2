@@ -4,6 +4,7 @@ import sk.zimen.semestralka.api.types.*
 import sk.zimen.semestralka.exceptions.NoResultFoundException
 import sk.zimen.semestralka.structures.dynamic_hashing.DynamicHashStructure
 import sk.zimen.semestralka.structures.dynamic_hashing.util.DynamicHashMetadata
+import sk.zimen.semestralka.structures.dynamic_hashing.util.HashPrint
 import sk.zimen.semestralka.structures.dynamic_hashing.util.ROOT_DIRECTORY
 import sk.zimen.semestralka.structures.quadtree.QuadTree
 import sk.zimen.semestralka.utils.Mapper
@@ -68,6 +69,11 @@ class ParcelService private constructor() {
 
     fun delete(parcel: QuadTreePlace) {
         parcelsQuadTree.delete(parcel)
+    }
+
+    fun hashStructurePrint(): HashPrint {
+        return HashPrint("This is main", "This is overload")
+//        return parcelsHash.sequentialPrint()
     }
 
     fun changeParameters(maxDepth: Int, topLeftX: Double, topLeftY: Double, bottomRightX: Double, bottomRightY: Double)

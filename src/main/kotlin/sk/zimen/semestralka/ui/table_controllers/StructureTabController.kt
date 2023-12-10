@@ -19,6 +19,6 @@ class StructureTabController : Initializable {
     override fun initialize(p0: URL?, p1: ResourceBundle?) {
         val state = WindowState.getInstance()
         tableTab.setContent(if (state.isParcel) "parcels.fxml" else "properties.fxml")
-        printTab.setContent("generator.fxml")
+        printTab.setContent("print-tab.fxml")
     }
 }
