@@ -6,6 +6,7 @@ import javafx.scene.control.Label
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Pane
 import sk.zimen.semestralka.Aus2Semestralka2
+import sk.zimen.semestralka.ui.state.WindowState
 
 class MainPageController {
 
@@ -16,18 +17,20 @@ class MainPageController {
     private lateinit var mainTitle: Label
 
     fun openParcels() {
-        loadPath("parcels.fxml")
+        WindowState.getInstance().isParcel = true
+        loadPath("structures-tab.fxml")
         mainTitle.text = "Parcels"
     }
 
     fun openProperties() {
-        loadPath("properties.fxml")
+        WindowState.getInstance().isParcel = false
+        loadPath("structures-tab.fxml")
         mainTitle.text = "Properties"
     }
 
     fun openGenerator() {
-        loadPath("data-manipulation.fxml")
-        mainTitle.text = "Storage / Generator"
+        loadPath("generator.fxml")
+        mainTitle.text = "Generator"
     }
 
     private fun loadPath(path: String, controller: Any? = null) {

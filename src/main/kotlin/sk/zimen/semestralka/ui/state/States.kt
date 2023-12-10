@@ -4,6 +4,22 @@ import sk.zimen.semestralka.api.types.HeightPos
 import sk.zimen.semestralka.api.types.QuadTreePlace
 import sk.zimen.semestralka.api.types.WidthPos
 
+class WindowState private constructor() {
+
+    var isParcel: Boolean = true
+
+    companion object {
+        @Volatile
+        private var instance: WindowState? = null
+
+        fun getInstance(): WindowState {
+            return instance
+                ?: synchronized(this) {
+                    instance ?: WindowState().also { instance = it }
+                }
+        }
+    }
+}
 
 class ParcelState private constructor() : AbstractState<QuadTreePlace>() {
     companion object {

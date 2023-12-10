@@ -20,7 +20,6 @@ abstract class AbstractStorageController : Initializable {
 
     protected val propertyService = PropertyService.getInstance()
 
-
     // UI properties
     @FXML
     protected lateinit var quadWidth: TextField
@@ -34,12 +33,21 @@ abstract class AbstractStorageController : Initializable {
     protected lateinit var spinner: ProgressIndicator
     @FXML
     protected lateinit var button: Button
+    @FXML
+    protected lateinit var trieDepth: TextField
+    @FXML
+    protected lateinit var overloadBlockFactor: TextField
+    @FXML
+    protected lateinit var mainBlockFactor: TextField
 
     override fun initialize(p0: URL?, p1: ResourceBundle?) {
         spinner.showSpinner(false, spinnerLabel)
         quadWidth.allowOnlyDouble()
         quadHeight.allowOnlyDouble()
         treeDepth.allowOnlyInt()
+        trieDepth.allowOnlyInt()
+        overloadBlockFactor.allowOnlyInt()
+        mainBlockFactor.allowOnlyInt()
     }
 
     protected fun showSuccessAlert() {
@@ -66,5 +74,8 @@ abstract class AbstractStorageController : Initializable {
         quadWidth.disable(disable)
         quadHeight.disable(disable)
         treeDepth.disable(disable)
+        trieDepth.disable(disable)
+        overloadBlockFactor.disable(disable)
+        mainBlockFactor.disable(disable)
     }
 }

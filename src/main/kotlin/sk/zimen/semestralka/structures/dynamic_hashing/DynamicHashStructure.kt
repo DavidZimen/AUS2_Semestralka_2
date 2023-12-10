@@ -222,9 +222,11 @@ class DynamicHashStructure<K, T : HashData<K>>(
         val dir = "$ROOT_DIRECTORY/$dirName"
         if (existsFileInDirectory(dir, MAIN_META_DATA)) {
             val metadata = loadFromCsv(dir, MAIN_META_DATA, DynamicHashMetadata::class)[0]
-            compareMetaData(metadata)
+            blockFactor = metadata.blockFactor
+            blockSize = metadata.blockSize
             firstEmpty = metadata.firstEmptyBlock
             size = metadata.size
+            hashTrie.maxDepth = metadata.trieDepth
             hashTrie.loadFromFile(dir)
             file = RandomAccessFile("$dir/$MAIN_FILE", "rw")
         } else {
@@ -246,17 +248,11 @@ class DynamicHashStructure<K, T : HashData<K>>(
         hashTrie = Trie(0, blockSize.toLong(), meta.trieDepth)
         file.setLength(2 * blockSize.toLong())
         firstEmpty = file.length()
+        size = 0
         block.writeBlock()
         block.apply { address = blockSize.toLong() }.writeBlock()
 
         overloadStructure.reset(HashMetadata(meta.overloadBlockFactor, -1, -1))
-    }
-
-    @Throws(IllegalStateException::class)
-    override fun compareMetaData(metaData: HashMetadata) {
-        super.compareMetaData(metaData)
-        if ((metaData as DynamicHashMetadata).trieDepth != hashTrie.maxDepth)
-            throw IllegalStateException("Trie depth is different in metadata compared to provided.")
     }
 
     // PRIVATE FUNCTIONS

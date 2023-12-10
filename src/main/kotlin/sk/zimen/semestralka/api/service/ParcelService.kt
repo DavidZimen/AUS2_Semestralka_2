@@ -3,6 +3,7 @@ package sk.zimen.semestralka.api.service
 import sk.zimen.semestralka.api.types.*
 import sk.zimen.semestralka.exceptions.NoResultFoundException
 import sk.zimen.semestralka.structures.dynamic_hashing.DynamicHashStructure
+import sk.zimen.semestralka.structures.dynamic_hashing.util.DynamicHashMetadata
 import sk.zimen.semestralka.structures.dynamic_hashing.util.ROOT_DIRECTORY
 import sk.zimen.semestralka.structures.quadtree.QuadTree
 import sk.zimen.semestralka.utils.Mapper
@@ -72,8 +73,20 @@ class ParcelService private constructor() {
     fun changeParameters(maxDepth: Int, topLeftX: Double, topLeftY: Double, bottomRightX: Double, bottomRightY: Double)
         = parcelsQuadTree.changeParameters(maxDepth, topLeftX, topLeftY, bottomRightX, bottomRightY)
 
-    fun generateData(count: Int, maxDepth: Int, topLeftX: Double, topLeftY: Double, bottomRightX: Double, bottomRightY: Double) {
-        changeParameters(maxDepth, topLeftX, topLeftY, bottomRightX, bottomRightY)
+    fun generateData(
+        count: Int,
+        quadTreeMaxDepth: Int,
+        topLeftX: Double,
+        topLeftY: Double,
+        bottomRightX: Double,
+        bottomRightY: Double,
+        mainBlockFactor: Int,
+        overloadBlockFactor: Int,
+        maxTrieDepth: Int
+    ) {
+        parcelsHash.reset(DynamicHashMetadata(mainBlockFactor, -1, -1, -1, maxTrieDepth, overloadBlockFactor))
+        parcelsQuadTree.reset()
+        changeParameters(quadTreeMaxDepth, topLeftX, topLeftY, bottomRightX, bottomRightY)
         val items = Generator().generateItems(Parcel::class, count, parcelsQuadTree.root.boundary)
         items.forEach {
             add(it)

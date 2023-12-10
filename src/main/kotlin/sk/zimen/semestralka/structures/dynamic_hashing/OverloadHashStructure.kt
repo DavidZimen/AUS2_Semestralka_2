@@ -213,7 +213,8 @@ class OverloadHashStructure<K, T : HashData<K>>(
 
         if (existsFileInDirectory(dir, OVERLOAD_META_DATA)) {
             val metaData = loadFromCsv(dir, OVERLOAD_META_DATA, HashMetadata::class)[0]
-            compareMetaData(metaData)
+            blockFactor = metaData.blockFactor
+            blockSize = metaData.blockSize
             firstEmpty = metaData.firstEmptyBlock
             file = RandomAccessFile("$dir/$OVERLOAD_FILE", "rw")
             println("Overload file length: ${file.length()}")

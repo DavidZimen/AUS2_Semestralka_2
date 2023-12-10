@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="PrintController">
+   <children>
+      <Label layoutX="47.0" layoutY="37.0" text="Main file" AnchorPane.leftAnchor="250.0" AnchorPane.topAnchor="50.0">
+         <font>
+            <Font name="System Bold" size="18.0" />
+         </font>
+      </Label>
+      <Label layoutX="260.0" layoutY="60.0" text="Overload file" AnchorPane.rightAnchor="250.0" AnchorPane.topAnchor="50.0">
+         <font>
+            <Font name="System Bold" size="18.0" />
+         </font>
+      </Label>
+      <TextArea fx:id="mainFileArea" layoutX="188.0" layoutY="120.0" prefHeight="200.0" prefWidth="185.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="660.0" AnchorPane.topAnchor="80.0" />
+      <TextArea fx:id="overloadFileArea" layoutX="30.0" layoutY="90.0" prefHeight="200.0" prefWidth="185.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="660.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="80.0" />
+   </children>
+</AnchorPane>

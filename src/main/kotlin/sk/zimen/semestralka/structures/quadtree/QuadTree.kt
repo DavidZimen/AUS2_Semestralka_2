@@ -314,6 +314,13 @@ class QuadTree<T : QuadTreeData> (
     }
 
     /**
+     * Deletes all data from [QuadTree].
+     */
+    fun reset() {
+        this.root = createRoot(-180.0, 90.0, 180.0, -90.0)
+    }
+
+    /**
      * Creates new root for quadtree.
      * USE ONLY when there is only one node.
      * Children nodes are not being deleted.

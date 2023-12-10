@@ -57,16 +57,6 @@ abstract class HashStructure<K, T : HashData<K>>(
 
     // PROTECTED FUNCTIONS
     /**
-     * Compares loaded metadata to created instance in runtime.
-     * @throws IllegalStateException when some parameters are not correct.
-     */
-    @Throws(IllegalStateException::class)
-    protected open fun compareMetaData(metaData: HashMetadata) {
-        if (metaData.blockSize != blockSize || metaData.blockFactor != blockFactor)
-            throw IllegalStateException("Inserted item are different size than ones saved in file.")
-    }
-
-    /**
      * Load block from [file] from provided [address] with size of [blockSize].
      */
     protected fun loadBlock(address: Long): Block<K, T> {
@@ -169,8 +159,8 @@ abstract class HashStructure<K, T : HashData<K>>(
      * Writes block to [file].
      */
     protected fun Block<K, T>.writeBlock() {
-        if (address == next || address == previous)
-            throw IllegalStateException("Wrong addresses at block")
+//        if (address == next || address == previous)
+//            throw IllegalStateException("Wrong addresses at block")
         file.writeAtPosition(address, getData())
     }
 

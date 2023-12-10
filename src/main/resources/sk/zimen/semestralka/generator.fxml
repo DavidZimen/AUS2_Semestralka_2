@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -22,9 +22,11 @@
       </HBox>
    </top>
    <left>
-      <GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="571.0" prefWidth="502.0" BorderPane.alignment="CENTER">
+      <GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="591.0" prefWidth="959.0" BorderPane.alignment="CENTER">
         <columnConstraints>
           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
         </columnConstraints>
         <rowConstraints>
@@ -59,7 +61,7 @@
             <TextField fx:id="quadWidth" prefHeight="32.0" text="180.0" GridPane.columnIndex="1" />
             <TextField fx:id="quadHeight" layoutX="233.0" layoutY="24.0" prefHeight="32.0" text="90.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
             <TextField fx:id="treeDepth" layoutX="233.0" layoutY="84.0" prefHeight="32.0" text="10" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-            <TextField fx:id="itemsCount" layoutX="233.0" layoutY="145.0" prefHeight="32.0" text="10000" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            <TextField fx:id="itemsCount" layoutX="233.0" layoutY="145.0" prefHeight="32.0" text="1000" GridPane.columnIndex="1" GridPane.rowIndex="3" />
             <VBox prefHeight="200.0" prefWidth="100.0" GridPane.rowIndex="4">
                <children>
                   <ImageView fitHeight="41.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
@@ -74,7 +76,7 @@
                   </Label>
                </children>
             </VBox>
-            <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
+            <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="3" GridPane.rowIndex="4">
                <children>
                   <ProgressIndicator fx:id="spinner" prefHeight="24.0" prefWidth="25.0" />
                   <Label fx:id="spinnerLabel" prefHeight="71.0" prefWidth="188.0" text="Generating data please wait">
@@ -84,6 +86,33 @@
                   </Label>
                </children>
             </HBox>
+            <Label layoutX="10.0" layoutY="30.0" text="Main block factor:" GridPane.columnIndex="2">
+               <font>
+                  <Font size="14.0" />
+               </font>
+               <GridPane.margin>
+                  <Insets left="10.0" />
+               </GridPane.margin>
+            </Label>
+            <Label layoutX="10.0" layoutY="90.0" text="Overload block factor:" GridPane.columnIndex="2" GridPane.rowIndex="1">
+               <font>
+                  <Font size="14.0" />
+               </font>
+               <padding>
+                  <Insets left="10.0" />
+               </padding>
+            </Label>
+            <Label layoutX="10.0" layoutY="150.0" text="Trie max depth:" GridPane.columnIndex="2" GridPane.rowIndex="2">
+               <font>
+                  <Font size="14.0" />
+               </font>
+               <padding>
+                  <Insets left="10.0" />
+               </padding>
+            </Label>
+            <TextField fx:id="mainBlockFactor" layoutX="250.0" layoutY="24.0" prefHeight="32.0" text="6" GridPane.columnIndex="3" />
+            <TextField fx:id="overloadBlockFactor" layoutX="730.0" layoutY="24.0" prefHeight="32.0" text="6" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+            <TextField fx:id="trieDepth" layoutX="730.0" layoutY="84.0" prefHeight="32.0" text="7" GridPane.columnIndex="3" GridPane.rowIndex="2" />
          </children>
       </GridPane>
    </left>

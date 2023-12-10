@@ -24,6 +24,11 @@ class GeneratorController : AbstractStorageController() {
         val height = quadHeight.text.toDouble()
         val depth = treeDepth.text.toInt()
         val count = itemsCount.text.toInt()
+        val mainBf = mainBlockFactor.text.toInt()
+        val overloadBf = overloadBlockFactor.text.toInt()
+        val trieMaxDepth = trieDepth.text.toInt()
+
+        println(overloadBf)
 
         // Show loader on screen
         disableAll(true)
@@ -31,8 +36,8 @@ class GeneratorController : AbstractStorageController() {
         //show loader on screen
         GlobalScope.launch {
             try {
-                parcelService.generateData(count, depth, -width, height, width, -height)
-                propertyService.generateData(count, depth, -width, height, width, -height)
+                parcelService.generateData(count, depth, -width, height, width, -height, mainBf, overloadBf, trieMaxDepth)
+                propertyService.generateData(count, depth, -width, height, width, -height, mainBf, overloadBf, trieMaxDepth)
 
                 // Once the background tasks are done, update the UI on the JavaFX application thread
                 Platform.runLater {
