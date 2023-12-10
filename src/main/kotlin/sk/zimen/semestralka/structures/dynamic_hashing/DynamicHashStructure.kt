@@ -409,17 +409,17 @@ class DynamicHashStructure<K, T : HashData<K>>(
      * Checks if two sibling nodes can be merged into one.
      */
     private fun ExternalTrieNode.canMergeWithBrother(brother: TrieNode?): Boolean {
-        if (brother is InternalTrieNode?)
-            return false
+        if (brother == null)
+            return true
 
         if (brother !is ExternalTrieNode?)
             return false
 
         return chainLength == 1
-                && brother?.chainLength == 1
+                && brother.chainLength == 1
                 && overloadsSize == 0
-                && brother?.overloadsSize == 0
-                && mainSize + brother?.mainSize!! <= blockFactor
+                && brother.overloadsSize == 0
+                && mainSize + brother.mainSize <= blockFactor
     }
 
     /**
@@ -436,6 +436,7 @@ class DynamicHashStructure<K, T : HashData<K>>(
     }
 
     fun isStateInitial(): Boolean {
+        val length = file.length()
         return hashTrie.root.left != null
                 && hashTrie.root.right != null
                 && hashTrie.root.left is ExternalTrieNode
