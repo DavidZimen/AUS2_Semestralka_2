@@ -44,6 +44,9 @@ class AddEditParcelController : AbstractAddEditController<Parcel>() {
         val key = state.editItem?.key ?: return
 
         editBefore = parcelService.find(key)
-        associatedItems = FXCollections.observableArrayList(editBefore?.propertiesForParcel)
+        editBefore?.also {
+            associatedItems = FXCollections.observableArrayList(editBefore?.propertiesForParcel)
+            desc.text = editBefore!!.description.value
+        }
     }
 }

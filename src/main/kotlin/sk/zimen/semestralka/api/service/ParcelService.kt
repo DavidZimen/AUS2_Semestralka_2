@@ -6,6 +6,7 @@ import sk.zimen.semestralka.structures.dynamic_hashing.DynamicHashStructure
 import sk.zimen.semestralka.structures.dynamic_hashing.util.ROOT_DIRECTORY
 import sk.zimen.semestralka.structures.quadtree.QuadTree
 import sk.zimen.semestralka.utils.Mapper
+import sk.zimen.semestralka.utils.file.existsFileInDirectory
 import sk.zimen.semestralka.utils.file.initializeDirectory
 import sk.zimen.semestralka.utils.file.loadFromCsv
 import sk.zimen.semestralka.utils.file.writeToCsv
@@ -24,7 +25,7 @@ class ParcelService private constructor() {
     /**
      * DynamicHashStructure for holding all [Parcel]ies of the application.
      */
-    private val parcelsHash = DynamicHashStructure(NAME, 5, 5, Parcel::class, moduloHashFunction(1000L), 15)
+    private val parcelsHash = DynamicHashStructure(NAME, 5, 5, Parcel::class, moduloHashFunction(1000L), 5)
 
     init {
         initializeDirectory(directory)
@@ -93,6 +94,9 @@ class ParcelService private constructor() {
     }
 
     fun loadFromFile() {
+        if (!existsFileInDirectory(directory, "parcels.csv"))
+            return
+
         val items = loadFromCsv(directory, "parcels.csv", QuadTreePlace::class)
         val gpsPositions = loadFromCsv(directory, "parcels-positions.csv", GpsPosition::class)
         gpsPositions.reverse()

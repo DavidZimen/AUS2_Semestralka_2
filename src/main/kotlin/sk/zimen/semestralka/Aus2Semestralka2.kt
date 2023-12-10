@@ -5,8 +5,8 @@ import javafx.fxml.FXMLLoader
 import javafx.scene.Scene
 import javafx.scene.image.Image
 import javafx.stage.Stage
-import sk.zimen.semestralka.api.types.Parcel
-import sk.zimen.semestralka.utils.generator.Generator
+import sk.zimen.semestralka.api.service.ParcelService
+import sk.zimen.semestralka.api.service.PropertyService
 
 class Aus2Semestralka2 : Application() {
     override fun start(stage: Stage) {
@@ -16,21 +16,27 @@ class Aus2Semestralka2 : Application() {
         stage.icons.add(Image(Aus2Semestralka2::class.java.getResourceAsStream("icons/SYMBOL_T_biela.png")))
         stage.scene = scene
 
+        val propertyService = PropertyService.getInstance()
+        val parcelService = ParcelService.getInstance()
+
         stage.setOnCloseRequest {
+            propertyService.saveToFile()
+            parcelService.saveToFile()
             println("Application is closing.")
-            //PropertyService.getInstance().saveToFile()
-            //ParcelService.getInstance().saveToFile()
         }
         stage.show()
+
+        propertyService.loadFromFile()
+        parcelService.loadFromFile()
     }
 }
 
 fun main() {
-//    Application.launch(Aus2Semestralka2::class.java)
+    Application.launch(Aus2Semestralka2::class.java)
 
-    val item = Generator().generateItems(Parcel::class, 1)[0]
-    val data = item.getData()
-    val newItem = Parcel()
-    newItem.formData(data)
-    println(item.key)
+//    val item = Generator().generateItems(Parcel::class, 1)[0]
+//    val data = item.getData()
+//    val newItem = Parcel()
+//    newItem.formData(data)
+//    println(item.key)
 }

@@ -85,7 +85,7 @@ class Property() : QuadTreePlace(), HashData<Long> {
         description.formData(bytes.copyOfRange(index, index + stringSize), MAX_STRING_LENGTH)
         index += stringSize
 
-        bytes.copyOfRange(index, Long.SIZE_BYTES).toNumber(index, Long::class).also {
+        bytes.copyOfRange(index, index + Long.SIZE_BYTES).toNumber(index, Long::class).also {
             key = it.number as Long
             index = it.newIndex
         }

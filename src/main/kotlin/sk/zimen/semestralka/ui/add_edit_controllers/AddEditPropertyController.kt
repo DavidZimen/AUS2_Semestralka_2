@@ -54,6 +54,7 @@ class AddEditPropertyController : AbstractAddEditController<Property>() {
         editBefore?.let {
             associatedItems = FXCollections.observableArrayList(editBefore!!.parcelsForProperty)
             number.text = editBefore!!.number.toString()
+            desc.text = editBefore!!.description.value
         }
     }
 }

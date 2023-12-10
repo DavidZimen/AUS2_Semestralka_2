@@ -2,6 +2,7 @@ package sk.zimen.semestralka.api.types
 
 import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.HashData
 import sk.zimen.semestralka.utils.*
+import sk.zimen.semestralka.utils.file.CsvExclude
 import java.util.*
 
 /**
@@ -25,6 +26,7 @@ class GpsPosition() : HashData<Byte?> {
     /**
      * Not necessary to implement because it will not be directly inserted into structure.
      */
+    @CsvExclude
     override var key: Byte? = null
 
     override fun equals(other: Any?): Boolean {

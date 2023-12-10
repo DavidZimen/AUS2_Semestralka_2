@@ -3,11 +3,14 @@ package sk.zimen.semestralka.api.types
 import sk.zimen.semestralka.structures.quadtree.types.Boundary
 import sk.zimen.semestralka.structures.quadtree.types.QuadTreeData
 import sk.zimen.semestralka.utils.Mapper
+import sk.zimen.semestralka.utils.file.CsvExclude
 
 open class QuadTreePlace() : QuadTreeData {
 
     var key: Long = Long.MIN_VALUE
+    @CsvExclude
     lateinit var topLeft: GpsPosition
+    @CsvExclude
     lateinit var bottomRight: GpsPosition
 
     constructor(topLeft: GpsPosition, bottomRight: GpsPosition) : this() {

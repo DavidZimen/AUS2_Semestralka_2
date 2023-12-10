@@ -6,6 +6,7 @@ import sk.zimen.semestralka.structures.dynamic_hashing.DynamicHashStructure
 import sk.zimen.semestralka.structures.dynamic_hashing.util.ROOT_DIRECTORY
 import sk.zimen.semestralka.structures.quadtree.QuadTree
 import sk.zimen.semestralka.utils.Mapper
+import sk.zimen.semestralka.utils.file.existsFileInDirectory
 import sk.zimen.semestralka.utils.file.initializeDirectory
 import sk.zimen.semestralka.utils.file.loadFromCsv
 import sk.zimen.semestralka.utils.file.writeToCsv
@@ -24,7 +25,7 @@ class PropertyService private constructor() {
     /**
      * DynamicHashStructure for holding all [Property]ies of the application.
      */
-    private val propertiesHash = DynamicHashStructure(NAME, 5, 5, Property::class, moduloHashFunction(1000L), 15)
+    private val propertiesHash = DynamicHashStructure(NAME, 5, 5, Property::class, moduloHashFunction(1000L), 5)
 
     init {
         initializeDirectory(directory)
@@ -33,7 +34,7 @@ class PropertyService private constructor() {
     fun add(property: Property) {
         associateParcels(property)
         propertiesQuadTree.insert(property as QuadTreePlace)
-        propertiesQuadTree.insert(property)
+        propertiesHash.insert(property)
     }
 
     fun edit(propertyBefore: Property, propertyAfter: Property) {
@@ -94,6 +95,9 @@ class PropertyService private constructor() {
     }
 
     fun loadFromFile() {
+        if (!existsFileInDirectory(directory, "properties.csv"))
+            return
+
         val items = loadFromCsv(directory, "properties.csv", QuadTreePlace::class)
         val gpsPositions = loadFromCsv(directory, "properties-positions.csv", GpsPosition::class)
         gpsPositions.reverse()

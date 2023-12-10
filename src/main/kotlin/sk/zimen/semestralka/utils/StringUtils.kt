@@ -46,6 +46,10 @@ class StringData() {
         return other is StringData && value == other.value && validChars == other.validChars
     }
 
+    override fun toString(): String {
+        return "Value: $value, valid chars: $validChars."
+    }
+
     companion object {
         fun getSize(maxStringLength: Int): Int {
             return Int.SIZE_BYTES + maxStringLength
