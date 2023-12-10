@@ -126,11 +126,12 @@ abstract class AbstractAddEditController<T : QuadTreePlace> : Initializable {
         if (alert.result == ButtonType.OK) onCancel()
     }
 
-    protected fun showErrorAlert(add: Boolean) {
+    protected fun showErrorAlert(add: Boolean, reason: String?) {
         val alert = Alert(Alert.AlertType.ERROR, "Error")
         val suffix = if (add) "added" else "edited"
         alert.isResizable = false
-        alert.headerText = "Item with provided attributes could not be $suffix. Please try again later."
+        alert.headerText = "Item with provided attributes could not be $suffix."
+        alert.contentText = reason
         alert.showAndWait()
     }
 

@@ -19,7 +19,7 @@ class AddEditParcelController : AbstractAddEditController<Parcel>() {
                 showSuccessAlert(true)
             } catch (e: Exception) {
                 e.printStackTrace()
-                showErrorAlert(true)
+                showErrorAlert(true, e.message)
             }
         } else {
             try {
@@ -29,7 +29,7 @@ class AddEditParcelController : AbstractAddEditController<Parcel>() {
                 )
                 showSuccessAlert(false)
             } catch (e: Exception) {
-                showErrorAlert(false)
+                showErrorAlert(false, e.message)
             }
         }
     }

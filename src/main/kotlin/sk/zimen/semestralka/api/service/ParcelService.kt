@@ -141,8 +141,7 @@ class ParcelService private constructor() {
         property.parcelsForProperty.forEach {
             val parcelBefore = parcelsHash.find(it.key)
             val parcelAfter = parcelBefore.clone()
-            parcelAfter.propertiesForParcel.removeIf { it.key == property.key }
-            parcelAfter.validAssociated--
+            parcelAfter.removeProperty(AssociatedPlace(property.key))
             parcelsHash.edit(parcelBefore, parcelAfter)
         }
     }
@@ -156,11 +155,7 @@ class ParcelService private constructor() {
             parcels.forEach {
                 val parcelBefore = parcelsHash.find(it.key)
                 val parcelAfter = parcelBefore.clone()
-                parcelAfter.propertiesForParcel.add(AssociatedPlace(property))
-                parcelAfter.validAssociated++
-
-                if (parcelAfter.validAssociated > Parcel.MAX_ASSOCIATED_PROPERTIES)
-                    throw IllegalStateException("Parcel cannot have more than ${Parcel.MAX_ASSOCIATED_PROPERTIES} properties associated.")
+                parcelAfter.addProperty(AssociatedPlace(property))
 
                 parcelsHash.edit(parcelBefore, parcelAfter)
                 updated.add(Pair(parcelBefore, parcelAfter))
@@ -169,21 +164,18 @@ class ParcelService private constructor() {
             updated.forEach {
                 parcelsHash.edit(it.second, it.first)
             }
-            throw IllegalStateException("Parcel cannot have more than ${Parcel.MAX_ASSOCIATED_PROPERTIES} properties associated.")
+            throw e
         }
     }
 
     @Throws(IllegalStateException::class)
     private fun associateProperties(parcel: Parcel) {
         val propertyService = PropertyService.getInstance()
-        parcel.propertiesForParcel = propertyService
-            .find(GpsPositions(parcel.topLeft, parcel.bottomRight))
-            .map { AssociatedPlace(it.key) }
-            .toMutableList()
-        parcel.validAssociated = parcel.propertiesForParcel.size.toShort()
-
-        if (parcel.validAssociated > Parcel.MAX_ASSOCIATED_PROPERTIES)
-            throw IllegalStateException("Parcel cannot have more than ${Parcel.MAX_ASSOCIATED_PROPERTIES} parcels associated.")
+        parcel.addProperties(
+            propertyService.find(GpsPositions(parcel.topLeft, parcel.bottomRight))
+                .map { AssociatedPlace(it.key) }
+                .toMutableList()
+        )
 
         propertyService.associateProperties(parcel.propertiesForParcel, parcel.key)
     }

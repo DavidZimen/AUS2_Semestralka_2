@@ -40,7 +40,7 @@ class PropertyService private constructor() {
     @Throws(IllegalStateException::class)
     fun add(property: Property) {
         property.key = generator.generateLongKey(keys)
-        //associateParcels(property)
+        associateParcels(property)
         propertiesQuadTree.insert(property as QuadTreePlace)
         propertiesHash.insert(property)
     }
@@ -140,8 +140,7 @@ class PropertyService private constructor() {
         parcel.propertiesForParcel.forEach {
             val propertyBefore = propertiesHash.find(it.key)
             val propertyAfter = propertyBefore.clone()
-            propertyAfter.parcelsForProperty.removeIf { it.key == parcel.key }
-            propertyAfter.validAssociated--
+            propertyAfter.removeParcel(AssociatedPlace(parcel.key))
             propertiesHash.edit(propertyBefore, propertyAfter)
         }
     }
@@ -155,11 +154,7 @@ class PropertyService private constructor() {
             properties.forEach {
                 val propertyBefore = propertiesHash.find(it.key)
                 val propertyAfter = propertyBefore.clone()
-                propertyAfter.parcelsForProperty.add(AssociatedPlace(parcel))
-                propertyAfter.validAssociated++
-
-                if (propertyAfter.validAssociated > Property.MAX_ASSOCIATED_PARCELS)
-                    throw IllegalStateException("Property cannot have more than ${Property.MAX_ASSOCIATED_PARCELS} parcels associated.")
+                propertyAfter.addParcel(AssociatedPlace(parcel))
 
                 propertiesHash.edit(propertyBefore, propertyAfter)
                 updated.add(Pair(propertyBefore, propertyAfter))
@@ -168,21 +163,18 @@ class PropertyService private constructor() {
             updated.forEach {
                 propertiesHash.edit(it.second, it.first)
             }
-            throw IllegalStateException("Property cannot have more than ${Property.MAX_ASSOCIATED_PARCELS} parcels associated.")
+            throw e
         }
     }
 
     @Throws(IllegalStateException::class)
     private fun associateParcels(property: Property) {
         val parcelService = ParcelService.getInstance()
-        property.parcelsForProperty = parcelService
-            .find(GpsPositions(property.topLeft, property.bottomRight))
-            .map { AssociatedPlace(it.key) }
-            .toMutableList()
-        property.validAssociated = property.parcelsForProperty.size.toShort()
-
-        if (property.validAssociated > Property.MAX_ASSOCIATED_PARCELS)
-            throw IllegalStateException("Property cannot have more than ${Property.MAX_ASSOCIATED_PARCELS} parcels associated.")
+        property.addParcels(
+            parcelService.find(GpsPositions(property.topLeft, property.bottomRight))
+                .map { AssociatedPlace(it.key) }
+                .toMutableList()
+        )
 
         parcelService.associateParcels(property.parcelsForProperty, property.key)
     }

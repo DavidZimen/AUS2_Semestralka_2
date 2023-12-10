@@ -24,7 +24,7 @@ class AddEditPropertyController : AbstractAddEditController<Property>() {
                 showSuccessAlert(true)
             } catch (e: Exception) {
                 e.printStackTrace()
-                showErrorAlert(true)
+                showErrorAlert(true, e.message)
             }
         } else {
             try {
@@ -36,7 +36,7 @@ class AddEditPropertyController : AbstractAddEditController<Property>() {
                 )
                 showSuccessAlert(false)
             } catch (e: Exception) {
-                showErrorAlert(false)
+                showErrorAlert(false, e.message)
             }
         }
     }

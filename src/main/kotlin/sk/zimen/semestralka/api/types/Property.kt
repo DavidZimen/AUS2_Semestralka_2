@@ -45,6 +45,29 @@ class Property() : QuadTreePlace(), HashData<Long> {
         return property
     }
 
+    @Throws(IllegalStateException::class)
+    fun addParcel(parcel: AssociatedPlace) {
+        if (validAssociated > MAX_ASSOCIATED_PARCELS - 1)
+            throw IllegalStateException("Property cannot have more than $MAX_ASSOCIATED_PARCELS parcels associated.")
+        parcelsForProperty.add((validAssociated++).toInt(), parcel)
+    }
+
+    @Throws(IllegalStateException::class)
+    fun addParcels(parcels: List<AssociatedPlace>) {
+        parcels.forEach { addParcel(it) }
+    }
+
+    fun removeParcel(parcel: AssociatedPlace): Boolean {
+        for (i in 0 until validAssociated) {
+            if (parcelsForProperty[i].key == parcel.key) {
+                parcelsForProperty[i] = parcelsForProperty[validAssociated - 1]
+                validAssociated--
+                return true
+            }
+        }
+        return false
+    }
+
     override fun equals(other: Any?): Boolean {
         return super.equals(other)
                 && other is Property
@@ -67,6 +90,7 @@ class Property() : QuadTreePlace(), HashData<Long> {
         return Short.SIZE_BYTES +
                 Int.SIZE_BYTES +
                 Long.SIZE_BYTES +
+                StringData.getSize(Parcel.MAX_STRING_LENGTH) +
                 2 * GpsPosition::class.createInstance().getSize() +
                 MAX_ASSOCIATED_PARCELS * AssociatedPlace::class.createInstance().getSize()
     }
@@ -83,6 +107,9 @@ class Property() : QuadTreePlace(), HashData<Long> {
         index = bytes.append(bottomRight.getData(), index)
 
         val elementSize = AssociatedPlace::class.createInstance().getSize()
+        if (validAssociated > MAX_ASSOCIATED_PARCELS)
+            throw IllegalStateException("More parcels added than allowed")
+
         for (i in 0 until validAssociated) {
             val element = parcelsForProperty[i]
             element.getData().copyInto(bytes, index)

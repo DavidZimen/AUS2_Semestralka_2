@@ -35,9 +35,10 @@ fun main() {
     Application.launch(Aus2Semestralka2::class.java)
 
 //    val item = Generator().generateItems(Parcel::class, 1)[0]
-//    item.propertiesForParcel.add(AssociatedPlace(1))
-//    item.propertiesForParcel.add(AssociatedPlace(2))
-//    item.validAssociated = 2
+//    item.addProperty(AssociatedPlace(1))
+//    item.addProperty(AssociatedPlace(2))
+//    item.addProperty(AssociatedPlace(3))
+//    item.addProperty(AssociatedPlace(4))
 //    val data = item.getData()
 //    val newItem = Parcel()
 //    newItem.formData(data)
