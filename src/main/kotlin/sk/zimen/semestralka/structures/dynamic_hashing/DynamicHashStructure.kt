@@ -116,7 +116,7 @@ class DynamicHashStructure<K, T : HashData<K>>(
      * @throws NoResultFoundException when [oldItem] was not in structure.
      */
     @Throws(IllegalStateException::class)
-    fun replace(oldItem: T, newItem: T) {
+    fun edit(oldItem: T, newItem: T) {
         if (oldItem.key != newItem.key)
             throw IllegalStateException("Provided items have different keys.")
 
@@ -140,7 +140,7 @@ class DynamicHashStructure<K, T : HashData<K>>(
      * @throws NoSuchElementException when no element with such key exists.
      */
     @Throws(NoSuchElementException::class)
-    fun delete(key: K) {
+    fun delete(key: K): T {
         var hashNode = getTrieNode(hashFunction.invoke(key), false)
         if (hashNode is InternalTrieNode)
             throw NoSuchElementException("Element with key ${key.toString()} does not exist.")
@@ -149,17 +149,17 @@ class DynamicHashStructure<K, T : HashData<K>>(
         val block = loadBlock(hashNode.blockAddress)
 
         val deleteBlock = block.delete(key)
-        val deleteOverload = if (!deleteBlock) {
+        val deleteOverload = if (deleteBlock == null) {
             overloadStructure.delete(block.next, hashNode, key)
         } else {
-            false
+            null
         }
 
-        if (deleteBlock) {
+        if (deleteBlock != null) {
             hashNode.mainSize--
         }
 
-        if (!deleteBlock && !deleteOverload) {
+        if (deleteBlock == null && deleteOverload == null) {
             throw NoSuchElementException("Element with key ${key.toString()} does not exist.")
         }
 
@@ -169,6 +169,8 @@ class DynamicHashStructure<K, T : HashData<K>>(
         // merge tho brother blocks if possible, block is written to file in method
         mergeBlocks(hashNode, block)
         size--
+
+        return deleteBlock ?: deleteOverload!!
     }
 
     /**

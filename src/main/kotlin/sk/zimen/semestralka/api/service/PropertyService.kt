@@ -29,22 +29,29 @@ class PropertyService private constructor() {
      */
     private val propertiesHash = DynamicHashStructure(NAME, 5, 5, Property::class, moduloHashFunction(1000L), 5)
 
+    private val keys= mutableSetOf<Long>()
+
+    private val generator = Generator()
+
     init {
         initializeDirectory(directory)
     }
 
+    @Throws(IllegalStateException::class)
     fun add(property: Property) {
-        associateParcels(property)
+        property.key = generator.generateLongKey(keys)
+        //associateParcels(property)
         propertiesQuadTree.insert(property as QuadTreePlace)
         propertiesHash.insert(property)
     }
 
+    @Throws(IllegalStateException::class)
     fun edit(propertyBefore: Property, propertyAfter: Property) {
         if (propertyBefore.topLeft != propertyAfter.topLeft || propertyBefore.bottomRight != propertyAfter.bottomRight) {
             associateParcels(propertyAfter)
         }
         propertiesQuadTree.edit(propertyBefore as QuadTreePlace, propertyAfter as QuadTreePlace)
-        propertiesHash.replace(propertyBefore, propertyAfter)
+        propertiesHash.edit(propertyBefore, propertyAfter)
     }
 
     fun find(key: Long): Property = propertiesHash.find(key)
@@ -68,8 +75,8 @@ class PropertyService private constructor() {
     fun all(): MutableList<QuadTreePlace> = propertiesQuadTree.all() as MutableList
 
     fun delete(property: QuadTreePlace) {
+        ParcelService.getInstance().removeParcelFromAssociatedParcels(propertiesHash.delete(property.key))
         propertiesQuadTree.delete(property)
-        propertiesHash.delete(property.key)
     }
 
     fun hashStructurePrint(): HashPrint {
@@ -93,7 +100,7 @@ class PropertyService private constructor() {
         propertiesHash.reset(DynamicHashMetadata(mainBlockFactor, -1, -1, -1, maxTrieDepth, overloadBlockFactor))
         propertiesQuadTree.reset()
         changeParameters(maxDepth, topLeftX, topLeftY, bottomRightX, bottomRightY)
-        val items = Generator().generateItems(Property::class, count, propertiesQuadTree.root.boundary,)
+        val items = generator.generateItems(Property::class, count, propertiesQuadTree.root.boundary,)
         items.forEach {
             add(it)
         }
@@ -120,6 +127,7 @@ class PropertyService private constructor() {
         val gpsPositions = loadFromCsv(directory, "properties-positions.csv", GpsPosition::class)
         gpsPositions.reverse()
         items.forEach {
+            keys.add(it.key)
             val topLeft = gpsPositions.removeAt(gpsPositions.size - 1)
             val bottomRightX = gpsPositions.removeAt(gpsPositions.size - 1)
             it.topLeft = topLeft
@@ -128,16 +136,55 @@ class PropertyService private constructor() {
         }
     }
 
+    fun removeParcelFromAssociatedProperties(parcel: Parcel) {
+        parcel.propertiesForParcel.forEach {
+            val propertyBefore = propertiesHash.find(it.key)
+            val propertyAfter = propertyBefore.clone()
+            propertyAfter.parcelsForProperty.removeIf { it.key == parcel.key }
+            propertyAfter.validAssociated--
+            propertiesHash.edit(propertyBefore, propertyAfter)
+        }
+    }
+
+    @Throws(IllegalStateException::class)
+    fun associateProperties(properties: List<AssociatedPlace>, parcel: Long) {
+        // list of already written changes
+        val updated: MutableList<Pair<Property, Property>> = mutableListOf()
+
+        try {
+            properties.forEach {
+                val propertyBefore = propertiesHash.find(it.key)
+                val propertyAfter = propertyBefore.clone()
+                propertyAfter.parcelsForProperty.add(AssociatedPlace(parcel))
+                propertyAfter.validAssociated++
+
+                if (propertyAfter.validAssociated > Property.MAX_ASSOCIATED_PARCELS)
+                    throw IllegalStateException("Property cannot have more than ${Property.MAX_ASSOCIATED_PARCELS} parcels associated.")
+
+                propertiesHash.edit(propertyBefore, propertyAfter)
+                updated.add(Pair(propertyBefore, propertyAfter))
+            }
+        } catch (e: IllegalStateException) {
+            updated.forEach {
+                propertiesHash.edit(it.second, it.first)
+            }
+            throw IllegalStateException("Property cannot have more than ${Property.MAX_ASSOCIATED_PARCELS} parcels associated.")
+        }
+    }
+
+    @Throws(IllegalStateException::class)
     private fun associateParcels(property: Property) {
-        property.parcelsForProperty = ParcelService.getInstance()
+        val parcelService = ParcelService.getInstance()
+        property.parcelsForProperty = parcelService
             .find(GpsPositions(property.topLeft, property.bottomRight))
             .map { AssociatedPlace(it.key) }
             .toMutableList()
+        property.validAssociated = property.parcelsForProperty.size.toShort()
 
-        if (property.parcelsForProperty.size > Property.MAX_ASSOCIATED_PARCELS)
+        if (property.validAssociated > Property.MAX_ASSOCIATED_PARCELS)
             throw IllegalStateException("Property cannot have more than ${Property.MAX_ASSOCIATED_PARCELS} parcels associated.")
 
-        // TODO associate also other way arround
+        parcelService.associateParcels(property.parcelsForProperty, property.key)
     }
 
     companion object {

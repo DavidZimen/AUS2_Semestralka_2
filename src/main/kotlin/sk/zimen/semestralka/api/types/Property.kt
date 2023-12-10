@@ -31,6 +31,20 @@ class Property() : QuadTreePlace(), HashData<Long> {
             this.description.value = description
     }
 
+    fun clone(): Property {
+        val property = Property()
+        property.key = key
+        property.number = number
+        property.description = StringData(description.value)
+        property.validAssociated = validAssociated
+        property.topLeft = topLeft.clone()
+        property.bottomRight = bottomRight.clone()
+        for (i in 0 until property.validAssociated) {
+            property.parcelsForProperty.add(parcelsForProperty[i].clone())
+        }
+        return property
+    }
+
     override fun equals(other: Any?): Boolean {
         return super.equals(other)
                 && other is Property

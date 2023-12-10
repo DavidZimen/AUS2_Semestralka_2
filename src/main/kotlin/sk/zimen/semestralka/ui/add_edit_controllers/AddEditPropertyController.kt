@@ -6,6 +6,7 @@ import javafx.scene.control.TextField
 import sk.zimen.semestralka.api.service.PropertyService
 import sk.zimen.semestralka.api.types.Property
 import sk.zimen.semestralka.ui.state.PropertyState
+import sk.zimen.semestralka.ui.util.setMaxLength
 
 class AddEditPropertyController : AbstractAddEditController<Property>() {
 
@@ -22,6 +23,7 @@ class AddEditPropertyController : AbstractAddEditController<Property>() {
                 )
                 showSuccessAlert(true)
             } catch (e: Exception) {
+                e.printStackTrace()
                 showErrorAlert(true)
             }
         } else {
@@ -48,6 +50,7 @@ class AddEditPropertyController : AbstractAddEditController<Property>() {
     }
 
     override fun init() {
+        desc.setMaxLength(Property.MAX_STRING_LENGTH)
         val key = state.editItem?.key ?: return
 
         editBefore = propertyService.find(key)

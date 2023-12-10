@@ -77,15 +77,16 @@ class Block<K, T : HashData<K>>(
      *  - true when item was deleted
      *  - false when item was not deleted
      */
-    fun delete(key: K): Boolean {
+    fun delete(key: K): T? {
         for (i in 0 until validElements) {
             if (data[i].key == key) {
+                val delItem = data[i]
                 data[i] = data[validElements - 1]
                 validElements--
-                return true
+                return delItem
             }
         }
-        return false
+        return null
     }
 
     /**

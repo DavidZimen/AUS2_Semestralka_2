@@ -4,6 +4,7 @@ import javafx.collections.FXCollections
 import sk.zimen.semestralka.api.service.ParcelService
 import sk.zimen.semestralka.api.types.Parcel
 import sk.zimen.semestralka.ui.state.ParcelState
+import sk.zimen.semestralka.ui.util.setMaxLength
 
 class AddEditParcelController : AbstractAddEditController<Parcel>() {
 
@@ -17,6 +18,7 @@ class AddEditParcelController : AbstractAddEditController<Parcel>() {
                 )
                 showSuccessAlert(true)
             } catch (e: Exception) {
+                e.printStackTrace()
                 showErrorAlert(true)
             }
         } else {
@@ -41,6 +43,7 @@ class AddEditParcelController : AbstractAddEditController<Parcel>() {
     }
 
     override fun init() {
+        desc.setMaxLength(Parcel.MAX_STRING_LENGTH)
         val key = state.editItem?.key ?: return
 
         editBefore = parcelService.find(key)

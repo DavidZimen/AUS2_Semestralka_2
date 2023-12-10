@@ -23,10 +23,6 @@ class Generator() {
     var rightX: Double = 180.0
     var bottomY: Double = -90.0
 
-    constructor(quadrantWidth: Double, quadrantHeight: Double) : this() {
-        setCoordinates(-quadrantWidth, quadrantHeight, quadrantWidth, -quadrantHeight)
-    }
-
     init {
         random.setSeed(seed)
     }
@@ -72,6 +68,13 @@ class Generator() {
             }
         }
         return items as MutableList<T>
+    }
+
+    fun generateLongKey(keys: MutableSet<Long>): Long {
+        var key = random.nextLong()
+        while (!keys.add(key))
+            key = random.nextLong()
+        return key
     }
 
     fun generateBoundaries(count: Int, boundary: Boundary? = null): MutableList<Boundary> {

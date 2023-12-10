@@ -11,6 +11,7 @@ import javafx.scene.layout.Pane
 import sk.zimen.semestralka.Aus2Semestralka2
 import sk.zimen.semestralka.api.types.*
 import sk.zimen.semestralka.ui.state.AbstractState
+import sk.zimen.semestralka.ui.util.disable
 import java.net.URL
 import java.util.*
 
@@ -90,6 +91,7 @@ abstract class AbstractAddEditController<T : QuadTreePlace> : Initializable {
                 jPosBottom.isSelected = heightPosition == HeightPos.J
             }
         }
+        key.disable(true)
         keyCol.cellValueFactory = PropertyValueFactory("key")
         associatedTable.items = associatedItems
         if (state.editItem == null) {

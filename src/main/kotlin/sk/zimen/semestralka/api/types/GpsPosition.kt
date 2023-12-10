@@ -29,6 +29,15 @@ class GpsPosition() : HashData<Byte?> {
     @CsvExclude
     override var key: Byte? = null
 
+    fun clone(): GpsPosition {
+        val pos = GpsPosition()
+        pos.width = width
+        pos.widthPosition = widthPosition
+        pos.height = height
+        pos.heightPosition = heightPosition
+        return pos
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) {
             return true

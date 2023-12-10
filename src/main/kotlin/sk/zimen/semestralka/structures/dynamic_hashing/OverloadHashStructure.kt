@@ -112,23 +112,23 @@ class OverloadHashStructure<K, T : HashData<K>>(
      *  - true when item was delete
      *  - false when item was not deleted
      */
-    fun delete(address: Long, trieNode: ExternalTrieNode, key: K): Boolean {
+    fun delete(address: Long, trieNode: ExternalTrieNode, key: K): T? {
         if (address <= -1L)
-            return false
+            return null
 
-        var deleted: Boolean
+        var deleted: T?
         var previousBlock: Block<K, T>? = null
         var block = loadBlock(address)
 
         while (true) {
             deleted = block.delete(key)
-            if (deleted || !block.hasNext())
+            if (deleted != null || !block.hasNext())
                 break
             previousBlock = block
             block = loadBlock(block.next)
         }
 
-        if (deleted) {
+        if (deleted != null) {
             mergeBlocks(previousBlock, block, trieNode)
             trieNode.overloadsSize--
         }

@@ -44,3 +44,11 @@ fun TextField.disable(disable: Boolean = true) {
 fun Tab.setContent(path: String) {
     content = loadFile<AnchorPane>(path)
 }
+
+fun TextArea.setMaxLength(maxLength: Int) {
+    textProperty().addListener { _, _, new ->
+        if (new.length > maxLength) {
+            text = new.substring(0, maxLength)
+        }
+    }
+}

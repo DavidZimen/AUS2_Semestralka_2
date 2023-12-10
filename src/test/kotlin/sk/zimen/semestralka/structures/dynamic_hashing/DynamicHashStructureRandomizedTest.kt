@@ -64,7 +64,7 @@ internal class DynamicHashStructureRandomizedTest {
                     val newItem = TestItem(oldItem.key, generator.nextString(TestItem.MAX_STRING_LENGTH))
                     items[index] = newItem
 
-                    dynamicHash.replace(oldItem, newItem)
+                    dynamicHash.edit(oldItem, newItem)
                     assertTrue(dynamicHash.contains(newItem))
                     assertFalse(dynamicHash.contains(oldItem))
                     assertEquals(newItem, dynamicHash.find(newItem.key))

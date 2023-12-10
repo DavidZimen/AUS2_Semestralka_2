@@ -8,8 +8,12 @@ class AssociatedPlace() : HashData<Long> {
 
     override var key: Long = Long.MIN_VALUE
 
-    constructor(key: Long,) : this() {
+    constructor(key: Long) : this() {
         this.key = key
+    }
+
+    fun clone(): AssociatedPlace {
+        return AssociatedPlace(key)
     }
 
     override fun equals(other: Any?): Boolean {
