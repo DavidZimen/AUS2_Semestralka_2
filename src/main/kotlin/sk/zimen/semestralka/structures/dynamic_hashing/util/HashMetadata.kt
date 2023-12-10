@@ -18,6 +18,7 @@ open class HashMetadata() {
 class DynamicHashMetadata() : HashMetadata() {
     var size: Int = 0
     var trieDepth: Int = 0
+    var overloadBlockFactor: Int = 0
 
     constructor(blockFactor: Int, firstEmptyBlock: Long, blockSize: Int, size: Int, trieDepth: Int) : this() {
         this.size = size
@@ -25,5 +26,21 @@ class DynamicHashMetadata() : HashMetadata() {
         this.blockFactor = blockFactor
         this.blockSize = blockSize
         this.firstEmptyBlock = firstEmptyBlock
+    }
+
+    constructor(blockFactor: Int,
+                firstEmptyBlock: Long,
+                blockSize: Int,
+                size: Int,
+                trieDepth: Int,
+                overloadBlockFactor: Int)
+            : this(
+                blockFactor,
+                firstEmptyBlock,
+                blockSize,
+                size,
+                trieDepth
+            ) {
+        this.overloadBlockFactor = overloadBlockFactor
     }
 }

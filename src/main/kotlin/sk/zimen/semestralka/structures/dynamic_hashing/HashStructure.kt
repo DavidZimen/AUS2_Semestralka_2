@@ -26,7 +26,7 @@ abstract class HashStructure<K, T : HashData<K>>(
     /**
      * Number of items, that can be inserted into one block.
      */
-    protected val blockSize: Int = Block(blockFactor, clazz).getSize()
+    protected var blockSize: Int = Block(blockFactor, clazz).getSize()
 
     /**
      * File where data are being written and read from.
@@ -44,6 +44,16 @@ abstract class HashStructure<K, T : HashData<K>>(
      * Closes [file], so the buffer for it is released.
      */
     open fun save() = file.close()
+
+    /**
+     * Resets structure according to [metaData] with loosing all data.
+     */
+    open fun reset(metaData: HashMetadata) {
+        file.setLength(0)
+        blockFactor = metaData.blockFactor
+        firstEmpty = 0L
+        blockSize = Block(blockFactor, clazz).getSize()
+    }
 
     // PROTECTED FUNCTIONS
     /**

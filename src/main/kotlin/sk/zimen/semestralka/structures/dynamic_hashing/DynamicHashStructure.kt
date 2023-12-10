@@ -227,7 +227,6 @@ class DynamicHashStructure<K, T : HashData<K>>(
             size = metadata.size
             hashTrie.loadFromFile(dir)
             file = RandomAccessFile("$dir/$MAIN_FILE", "rw")
-            println("Main file length: ${file.length()}")
         } else {
             initializeDirectory(dir)
             file = RandomAccessFile("$dir/$MAIN_FILE", "rw")
@@ -237,6 +236,20 @@ class DynamicHashStructure<K, T : HashData<K>>(
             block.writeBlock()
             block.apply { address = blockSize.toLong() }.writeBlock()
         }
+    }
+
+    override fun reset(metaData: HashMetadata) {
+        val meta = metaData as DynamicHashMetadata
+        val block = Block(meta.blockFactor, clazz)
+        blockFactor = meta.blockFactor
+        blockSize = block.getSize()
+        hashTrie = Trie(0, blockSize.toLong(), meta.trieDepth)
+        file.setLength(2 * blockSize.toLong())
+        firstEmpty = file.length()
+        block.writeBlock()
+        block.apply { address = blockSize.toLong() }.writeBlock()
+
+        overloadStructure.reset(HashMetadata(meta.overloadBlockFactor, -1, -1))
     }
 
     @Throws(IllegalStateException::class)
