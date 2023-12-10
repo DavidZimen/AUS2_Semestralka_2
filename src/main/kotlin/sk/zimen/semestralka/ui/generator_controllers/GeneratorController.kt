@@ -2,6 +2,7 @@ package sk.zimen.semestralka.ui.generator_controllers
 
 import javafx.application.Platform
 import javafx.fxml.FXML
+import javafx.fxml.Initializable
 import javafx.scene.control.*
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -15,7 +16,7 @@ import sk.zimen.semestralka.ui.util.showSpinner
 import java.net.URL
 import java.util.*
 
-class GeneratorController {
+class GeneratorController : Initializable {
 
     private val operationType: String = "generation"
     
@@ -45,7 +46,7 @@ class GeneratorController {
     @FXML
     private lateinit var mainBlockFactor: TextField
 
-    fun initialize(p0: URL?, p1: ResourceBundle?) {
+    override fun initialize(p0: URL?, p1: ResourceBundle?) {
         spinner.showSpinner(false, spinnerLabel)
         quadWidth.allowOnlyDouble()
         quadHeight.allowOnlyDouble()
@@ -54,36 +55,6 @@ class GeneratorController {
         overloadBlockFactor.allowOnlyInt()
         mainBlockFactor.allowOnlyInt()
         itemsCount.allowOnlyInt()
-    }
-
-    fun showSuccessAlert() {
-        val alert = Alert(Alert.AlertType.NONE, "" , ButtonType.OK)
-        alert.isResizable = false
-        alert.headerText = "Parcels and properties $operationType was successful."
-        alert.showAndWait()
-    }
-
-    fun showErrorAlert() {
-        val alert = Alert(Alert.AlertType.ERROR, "" , ButtonType.OK)
-        alert.isResizable = false
-        alert.headerText = "Parcels and properties $operationType failed, please try again later."
-        alert.showAndWait()
-    }
-
-    fun disableAll(disable: Boolean = true) {
-        spinner.showSpinner(disable, spinnerLabel)
-        button.disable(disable)
-        itemsCount.disable(disable)
-        disableForm(disable)
-    }
-
-    private fun disableForm(disable: Boolean = true) {
-        quadWidth.disable(disable)
-        quadHeight.disable(disable)
-        treeDepth.disable(disable)
-        trieDepth.disable(disable)
-        overloadBlockFactor.disable(disable)
-        mainBlockFactor.disable(disable)
     }
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -121,5 +92,35 @@ class GeneratorController {
                 }
             }
         }
+    }
+
+    private fun showSuccessAlert() {
+        val alert = Alert(Alert.AlertType.NONE, "" , ButtonType.OK)
+        alert.isResizable = false
+        alert.headerText = "Parcels and properties $operationType was successful."
+        alert.showAndWait()
+    }
+
+    private fun showErrorAlert() {
+        val alert = Alert(Alert.AlertType.ERROR, "" , ButtonType.OK)
+        alert.isResizable = false
+        alert.headerText = "Parcels and properties $operationType failed, please try again later."
+        alert.showAndWait()
+    }
+
+    private fun disableAll(disable: Boolean = true) {
+        spinner.showSpinner(disable, spinnerLabel)
+        button.disable(disable)
+        itemsCount.disable(disable)
+        disableForm(disable)
+    }
+
+    private fun disableForm(disable: Boolean = true) {
+        quadWidth.disable(disable)
+        quadHeight.disable(disable)
+        treeDepth.disable(disable)
+        trieDepth.disable(disable)
+        overloadBlockFactor.disable(disable)
+        mainBlockFactor.disable(disable)
     }
 }
