@@ -10,7 +10,6 @@ import java.util.*
 
 class StructureTabController : Initializable {
 
-    //UI elements
     @FXML
     private lateinit var tableTab: Tab
     @FXML
