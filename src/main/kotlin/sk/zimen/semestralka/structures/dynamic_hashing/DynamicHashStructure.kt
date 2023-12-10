@@ -75,15 +75,16 @@ class DynamicHashStructure<K, T : HashData<K>>(
         try {
             block.insert(item)
             hashNode.mainSize++
+            block.writeBlock()
         } catch (e: BlockIsFullException) {
             if (!block.hasNext()) {
                 block.next = overloadStructure.firstEmpty
+                block.writeBlock()
             }
             if (hashNode.level < hashTrie.maxDepth)
                 throw IllegalStateException("Dont insert into overload yet")
             overloadStructure.insert(block.next, hashNode, item)
         }
-        block.writeBlock()
         size++
     }
 
