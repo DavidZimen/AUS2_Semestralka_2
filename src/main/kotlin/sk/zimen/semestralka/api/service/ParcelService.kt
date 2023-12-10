@@ -72,8 +72,7 @@ class ParcelService private constructor() {
     }
 
     fun hashStructurePrint(): HashPrint {
-        return HashPrint("This is main", "This is overload")
-//        return parcelsHash.sequentialPrint()
+        return parcelsHash.sequentialPrint()
     }
 
     fun changeParameters(maxDepth: Int, topLeftX: Double, topLeftY: Double, bottomRightX: Double, bottomRightY: Double)

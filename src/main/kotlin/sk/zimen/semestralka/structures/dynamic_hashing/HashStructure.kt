@@ -159,8 +159,6 @@ abstract class HashStructure<K, T : HashData<K>>(
      * Writes block to [file].
      */
     protected fun Block<K, T>.writeBlock() {
-//        if (address == next || address == previous)
-//            throw IllegalStateException("Wrong addresses at block")
         file.writeAtPosition(address, getData())
     }
 
@@ -199,5 +197,21 @@ abstract class HashStructure<K, T : HashData<K>>(
         if (file.length() < blockSize)
             return true
         return loadBlock(file.length() - blockSize).validElements > 0
+    }
+
+    /**
+     * Returns one big string of blocks written sequentially into it.
+     */
+    open fun getSequentialString(): String {
+        var result = ""
+        var position = 0L
+        val endPosition = file.length()
+
+        while (position < endPosition) {
+            result += "\n${loadBlock(position)}"
+            position += blockSize
+        }
+
+        return result
     }
 }

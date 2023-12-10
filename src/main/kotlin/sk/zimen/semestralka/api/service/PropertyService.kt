@@ -73,8 +73,7 @@ class PropertyService private constructor() {
     }
 
     fun hashStructurePrint(): HashPrint {
-        return HashPrint("This is main property", "This is overload property")
-//        return propertiesHash.sequentialPrint()
+        return propertiesHash.sequentialPrint()
     }
 
     fun changeParameters(maxDepth: Int, topLeftX: Double, topLeftY: Double, bottomRightX: Double, bottomRightY: Double)

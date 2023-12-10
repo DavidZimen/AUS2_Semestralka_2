@@ -34,6 +34,16 @@ class Parcel() : QuadTreePlace(), HashData<Long> {
                 && validAssociated == other.validAssociated
     }
 
+    override fun toString(): String {
+        var result = "${super.toString()}, Desc: ${description.value}"
+        for (i in 0 until validAssociated) {
+            if (i == 0)
+                result += ", Associated places: "
+            result += "${propertiesForParcel[i]}, "
+        }
+        return result
+    }
+
     override fun getSize(): Int {
         return Short.SIZE_BYTES +
                 Long.SIZE_BYTES +

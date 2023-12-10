@@ -20,4 +20,6 @@ interface HashBlock {
      * Converts provided [ByteArray].
      */
     fun formData(bytes: ByteArray)
+
+    override fun toString(): String
 }

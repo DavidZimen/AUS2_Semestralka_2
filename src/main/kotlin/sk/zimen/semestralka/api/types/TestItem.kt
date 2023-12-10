@@ -24,6 +24,10 @@ class TestItem() : HashData<Long> {
         return other is TestItem && key == other.key && desc == other.desc
     }
 
+    override fun toString(): String {
+        return "Key: $key, Desc: ${desc.value}"
+    }
+
     override fun getSize(): Int {
         return Long.SIZE_BYTES + StringData.getSize(MAX_STRING_LENGTH)
     }

@@ -1,5 +1,7 @@
 package sk.zimen.semestralka.structures.dynamic_hashing
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
 import sk.zimen.semestralka.exceptions.BlockIsFullException
 import sk.zimen.semestralka.exceptions.NoResultFoundException
 import sk.zimen.semestralka.structures.dynamic_hashing.interfaces.HashData
@@ -186,23 +188,6 @@ class DynamicHashStructure<K, T : HashData<K>>(
         } else {
             overloadStructure.contains(block.next, item)
         }
-    }
-
-    /**
-     * Prints structure to the console for purposes of checking,
-     * whether everything works correctly.
-     */
-    fun printStructure() {
-        println("\nDynamic hash structure: $dirName")
-        println("File size: ${file.length()}")
-        println("First empty block at: $firstEmpty")
-        println("Size: $size")
-//        hashTrie.actionOnLeafs(true) { address ->
-//            val block = loadBlock(address!!)
-//            if (block.hasNext())
-//                block.printData(hashFunction)
-//        }
-        println("-------------------------------------------------------------------\n")
     }
 
     // OVERRIDE FUNCTIONS
@@ -456,5 +441,13 @@ class DynamicHashStructure<K, T : HashData<K>>(
                 && (hashTrie.root.left as ExternalTrieNode).size == 0
                 && (hashTrie.root.right as ExternalTrieNode).size == 0
                 && file.length() == 2L * blockSize
+    }
+
+    fun sequentialPrint(): HashPrint {
+        return runBlocking {
+            val main = async { getSequentialString() }
+            val overload = async { overloadStructure.getSequentialString() }
+            HashPrint(main.await(), overload.await())
+        }
     }
 }

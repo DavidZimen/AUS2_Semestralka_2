@@ -21,6 +21,8 @@ class AssociatedPlace() : HashData<Long> {
         else false
     }
 
+    override fun toString() = key.toString()
+
     override fun getSize(): Int {
         return Long.SIZE_BYTES
     }

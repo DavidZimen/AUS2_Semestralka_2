@@ -43,6 +43,10 @@ class GpsPosition() : HashData<Byte?> {
         } else false
     }
 
+    override fun toString(): String {
+        return "Width: $widthPosition ${widthPosition.value}, Height: $height, ${heightPosition.value}"
+    }
+
     override fun getSize(): Int {
         return 2 * Double.SIZE_BYTES + 2 * Char.SIZE_BYTES
     }

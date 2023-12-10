@@ -171,12 +171,11 @@ class Block<K, T : HashData<K>>(
         }
     }
 
-//    override fun printData(hashFunc: (K) -> BitSet) {
-//        println("Address: $address, Valid items: $validElements, Prev: $previous, Next: $next")
-//        println("Data items:")
-//        for (i in 0 until  validElements) {
-//            print("\t")
-//            data[i].printData(hashFunc)
-//        }
-//    }
+    override fun toString(): String {
+        var result = "Address: $address, Previous: $previous, Next: $next, Valid count: $validElements \n\tData:"
+        for (i in 0 until validElements) {
+            result += "\n\t\t${data[i]}"
+        }
+        return result
+    }
 }

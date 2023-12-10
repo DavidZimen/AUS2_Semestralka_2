@@ -36,4 +36,8 @@ open class QuadTreePlace() : QuadTreeData {
                     && key == other.key
         } else false
     }
+
+    override fun toString(): String {
+        return "Key: $key, Top: $topLeft, Bottom: $bottomRight"
+    }
 }
