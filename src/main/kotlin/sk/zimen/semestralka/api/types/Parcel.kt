@@ -72,7 +72,7 @@ class Parcel() : QuadTreePlace(), HashData<Long> {
         index = bytes.append(description.getData(MAX_STRING_LENGTH), index)
         index = bytes.append(key.toByteArray(), index)
         index = bytes.append(topLeft.getData(), index)
-        bytes.append(bottomRight.getData(), index)
+        index = bytes.append(bottomRight.getData(), index)
 
         val elementSize = AssociatedPlace::class.createInstance().getSize()
         for (i in 0 until validAssociated) {
